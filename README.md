@@ -40,7 +40,14 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env
+flask --app app demo
 python run.py
 ```
 
-Después abrir http://127.0.0.1:5000
+`flask --app app demo` borra la base local y carga el hotel de ejemplo "Hotel Mirador" (24 habitaciones y reservas alrededor de la fecha de hoy). Después abrir http://127.0.0.1:5000
+
+Para correr los tests:
+
+```bash
+python -m pytest
+```

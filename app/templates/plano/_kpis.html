@@ -1,0 +1,46 @@
+{% from "components/macros.html" import icono %}
+{% set cuando = "hoy" if es_hoy else "del " ~ fecha|fecha_corta %}
+<section class="kpis" id="plano-kpis" aria-label="Resumen del día">
+  <article class="kpi">
+    <header class="kpi__cabecera"><span>Ocupación de la noche</span>{{ icono("ocupacion") }}</header>
+    <div class="kpi__valor">
+      <strong class="num">{{ resumen.porcentaje }}%</strong>
+      <span class="num muted">{{ resumen.ocupadas }} / {{ resumen.habilitadas }} hab.</span>
+    </div>
+    <div class="kpi__barra" role="progressbar" aria-label="Ocupación" aria-valuenow="{{ resumen.porcentaje }}" aria-valuemin="0" aria-valuemax="100">
+      <span style="width: {{ resumen.porcentaje }}%"></span>
+    </div>
+  </article>
+
+  <article class="kpi" style="--c: var(--estado-llega); --c-soft: var(--estado-llega-soft)">
+    <header class="kpi__cabecera"><span>Llegadas {{ cuando }}</span><span class="kpi__tag">Check-in</span></header>
+    <div class="kpi__valor">
+      <strong class="num">{{ resumen.llegadas_pendientes }}</strong>
+      <span class="muted">{{ "pendiente" if resumen.llegadas_pendientes == 1 else "pendientes" }}</span>
+    </div>
+    <p class="kpi__pie">{{ icono("entrada") }}{{ resumen.llegadas_hechas }} ya {{ "ingresó" if resumen.llegadas_hechas == 1 else "ingresaron" }}</p>
+  </article>
+
+  <article class="kpi" style="--c: var(--estado-sale); --c-soft: var(--estado-sale-soft)">
+    <header class="kpi__cabecera"><span>Salidas {{ cuando }}</span><span class="kpi__tag">Check-out</span></header>
+    <div class="kpi__valor">
+      <strong class="num">{{ resumen.salidas_pendientes }}</strong>
+      <span class="muted">{{ "pendiente" if resumen.salidas_pendientes == 1 else "pendientes" }}</span>
+    </div>
+    <p class="kpi__pie">{{ icono("salida") }}{{ resumen.salidas_hechas }} ya {{ "se fue" if resumen.salidas_hechas == 1 else "se fueron" }}</p>
+  </article>
+
+  <article class="kpi" style="--c: var(--estado-sucia); --c-soft: var(--estado-sucia-soft)">
+    <header class="kpi__cabecera"><span>Limpieza</span><span class="kpi__tag">Housekeeping</span></header>
+    {% if es_hoy %}
+      <div class="kpi__valor">
+        <strong class="num">{{ resumen.sucias }}</strong>
+        <span class="muted">para limpiar</span>
+      </div>
+      <p class="kpi__pie">{{ icono("mantenimiento") }}{{ resumen.mantenimiento }} en mantenimiento</p>
+    {% else %}
+      <div class="kpi__valor"><strong class="num muted">—</strong></div>
+      <p class="kpi__pie">Se ve solo en el plano de hoy</p>
+    {% endif %}
+  </article>
+</section>

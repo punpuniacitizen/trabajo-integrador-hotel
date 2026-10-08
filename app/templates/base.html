@@ -1,0 +1,82 @@
+{% from "components/macros.html" import icono %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}{% endblock %} · {{ hotel.nombre }}</title>
+  <link rel="icon" href="{{ url_for('static', filename='brand/favicon.svg') }}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  {% block estilos %}{% endblock %}
+  {# Tema del hotel: el color de acento sale de su configuración #}
+  <style>:root { --accent: {{ acento }}; --accent-contrast: {{ acento_texto }}; }</style>
+</head>
+<body>
+{% include "components/iconos.html" %}
+{% set secciones = [
+  ("Plano", "plano", "plano.index"),
+  ("Reservas", "calendario", None),
+  ("Huéspedes", "huespedes", None),
+  ("Habitaciones", "cama", None),
+  ("Configuración", "ajustes", None),
+] %}
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar__marca" href="{{ url_for('plano.index') }}">
+      {% if hotel.logo %}
+        <img src="{{ url_for('media.archivo', nombre=hotel.logo) }}" alt="{{ hotel.nombre }}">
+      {% else %}
+        <span class="sidebar__iniciales">{{ hotel.nombre|iniciales }}</span>
+        <span class="sidebar__nombre">{{ hotel.nombre }}</span>
+      {% endif %}
+    </a>
+    <nav class="sidebar__nav" aria-label="Secciones">
+      {% for titulo, nombre_icono, endpoint in secciones %}
+        {% if endpoint %}
+          <a class="sidebar__item" href="{{ url_for(endpoint) }}"{% if request.endpoint == endpoint %} aria-current="page"{% endif %}>
+            {{ icono(nombre_icono) }}<span>{{ titulo }}</span>
+          </a>
+        {% else %}
+          <span class="sidebar__item sidebar__item--pronto" aria-disabled="true">
+            {{ icono(nombre_icono) }}<span>{{ titulo }}</span><small>Pronto</small>
+          </span>
+        {% endif %}
+      {% endfor %}
+    </nav>
+    <div class="sidebar__pie">
+      <img src="{{ url_for('static', filename='brand/isotipo.svg') }}" alt="" width="16" height="16">
+      <span>con Conserje</span>
+    </div>
+  </aside>
+  <div class="sidebar-fondo" data-cerrar-menu hidden></div>
+
+  <div class="app__cuerpo">
+    <header class="topbar">
+      <button class="btn btn--ghost btn--icono topbar__menu" type="button" data-abrir-menu aria-label="Abrir menú" aria-controls="sidebar">{{ icono("menu") }}</button>
+      <label class="buscador">
+        {{ icono("buscar") }}
+        <input class="buscador__input" id="buscador" type="search" placeholder="{% block placeholder_busqueda %}Buscar{% endblock %}" autocomplete="off">
+        <kbd class="kbd">Ctrl K</kbd>
+      </label>
+      <div class="topbar__fecha">
+        <span class="topbar__dia">{{ (hoy|fecha_larga)|capitalize }}</span>
+        <span class="chip"><span class="chip__punto"></span>Turno {{ turno|lower }}</span>
+      </div>
+    </header>
+
+    <main class="contenido">
+      {% block contenido %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

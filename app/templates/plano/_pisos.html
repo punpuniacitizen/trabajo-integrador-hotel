@@ -1,0 +1,53 @@
+{% macro detalle(e) -%}
+  {%- set r = e.reserva -%}
+  {%- if e.estado == "llega" and e.es_hoy -%}Check-in pendiente
+  {%- elif e.estado in ("ocupada", "llega") -%}Hasta el {{ r.salida|fecha_corta }}
+  {%- elif e.estado == "sale" -%}
+    {%- if e.llega_despues -%}Luego entra {{ e.llega_despues.huesped.apellido }}{%- else -%}Check-out pendiente{%- endif -%}
+  {%- elif e.estado == "sucia" -%}Necesita limpieza
+  {%- elif e.estado == "mantenimiento" -%}Fuera de servicio
+  {%- else -%}Lista para asignar
+  {%- endif -%}
+{%- endmacro %}
+
+<div class="plano-pisos" id="plano-pisos">
+  {% for piso, estados_piso in pisos %}
+    <section class="piso" data-piso="{{ piso }}">
+      <header class="piso__cabecera">
+        <h2 class="piso__titulo">Piso {{ piso }} <span class="muted">· {{ estados_piso[0].habitacion.numero }} a {{ estados_piso[-1].habitacion.numero }}</span></h2>
+        <span class="piso__ocupacion num">{{ estados_piso|selectattr("duerme")|list|length }} / {{ estados_piso|length }} ocupadas</span>
+      </header>
+      <div class="piso__grilla">
+        {% for e in estados_piso %}
+          {% set h = e.habitacion %}
+          {% set huesped = e.reserva.huesped if e.reserva else None %}
+          <button type="button" class="habitacion habitacion--{{ e.estado }}" aria-pressed="false"
+                  data-numero="{{ h.numero }}" data-piso="{{ h.piso }}" data-tipo="{{ h.tipo_id }}" data-estado="{{ e.estado }}"
+                  data-busqueda="{{ h.numero }} {{ huesped.nombre_completo|lower if huesped else '' }}"
+                  data-url="{{ url_for('plano.panel', habitacion_id=h.id) }}">
+            <span class="habitacion__cabecera">
+              <span class="habitacion__numero">{{ h.numero }}</span>
+              {% if e.sucia and e.estado != "sucia" %}<span class="habitacion__bandera habitacion__bandera--sucia" title="Sucia">S</span>{% endif %}
+              <span class="habitacion__estado">{{ e.etiqueta }}</span>
+            </span>
+            <span class="habitacion__tipo">{{ h.tipo.nombre }}</span>
+            {% if e.estado == "mantenimiento" %}
+              <span class="habitacion__huesped">{{ h.nota_mantenimiento or "Sin detalle" }}</span>
+            {% elif huesped %}
+              <span class="habitacion__huesped">{{ huesped.apellido }}</span>
+            {% else %}
+              <span class="habitacion__huesped habitacion__huesped--vacio">—</span>
+            {% endif %}
+            <span class="habitacion__detalle">{{ detalle(e) }}</span>
+          </button>
+        {% endfor %}
+      </div>
+    </section>
+  {% else %}
+    <div class="vacio card plano-vacio">
+      <p><strong>Todavía no hay habitaciones cargadas.</strong></p>
+      <p class="muted">Para probar con datos de ejemplo: <code>flask --app app demo</code></p>
+    </div>
+  {% endfor %}
+  <p class="vacio plano-sin-resultados" id="plano-sin-resultados" hidden>Ninguna habitación coincide con la búsqueda o los filtros.</p>
+</div>

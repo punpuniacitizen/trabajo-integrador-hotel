@@ -94,7 +94,7 @@
     .bb-espacios span { display: block; background: var(--accent-soft); outline: 1px solid var(--accent-ring); }
     .bb-cajita { display: grid; place-items: center; width: 120px; height: 72px; background: var(--surface); border: 1px solid var(--border); font-size: var(--text-xs); color: var(--text-muted); }
 
-    .bb-piso { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+    .bb-piso { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); }
 
     /* Tape chart de muestra */
     .bb-tape { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
@@ -417,21 +417,21 @@
     <ul class="leyenda" style="margin-bottom: var(--space-4)">
       <li><span class="leyenda__muestra" style="--c:var(--estado-libre)"></span>Libre</li>
       <li><span class="leyenda__muestra" style="--c:var(--estado-ocupada)"></span>Ocupada</li>
-      <li><span class="leyenda__muestra" style="--c:var(--estado-llega)"></span>Llega hoy</li>
-      <li><span class="leyenda__muestra" style="--c:var(--estado-sale)"></span>Sale hoy</li>
-      <li><span class="leyenda__muestra" style="--c:var(--estado-bloqueada)"></span>Bloqueada</li>
-      <li><span class="habitacion__bandera habitacion__bandera--sucia" style="position:static">S</span>Sucia</li>
-      <li><span class="habitacion__bandera habitacion__bandera--mantenimiento" style="position:static">M</span>Mantenimiento</li>
+      <li><span class="leyenda__muestra" style="--c:var(--estado-llega)"></span>Llega</li>
+      <li><span class="leyenda__muestra" style="--c:var(--estado-sale)"></span>Sale</li>
+      <li><span class="leyenda__muestra" style="--c:var(--estado-sucia)"></span>Sucia</li>
+      <li><span class="leyenda__muestra" style="--c:var(--estado-mantenimiento)"></span>Mantenimiento</li>
+      <li><span class="habitacion__bandera habitacion__bandera--sucia">S</span>Ocupada y sucia</li>
     </ul>
     <div class="bb-piso">
-      <button class="habitacion habitacion--libre"><span class="habitacion__numero">101</span><span class="habitacion__tipo">Doble</span><span class="habitacion__estado">Libre</span></button>
-      <button class="habitacion habitacion--ocupada"><span class="habitacion__numero">102</span><span class="habitacion__tipo">Doble</span><span class="habitacion__estado">Ocupada</span><span class="habitacion__huesped">M. García</span></button>
-      <button class="habitacion habitacion--llega"><span class="habitacion__numero">103</span><span class="habitacion__tipo">Triple</span><span class="habitacion__estado">Llega hoy</span><span class="habitacion__huesped">L. Fernández</span></button>
-      <button class="habitacion habitacion--sale"><span class="habitacion__numero">104</span><span class="habitacion__tipo">Simple</span><span class="habitacion__estado">Sale hoy</span><span class="habitacion__huesped">J. Pérez</span></button>
-      <button class="habitacion habitacion--libre"><span class="habitacion__bandera habitacion__bandera--sucia" title="Sucia">S</span><span class="habitacion__numero">105</span><span class="habitacion__tipo">Doble</span><span class="habitacion__estado">Libre</span></button>
-      <button class="habitacion habitacion--ocupada"><span class="habitacion__numero">106</span><span class="habitacion__tipo">Suite</span><span class="habitacion__estado">Ocupada</span><span class="habitacion__huesped">A. Rossi</span></button>
-      <button class="habitacion habitacion--bloqueada"><span class="habitacion__bandera habitacion__bandera--mantenimiento" title="Mantenimiento">M</span><span class="habitacion__numero">107</span><span class="habitacion__tipo">Doble</span><span class="habitacion__estado">Bloqueada</span></button>
-      <button class="habitacion habitacion--libre"><span class="habitacion__numero">108</span><span class="habitacion__tipo">Simple</span><span class="habitacion__estado">Libre</span></button>
+      <button class="habitacion habitacion--libre" aria-pressed="false"><span class="habitacion__cabecera"><span class="habitacion__numero">101</span><span class="habitacion__estado">Libre</span></span><span class="habitacion__tipo">Doble estándar</span><span class="habitacion__huesped habitacion__huesped--vacio">—</span><span class="habitacion__detalle">Lista para asignar</span></button>
+      <button class="habitacion habitacion--ocupada" aria-pressed="false"><span class="habitacion__cabecera"><span class="habitacion__numero">102</span><span class="habitacion__estado">Ocupada</span></span><span class="habitacion__tipo">Doble estándar</span><span class="habitacion__huesped">García</span><span class="habitacion__detalle">Hasta el 16 oct</span></button>
+      <button class="habitacion habitacion--llega" aria-pressed="false"><span class="habitacion__cabecera"><span class="habitacion__numero">103</span><span class="habitacion__estado">Llega hoy</span></span><span class="habitacion__tipo">Doble estándar</span><span class="habitacion__huesped">Fernández</span><span class="habitacion__detalle">Check-in pendiente</span></button>
+      <button class="habitacion habitacion--sale" aria-pressed="false"><span class="habitacion__cabecera"><span class="habitacion__numero">104</span><span class="habitacion__bandera habitacion__bandera--sucia" title="Sucia">S</span><span class="habitacion__estado">Sale hoy</span></span><span class="habitacion__tipo">Simple</span><span class="habitacion__huesped">Pérez</span><span class="habitacion__detalle">Luego entra Ibarra</span></button>
+      <button class="habitacion habitacion--sucia" aria-pressed="false"><span class="habitacion__cabecera"><span class="habitacion__numero">105</span><span class="habitacion__estado">Sucia</span></span><span class="habitacion__tipo">Doble superior</span><span class="habitacion__huesped habitacion__huesped--vacio">—</span><span class="habitacion__detalle">Necesita limpieza</span></button>
+      <button class="habitacion habitacion--ocupada" aria-pressed="false"><span class="habitacion__cabecera"><span class="habitacion__numero">106</span><span class="habitacion__estado">Ocupada</span></span><span class="habitacion__tipo">Doble superior</span><span class="habitacion__huesped">Rossi</span><span class="habitacion__detalle">Hasta el 18 oct</span></button>
+      <button class="habitacion habitacion--mantenimiento" aria-pressed="false"><span class="habitacion__cabecera"><span class="habitacion__numero">107</span><span class="habitacion__estado">Mantenimiento</span></span><span class="habitacion__tipo">Doble superior</span><span class="habitacion__huesped">Pierde agua el aire</span><span class="habitacion__detalle">Fuera de servicio</span></button>
+      <button class="habitacion habitacion--libre" aria-pressed="false"><span class="habitacion__cabecera"><span class="habitacion__numero">108</span><span class="habitacion__estado">Libre</span></span><span class="habitacion__tipo">Suite</span><span class="habitacion__huesped habitacion__huesped--vacio">—</span><span class="habitacion__detalle">Lista para asignar</span></button>
     </div>
 
     <h3 class="bb-sub">Tape chart de reservas</h3>
@@ -502,9 +502,9 @@
             <input class="input" placeholder="Nombre o documento">
           </label>
           <div class="bb-piso">
-            <button class="habitacion habitacion--libre"><span class="habitacion__numero">201</span><span class="habitacion__tipo">Doble</span><span class="habitacion__estado">Libre</span></button>
-            <button class="habitacion habitacion--ocupada"><span class="habitacion__numero">202</span><span class="habitacion__tipo">Suite</span><span class="habitacion__estado">Ocupada</span></button>
-            <button class="habitacion habitacion--llega"><span class="habitacion__numero">203</span><span class="habitacion__tipo">Doble</span><span class="habitacion__estado">Llega hoy</span></button>
+            <button class="habitacion habitacion--libre" aria-pressed="false"><span class="habitacion__cabecera"><span class="habitacion__numero">201</span><span class="habitacion__estado">Libre</span></span><span class="habitacion__tipo">Doble</span><span class="habitacion__huesped habitacion__huesped--vacio">—</span><span class="habitacion__detalle">Lista para asignar</span></button>
+            <button class="habitacion habitacion--ocupada" aria-pressed="false"><span class="habitacion__cabecera"><span class="habitacion__numero">202</span><span class="habitacion__estado">Ocupada</span></span><span class="habitacion__tipo">Suite</span><span class="habitacion__huesped">Castro</span><span class="habitacion__detalle">Hasta el 19 oct</span></button>
+            <button class="habitacion habitacion--llega" aria-pressed="false"><span class="habitacion__cabecera"><span class="habitacion__numero">203</span><span class="habitacion__estado">Llega hoy</span></span><span class="habitacion__tipo">Doble</span><span class="habitacion__huesped">Mendoza</span><span class="habitacion__detalle">Check-in pendiente</span></button>
           </div>
         </div>
       </div>

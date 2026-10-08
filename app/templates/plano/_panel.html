@@ -1,0 +1,115 @@
+{% from "components/macros.html" import icono %}
+{% set e = d.estado %}
+{% set h = e.habitacion %}
+{% set r = e.reserva %}
+<div class="panel" data-habitacion="{{ h.numero }}">
+  <header class="panel__cabecera">
+    <div>
+      <div class="panel__titulo">
+        <h2>Habitación {{ h.numero }}</h2>
+        <span class="badge badge--{{ e.estado }}">{{ e.etiqueta }}</span>
+      </div>
+      <p class="muted">{{ h.tipo.nombre }} · Piso {{ h.piso }} · hasta {{ h.tipo.capacidad }} {{ "persona" if h.tipo.capacidad == 1 else "personas" }}</p>
+    </div>
+    <button class="btn btn--ghost btn--icono btn--sm" type="button" data-cerrar-panel aria-label="Cerrar detalle">{{ icono("cerrar") }}</button>
+  </header>
+
+  {% if e.estado == "mantenimiento" %}
+    <div class="flash flash--danger">{{ h.nota_mantenimiento or "Fuera de servicio." }}</div>
+  {% elif e.sucia %}
+    <div class="flash flash--warning">La habitación está marcada como sucia.</div>
+  {% endif %}
+
+  {% if r %}
+    {% set persona = r.huesped %}
+    <section class="panel__bloque">
+      <div class="persona">
+        <span class="avatar">{{ persona.nombre_completo|iniciales }}</span>
+        <div>
+          <strong>{{ persona.nombre_completo }}</strong>
+          <p class="muted">Doc. {{ persona.documento|documento_oculto }} · Reserva {{ r.codigo }}</p>
+        </div>
+      </div>
+      <dl class="datos">
+        <div><dt>Estadía · {{ r.noches }} {{ "noche" if r.noches == 1 else "noches" }}</dt><dd>{{ rango_fechas(r.entrada, r.salida) }}</dd></div>
+        <div><dt>Personas</dt><dd>{{ r.personas }}</dd></div>
+        <div>
+          <dt>Entrada</dt>
+          <dd>{{ r.entrada|fecha_corta }} · {{ "hecha" if r.estado in ("en_curso", "finalizada") else "desde las " ~ hotel.hora_checkin }}</dd>
+        </div>
+        <div><dt>Salida</dt><dd>{{ r.salida|fecha_corta }} · hasta las {{ hotel.hora_checkout }}</dd></div>
+      </dl>
+      <dl class="importes">
+        <div><dt>Total</dt><dd class="num">{{ r.total|moneda }}</dd></div>
+        <div><dt>Pagado</dt><dd class="num importes__pagado">{{ r.pagado|moneda }}</dd></div>
+        <div class="importes__saldo{% if r.saldo > 0 %} importes__saldo--pendiente{% endif %}">
+          <dt>Saldo</dt><dd class="num">{{ r.saldo|moneda }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    {% if r.notas %}
+      <section class="panel__seccion">
+        <h3 class="panel__subtitulo">{{ icono("nota") }}Notas de recepción</h3>
+        <p class="panel__nota">{{ r.notas }}</p>
+      </section>
+    {% endif %}
+  {% else %}
+    <p class="muted">Sin huésped {{ "hoy" if es_hoy else "el " ~ fecha|fecha_corta }}.</p>
+  {% endif %}
+
+  {% for titulo, otra in [("Después llega", e.llega_despues), ("Próxima reserva", d.proxima)] if otra %}
+    <section class="panel__seccion">
+      <h3 class="panel__subtitulo">{{ titulo }}</h3>
+      <p><strong>{{ otra.huesped.nombre_completo }}</strong> · {{ rango_fechas(otra.entrada, otra.salida) }} · {{ otra.noches }} {{ "noche" if otra.noches == 1 else "noches" }}</p>
+    </section>
+  {% endfor %}
+
+  {% if es_hoy %}
+    <div class="panel__acciones">
+      {% if d.puede_checkin %}
+        <button class="btn btn--primary" type="button" data-accion="{{ url_for('api.checkin', reserva_id=r.id) }}">
+          {{ icono("entrada") }}Hacer check-in
+        </button>
+      {% endif %}
+      {% if d.puede_checkout %}
+        <button class="btn btn--primary" type="button" data-accion="{{ url_for('api.checkout', reserva_id=r.id) }}"
+                {% if r.saldo > 0 %}data-confirmar="Queda un saldo de {{ r.saldo|moneda }}. ¿Hacer el check-out igual?"{% endif %}>
+          {{ icono("salida") }}Hacer check-out
+        </button>
+      {% endif %}
+
+      {% if h.estado_limpieza == "sucia" %}
+        <button class="btn btn--secondary" type="button" data-accion="{{ url_for('api.limpieza', habitacion_id=h.id) }}" data-datos='{"estado": "limpia"}'>
+          {{ icono("check") }}Marcar limpia
+        </button>
+      {% else %}
+        <button class="btn btn--secondary" type="button" data-accion="{{ url_for('api.limpieza', habitacion_id=h.id) }}" data-datos='{"estado": "sucia"}'>
+          {{ icono("limpieza") }}Marcar sucia
+        </button>
+      {% endif %}
+
+      {% if h.fuera_de_servicio %}
+        <button class="btn btn--ghost" type="button" data-accion="{{ url_for('api.mantenimiento', habitacion_id=h.id) }}" data-datos='{"activo": false}'>
+          {{ icono("check") }}Quitar de mantenimiento
+        </button>
+      {% else %}
+        <button class="btn btn--ghost" type="button" data-mostrar-mantenimiento>
+          {{ icono("mantenimiento") }}Poner en mantenimiento
+        </button>
+        <form class="panel__mantenimiento" data-url="{{ url_for('api.mantenimiento', habitacion_id=h.id) }}" hidden>
+          <label class="field">
+            <span class="label">Motivo</span>
+            <input class="input" name="nota" maxlength="200" placeholder="Ej.: pierde agua el aire acondicionado" required>
+          </label>
+          <div class="panel__mantenimiento-botones">
+            <button class="btn btn--danger btn--sm" type="submit">Bloquear habitación</button>
+            <button class="btn btn--ghost btn--sm" type="button" data-cancelar-mantenimiento>Cancelar</button>
+          </div>
+        </form>
+      {% endif %}
+    </div>
+  {% else %}
+    <p class="hint">Las acciones de recepción están disponibles solo en el plano de hoy.</p>
+  {% endif %}
+</div>

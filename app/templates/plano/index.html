@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% from "components/macros.html" import icono %}
+
+{% block titulo %}Plano{% endblock %}
+{% block placeholder_busqueda %}Buscá habitación o huésped…{% endblock %}
+{% block estilos %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/plano.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<div class="pagina-cabecera">
+  <div class="pagina-cabecera__titulo">
+    <h1>Plano de habitaciones</h1>
+    <p class="muted">{{ pisos|length }} {{ "piso" if pisos|length == 1 else "pisos" }} · {{ estados|length }} habitaciones</p>
+  </div>
+
+  <div class="selector-fecha" role="group" aria-label="Fecha del plano">
+    <a class="btn btn--ghost btn--icono btn--sm" href="{{ url_for('plano.index', fecha=dia_anterior.isoformat()) }}" aria-label="Día anterior">{{ icono("anterior") }}</a>
+    <button class="selector-fecha__actual" type="button" data-abrir-calendario>
+      {{ icono("calendario") }}
+      <span>{% if es_hoy %}Hoy, {{ fecha|dia_mes }}{% else %}{{ (fecha|fecha_larga)|capitalize }}{% endif %}</span>
+    </button>
+    <input class="selector-fecha__input" type="date" id="fecha-plano" value="{{ fecha.isoformat() }}" aria-label="Elegir fecha" tabindex="-1">
+    <a class="btn btn--ghost btn--icono btn--sm" href="{{ url_for('plano.index', fecha=dia_siguiente.isoformat()) }}" aria-label="Día siguiente">{{ icono("siguiente") }}</a>
+    {% if not es_hoy %}
+      <a class="btn btn--secondary btn--sm" href="{{ url_for('plano.index') }}">Hoy</a>
+    {% endif %}
+  </div>
+
+  <div class="pagina-cabecera__acciones">
+    <button class="btn btn--primary" type="button" disabled title="Próximamente">{{ icono("mas") }}Nueva reserva</button>
+  </div>
+</div>
+
+<div class="plano" id="plano" data-fecha="{{ fecha.isoformat() }}" data-url-contenido="{{ url_for('plano.contenido') }}">
+  {% include "plano/_kpis.html" %}
+
+  <div class="plano-toolbar">
+    <div class="plano-filtros">
+      <label class="filtro">
+        <span>Piso</span>
+        <select id="filtro-piso">
+          <option value="">Todos</option>
+          {% for piso, _ in pisos %}<option value="{{ piso }}">{{ piso }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="filtro">
+        <span>Tipo</span>
+        <select id="filtro-tipo">
+          <option value="">Todos</option>
+          {% for tipo in tipos %}<option value="{{ tipo.id }}">{{ tipo.nombre }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="filtro">
+        <span>Estado</span>
+        <select id="filtro-estado">
+          <option value="">Todos</option>
+          {% for valor, etiqueta in etiquetas_estado.items() %}<option value="{{ valor }}">{{ etiqueta }}</option>{% endfor %}
+        </select>
+      </label>
+    </div>
+    <ul class="leyenda" aria-label="Referencias">
+      {% for valor, etiqueta in etiquetas_estado.items() %}
+        <li><span class="leyenda__muestra" style="--c: var(--estado-{{ valor }})"></span>{{ etiqueta }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="plano-area">
+    {% include "plano/_pisos.html" %}
+
+    <aside class="plano-panel" id="plano-panel" aria-label="Detalle de la habitación">
+      <div class="vacio plano-panel__vacio">
+        {{ icono("cama", "vacio__icono") }}
+        <p><strong>Elegí una habitación</strong></p>
+        <p class="muted">Vas a ver quién está alojado, sus fechas y las acciones de recepción.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/plano.js') }}"></script>
+{% endblock %}
