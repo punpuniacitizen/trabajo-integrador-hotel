@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conserje · Sistema de diseño</title>
+  <link rel="icon" href="logos/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../app/static/css/tokens.css">
+  <link rel="stylesheet" href="../../app/static/css/components.css">
+  <style>
+    /* Estilos propios del brandbook (no son parte del sistema) */
+    .bb-nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      gap: var(--space-1);
+      padding: var(--space-2) var(--space-4);
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in oklab, var(--surface) 92%, transparent);
+      backdrop-filter: blur(8px);
+    }
+    .bb-nav a {
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .bb-nav a:hover { background: var(--surface-sunken); color: var(--text); }
+
+    .bb-main { max-width: 1040px; margin: 0 auto; padding: 0 var(--space-4) var(--space-16); }
+    .bb-hero { padding: var(--space-16) 0 var(--space-12); border-bottom: 1px solid var(--border); }
+    .bb-hero img { height: 48px; }
+    .bb-hero p { max-width: 620px; margin-top: var(--space-6); font-size: var(--text-md); color: var(--text-muted); }
+    .bb-hero .bb-version { margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-subtle); }
+
+    .bb-section { padding: var(--space-12) 0; border-bottom: 1px solid var(--border); scroll-margin-top: 48px; }
+    .bb-section > h2 { margin-bottom: var(--space-2); }
+    .bb-section > .bb-lead { max-width: 640px; margin-bottom: var(--space-8); color: var(--text-muted); }
+    .bb-sub { margin: var(--space-8) 0 var(--space-3); font-size: var(--text-xs); font-weight: var(--weight-semibold); text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+
+    .bb-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+    .bb-grid--3 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+    .bb-principio { padding: var(--space-5); }
+    .bb-principio h3 { margin-bottom: var(--space-2); font-size: var(--text-md); }
+    .bb-principio p { color: var(--text-muted); }
+
+    .bb-logo { display: flex; flex-direction: column; overflow: hidden; }
+    .bb-logo__lienzo { display: grid; place-items: center; min-height: 160px; padding: var(--space-6); }
+    .bb-logo__lienzo img { max-width: 100%; }
+    .bb-logo__pie { padding: var(--space-3) var(--space-4); border-top: 1px solid var(--border); font-size: var(--text-xs); color: var(--text-muted); }
+    .bb-logo__pie code { color: var(--text); }
+    .bb-oscuro { background: var(--gray-900); }
+    .bb-gris { background: var(--gray-100); }
+    .bb-tamanos { display: flex; align-items: flex-end; gap: var(--space-4); }
+
+    .bb-resguardo { display: inline-block; padding: 14px; outline: 1px dashed var(--estado-mantenimiento); outline-offset: -1px; background: repeating-linear-gradient(45deg, transparent, transparent 4px, var(--estado-mantenimiento-soft) 4px, var(--estado-mantenimiento-soft) 5px); }
+    .bb-resguardo img { display: block; height: 44px; background: var(--surface); }
+
+    .bb-swatches { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .bb-swatch { overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    .bb-swatch__color { height: 64px; }
+    .bb-swatch__info { padding: var(--space-2) var(--space-3); font-size: var(--text-xs); }
+    .bb-swatch__info strong { display: block; font-size: var(--text-sm); }
+    .bb-swatch__info code { color: var(--text-muted); }
+    .bb-escala { display: grid; grid-template-columns: repeat(11, 1fr); overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); }
+    .bb-escala div { display: flex; align-items: flex-end; height: 72px; padding: var(--space-2); font-size: 11px; font-variant-numeric: tabular-nums; }
+
+    .bb-estado { display: grid; grid-template-columns: 44px 1fr; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    .bb-estado__par { display: grid; grid-template-rows: 1fr 1fr; }
+    .bb-estado__info { padding: var(--space-3); }
+    .bb-estado__info p { margin-top: var(--space-1); font-size: var(--text-xs); color: var(--text-muted); }
+
+    .bb-tipo-hero { display: flex; align-items: baseline; gap: var(--space-8); flex-wrap: wrap; }
+    .bb-tipo-hero .bb-aa { font-size: 120px; font-weight: var(--weight-semibold); line-height: 1; letter-spacing: -0.03em; }
+    .bb-tipo-hero .bb-pesos { display: grid; gap: var(--space-1); font-size: var(--text-lg); }
+    .bb-escala-tipo { width: 100%; border-collapse: collapse; }
+    .bb-escala-tipo td { padding: var(--space-3) 0; border-bottom: 1px solid var(--border); vertical-align: baseline; }
+    .bb-escala-tipo td:first-child { width: 160px; font-size: var(--text-xs); color: var(--text-muted); font-family: var(--font-mono); }
+    .bb-numeros { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    .bb-numeros div { padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); font-size: var(--text-xl); line-height: 1.4; }
+    .bb-numeros .bb-prop { font-variant-numeric: proportional-nums; }
+
+    .bb-fila { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+    .bb-espacios { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-4); }
+    .bb-espacios div { display: grid; justify-items: center; gap: var(--space-2); font-size: 11px; color: var(--text-muted); }
+    .bb-espacios span { display: block; background: var(--accent-soft); outline: 1px solid var(--accent-ring); }
+    .bb-cajita { display: grid; place-items: center; width: 120px; height: 72px; background: var(--surface); border: 1px solid var(--border); font-size: var(--text-xs); color: var(--text-muted); }
+
+    .bb-piso { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+
+    /* Tape chart de muestra */
+    .bb-tape { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+    .bb-tape__grid { display: grid; grid-template-columns: 88px repeat(10, minmax(56px, 1fr)); min-width: 680px; }
+    .bb-tape__head, .bb-tape__hab, .bb-tape__celda { border-bottom: 1px solid var(--border); }
+    .bb-tape__head { padding: var(--space-2); font-size: 11px; text-align: center; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .bb-tape__head strong { display: block; font-size: var(--text-sm); color: var(--text); }
+    .bb-tape__head--hoy { background: var(--accent-soft); }
+    .bb-tape__head--hoy strong { color: var(--accent); }
+    .bb-tape__hab { padding: var(--space-3) var(--space-3); font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; border-right: 1px solid var(--border); }
+    .bb-tape__hab small { display: block; font-weight: var(--weight-regular); font-size: 11px; color: var(--text-muted); }
+    .bb-tape__celda { border-left: 1px solid var(--gray-100); }
+    .bb-tape__celda--hoy { background: color-mix(in oklab, var(--accent) 5%, transparent); }
+    .bb-tape__barra { align-self: center; margin: 0 4px; }
+
+    /* Demo marca blanca */
+    .bb-wl { display: grid; gap: var(--space-6); grid-template-columns: 260px 1fr; align-items: start; }
+    .bb-wl__controles { display: grid; gap: var(--space-4); }
+    .bb-wl__presets { display: grid; gap: var(--space-2); }
+    .bb-wl__preset { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); font: inherit; text-align: left; cursor: pointer; }
+    .bb-wl__preset[aria-pressed="true"] { border-color: var(--text); box-shadow: 0 0 0 1px var(--text); }
+    .bb-wl__preset i { width: 18px; height: 18px; border-radius: var(--radius-full); background: var(--p); }
+    .bb-wl__picker { display: flex; align-items: center; gap: var(--space-3); }
+    .bb-wl__picker input[type="color"] { width: 44px; height: 36px; padding: 2px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--surface); cursor: pointer; }
+    .bb-wl__contraste { font-size: var(--text-xs); color: var(--text-muted); }
+
+    .bb-app { display: grid; grid-template-columns: 180px 1fr; min-height: 380px; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); box-shadow: var(--shadow-lg); }
+    .bb-app__side { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) var(--space-3); border-right: 1px solid var(--border); background: var(--surface); }
+    .bb-app__side img { height: 36px; max-width: 100%; margin: 0 var(--space-2) var(--space-4); object-fit: contain; object-position: left; }
+    .bb-app__item { padding: var(--space-2) var(--space-3); border-radius: var(--radius); font-size: var(--text-sm); color: var(--text-muted); }
+    .bb-app__item--activo { background: var(--accent-soft); color: var(--text); font-weight: var(--weight-medium); box-shadow: inset 3px 0 0 var(--accent); }
+    .bb-app__powered { margin-top: auto; padding: 0 var(--space-2); font-size: 11px; color: var(--text-subtle); }
+    .bb-app__main { padding: var(--space-5); display: grid; gap: var(--space-4); align-content: start; }
+    .bb-app__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+
+    .bb-voz { display: grid; gap: var(--space-3); grid-template-columns: 1fr 1fr; }
+    .bb-voz div { padding: var(--space-4); border-radius: var(--radius); font-size: var(--text-sm); }
+    .bb-voz .bb-si { background: var(--success-soft); }
+    .bb-voz .bb-no { background: var(--danger-soft); text-decoration: line-through; text-decoration-color: color-mix(in oklab, var(--danger) 50%, transparent); }
+    .bb-voz strong { display: block; margin-bottom: var(--space-1); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; }
+
+    @media (max-width: 720px) {
+      .bb-wl, .bb-app, .bb-voz, .bb-numeros { grid-template-columns: 1fr; }
+      .bb-app__side { flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--border); }
+      .bb-app__powered { display: none; }
+      .bb-escala { grid-template-columns: repeat(6, 1fr); }
+      .bb-tipo-hero .bb-aa { font-size: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="bb-nav" aria-label="Secciones">
+  <a href="#principios">Principios</a>
+  <a href="#logo">Logo</a>
+  <a href="#color">Color</a>
+  <a href="#tipografia">Tipografía</a>
+  <a href="#espacios">Espacios</a>
+  <a href="#componentes">Componentes</a>
+  <a href="#modulos">Módulos</a>
+  <a href="#marca-blanca">Marca blanca</a>
+  <a href="#voz">Voz y tono</a>
+</nav>
+
+<main class="bb-main">
+
+  <header class="bb-hero">
+    <img src="logos/logo-horizontal.svg" alt="Conserje">
+    <p>Conserje es un sistema de gestión hotelera que se vende a hoteles. Su identidad es sobria a propósito: el protagonista es el hotel que lo usa, con su nombre, su logo y su color.</p>
+    <p class="bb-version">Sistema de diseño · versión 0.1</p>
+  </header>
+
+  <!-- PRINCIPIOS -->
+  <section class="bb-section" id="principios">
+    <h2>Principios</h2>
+    <p class="bb-lead">Tres reglas que deciden cualquier duda de diseño.</p>
+    <div class="bb-grid bb-grid--3">
+      <div class="card bb-principio">
+        <h3>Neutro por defecto</h3>
+        <p>Grises, una sola tipografía y nada decorativo. Sin configurar, el sistema se ve prolijo y no tiene personalidad propia.</p>
+      </div>
+      <div class="card bb-principio">
+        <h3>El hotel pone el color</h3>
+        <p>Hay un solo color de acento (botones principales, navegación activa, foco) y lo elige cada hotel. Todo lo demás se deriva solo.</p>
+      </div>
+      <div class="card bb-principio">
+        <h3>Los estados se leen igual en todos lados</h3>
+        <p>Libre, ocupada, llega, sale: siempre el mismo color, y siempre con texto. No dependen del acento, así que un hotel verde no confunde "libre".</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGO -->
+  <section class="bb-section" id="logo">
+    <h2>Logo</h2>
+    <p class="bb-lead">El isotipo es una campanilla de recepción geométrica. El wordmark es "conserje" en minúsculas, Inter SemiBold convertido a curvas. Todos los archivos son SVG.</p>
+
+    <div class="bb-grid">
+      <figure class="card bb-logo" style="margin:0">
+        <div class="bb-logo__lienzo"><img src="logos/logo-horizontal.svg" alt="Logo horizontal" style="height:44px"></div>
+        <figcaption class="bb-logo__pie">Principal · <code>logo-horizontal.svg</code></figcaption>
+      </figure>
+      <figure class="card bb-logo" style="margin:0">
+        <div class="bb-logo__lienzo bb-oscuro"><img src="logos/logo-negativo.svg" alt="Logo en negativo" style="height:44px"></div>
+        <figcaption class="bb-logo__pie">Sobre fondo oscuro · <code>logo-negativo.svg</code></figcaption>
+      </figure>
+      <figure class="card bb-logo" style="margin:0">
+        <div class="bb-logo__lienzo bb-gris"><img src="logos/logo-vertical.svg" alt="Logo vertical" style="height:96px"></div>
+        <figcaption class="bb-logo__pie">Vertical · <code>logo-vertical.svg</code></figcaption>
+      </figure>
+      <figure class="card bb-logo" style="margin:0">
+        <div class="bb-logo__lienzo"><img src="logos/logo-mono.svg" alt="Logo monocromo" style="height:44px"></div>
+        <figcaption class="bb-logo__pie">Monocromo, para impresión · <code>logo-mono.svg</code></figcaption>
+      </figure>
+      <figure class="card bb-logo" style="margin:0">
+        <div class="bb-logo__lienzo"><img src="logos/isotipo.svg" alt="Isotipo" style="height:80px"></div>
+        <figcaption class="bb-logo__pie">Isotipo · <code>isotipo.svg</code></figcaption>
+      </figure>
+      <figure class="card bb-logo" style="margin:0">
+        <div class="bb-logo__lienzo">
+          <div class="bb-tamanos">
+            <img src="logos/isotipo-tile.svg" alt="Ícono de app" width="64">
+            <img src="logos/favicon.svg" alt="Favicon 32 px" width="32">
+            <img src="logos/favicon.svg" alt="Favicon 16 px" width="16">
+          </div>
+        </div>
+        <figcaption class="bb-logo__pie">Ícono y favicon · <code>isotipo-tile.svg</code>, <code>favicon.svg</code></figcaption>
+      </figure>
+    </div>
+
+    <h3 class="bb-sub">Área de resguardo y tamaño mínimo</h3>
+    <div class="bb-fila" style="gap: var(--space-8)">
+      <div class="bb-resguardo"><img src="logos/logo-horizontal.svg" alt="Logo con área de resguardo"></div>
+      <ul class="muted" style="margin:0; padding-left: 1.2em; max-width: 420px">
+        <li>Alrededor del logo se deja libre, como mínimo, la altura de la perilla de la campanilla.</li>
+        <li>El logo horizontal se usa desde 96 px de ancho. Por debajo de eso va el isotipo, que se lee bien hasta 16 px.</li>
+        <li>No se colorea con el acento del hotel: el logo de Conserje va siempre en negro o en blanco.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- COLOR -->
+  <section class="bb-section" id="color">
+    <h2>Color</h2>
+    <p class="bb-lead">Casi todo es gris. El color aparece por dos razones: para marcar la acción principal (acento) o para comunicar un estado.</p>
+
+    <h3 class="bb-sub">Neutros</h3>
+    <div class="bb-escala" aria-label="Escala de grises">
+      <div style="background:var(--gray-0)">0</div>
+      <div style="background:var(--gray-50)">50</div>
+      <div style="background:var(--gray-100)">100</div>
+      <div style="background:var(--gray-200)">200</div>
+      <div style="background:var(--gray-300)">300</div>
+      <div style="background:var(--gray-400)">400</div>
+      <div style="background:var(--gray-500);color:#fff">500</div>
+      <div style="background:var(--gray-600);color:#fff">600</div>
+      <div style="background:var(--gray-700);color:#fff">700</div>
+      <div style="background:var(--gray-800);color:#fff">800</div>
+      <div style="background:var(--gray-900);color:#fff">900</div>
+    </div>
+
+    <h3 class="bb-sub">Acento y feedback</h3>
+    <div class="bb-swatches">
+      <div class="bb-swatch"><div class="bb-swatch__color" style="background:#18181B"></div><div class="bb-swatch__info"><strong>Acento por defecto</strong><code>#18181B</code> · lo reemplaza el hotel</div></div>
+      <div class="bb-swatch"><div class="bb-swatch__color" style="background:var(--success)"></div><div class="bb-swatch__info"><strong>Éxito</strong><code>#15803D</code></div></div>
+      <div class="bb-swatch"><div class="bb-swatch__color" style="background:var(--warning)"></div><div class="bb-swatch__info"><strong>Advertencia</strong><code>#A16207</code></div></div>
+      <div class="bb-swatch"><div class="bb-swatch__color" style="background:var(--danger)"></div><div class="bb-swatch__info"><strong>Error</strong><code>#B91C1C</code></div></div>
+      <div class="bb-swatch"><div class="bb-swatch__color" style="background:var(--info)"></div><div class="bb-swatch__info"><strong>Información</strong><code>#1D4ED8</code></div></div>
+    </div>
+
+    <h3 class="bb-sub">Estados de habitación</h3>
+    <div class="bb-grid">
+      <div class="bb-estado"><div class="bb-estado__par"><span style="background:var(--estado-libre)"></span><span style="background:var(--estado-libre-soft)"></span></div><div class="bb-estado__info"><span class="badge badge--libre">Libre</span><p>Sin huésped en la fecha. <code>#15803D</code></p></div></div>
+      <div class="bb-estado"><div class="bb-estado__par"><span style="background:var(--estado-ocupada)"></span><span style="background:var(--estado-ocupada-soft)"></span></div><div class="bb-estado__info"><span class="badge badge--ocupada">Ocupada</span><p>Reserva en curso. <code>#1D4ED8</code></p></div></div>
+      <div class="bb-estado"><div class="bb-estado__par"><span style="background:var(--estado-llega)"></span><span style="background:var(--estado-llega-soft)"></span></div><div class="bb-estado__info"><span class="badge badge--llega">Llega hoy</span><p>Check-in pendiente. <code>#6D28D9</code></p></div></div>
+      <div class="bb-estado"><div class="bb-estado__par"><span style="background:var(--estado-sale)"></span><span style="background:var(--estado-sale-soft)"></span></div><div class="bb-estado__info"><span class="badge badge--sale">Sale hoy</span><p>Check-out pendiente. <code>#C2410C</code></p></div></div>
+      <div class="bb-estado"><div class="bb-estado__par"><span style="background:var(--estado-sucia)"></span><span style="background:var(--estado-sucia-soft)"></span></div><div class="bb-estado__info"><span class="badge badge--sucia">Sucia</span><p>Estado físico: necesita limpieza. <code>#A16207</code></p></div></div>
+      <div class="bb-estado"><div class="bb-estado__par"><span style="background:var(--estado-mantenimiento)"></span><span style="background:var(--estado-mantenimiento-soft)"></span></div><div class="bb-estado__info"><span class="badge badge--mantenimiento">Mantenimiento</span><p>Fuera de servicio por arreglo. <code>#B91C1C</code></p></div></div>
+    </div>
+    <p class="muted" style="margin-top: var(--space-4); font-size: var(--text-sm)">Cada estado tiene un tono sólido y uno suave. El blanco sobre el sólido y el sólido sobre el suave superan el contraste 4.5:1 (WCAG AA).</p>
+  </section>
+
+  <!-- TIPOGRAFÍA -->
+  <section class="bb-section" id="tipografia">
+    <h2>Tipografía</h2>
+    <p class="bb-lead">Una sola familia: <strong>Inter</strong>, de Google Fonts. Está hecha para pantallas, es legible en tamaños chicos y tiene números tabulares.</p>
+
+    <div class="bb-tipo-hero">
+      <div class="bb-aa">Aa</div>
+      <div class="bb-pesos">
+        <span style="font-weight:400">Regular 400: texto</span>
+        <span style="font-weight:500">Medium 500: botones y etiquetas</span>
+        <span style="font-weight:600">SemiBold 600: títulos y números</span>
+        <span style="font-weight:700">Bold 700: uso puntual</span>
+      </div>
+    </div>
+
+    <h3 class="bb-sub">Escala</h3>
+    <table class="bb-escala-tipo">
+      <tr><td>--text-3xl · 30px</td><td style="font-size:var(--text-3xl);font-weight:600" class="num">82% ocupación</td></tr>
+      <tr><td>--text-2xl · 24px</td><td style="font-size:var(--text-2xl);font-weight:600">Plano de habitaciones</td></tr>
+      <tr><td>--text-xl · 20px</td><td style="font-size:var(--text-xl);font-weight:600">Piso 2</td></tr>
+      <tr><td>--text-lg · 18px</td><td style="font-size:var(--text-lg);font-weight:600">Reserva #1042</td></tr>
+      <tr><td>--text-md · 16px</td><td style="font-size:var(--text-md)">Check-in disponible desde las 14:00.</td></tr>
+      <tr><td>--text-base · 14px</td><td style="font-size:var(--text-base)">Texto general de la interfaz: formularios, paneles y descripciones.</td></tr>
+      <tr><td>--text-sm · 13px</td><td style="font-size:var(--text-sm)">Celdas de tablas, metadatos y fechas.</td></tr>
+      <tr><td>--text-xs · 12px</td><td style="font-size:var(--text-xs);color:var(--text-muted)">Etiquetas, ayudas debajo de los campos y leyendas.</td></tr>
+    </table>
+
+    <h3 class="bb-sub">Números tabulares</h3>
+    <div class="bb-numeros">
+      <div class="bb-prop">111 · $ 48.000<br>208 · $ 126.500<br>314 · $ 9.990<p class="muted" style="font-size:var(--text-xs)">Proporcionales: no se alinean</p></div>
+      <div class="num">111 · $ 48.000<br>208 · $ 126.500<br>314 · $ 9.990<p class="muted" style="font-size:var(--text-xs)">Tabulares (<code>.num</code>): para tablas y el tape chart</p></div>
+    </div>
+  </section>
+
+  <!-- ESPACIOS -->
+  <section class="bb-section" id="espacios">
+    <h2>Espacios, bordes y sombras</h2>
+    <p class="bb-lead">Todo el espaciado es múltiplo de 4 px. Los bordes son finos y las sombras apenas se notan: la jerarquía la marcan el espacio y el texto.</p>
+
+    <div class="bb-espacios">
+      <div><span style="width:4px;height:4px"></span>1 · 4</div>
+      <div><span style="width:8px;height:8px"></span>2 · 8</div>
+      <div><span style="width:12px;height:12px"></span>3 · 12</div>
+      <div><span style="width:16px;height:16px"></span>4 · 16</div>
+      <div><span style="width:24px;height:24px"></span>6 · 24</div>
+      <div><span style="width:32px;height:32px"></span>8 · 32</div>
+      <div><span style="width:48px;height:48px"></span>12 · 48</div>
+      <div><span style="width:64px;height:64px"></span>16 · 64</div>
+    </div>
+
+    <h3 class="bb-sub">Radios y sombras</h3>
+    <div class="bb-fila">
+      <div class="bb-cajita" style="border-radius:var(--radius-sm)">radius-sm · 4</div>
+      <div class="bb-cajita" style="border-radius:var(--radius)">radius · 8</div>
+      <div class="bb-cajita" style="border-radius:var(--radius-lg)">radius-lg · 12</div>
+      <div class="bb-cajita" style="border-radius:var(--radius);box-shadow:var(--shadow-sm)">shadow-sm</div>
+      <div class="bb-cajita" style="border-radius:var(--radius);box-shadow:var(--shadow)">shadow</div>
+      <div class="bb-cajita" style="border-radius:var(--radius);box-shadow:var(--shadow-lg)">shadow-lg</div>
+    </div>
+  </section>
+
+  <!-- COMPONENTES -->
+  <section class="bb-section" id="componentes">
+    <h2>Componentes</h2>
+    <p class="bb-lead">Las clases están en <code>app/static/css/components.css</code>. El botón principal es el único que toma el color del hotel.</p>
+
+    <h3 class="bb-sub">Botones</h3>
+    <div class="bb-fila">
+      <button class="btn btn--primary">Hacer check-in</button>
+      <button class="btn btn--secondary">Ver ficha</button>
+      <button class="btn btn--ghost">Cancelar</button>
+      <button class="btn btn--danger">Cancelar reserva</button>
+      <button class="btn btn--primary btn--sm">Chico</button>
+      <button class="btn btn--primary" disabled>Deshabilitado</button>
+    </div>
+
+    <h3 class="bb-sub">Formularios</h3>
+    <div class="bb-grid">
+      <label class="field">
+        <span class="label">Apellido</span>
+        <input class="input" placeholder="Ej.: García">
+      </label>
+      <label class="field">
+        <span class="label">Tipo de habitación</span>
+        <select class="select"><option>Doble estándar</option><option>Suite</option></select>
+      </label>
+      <label class="field field--error">
+        <span class="label">Fecha de salida</span>
+        <input class="input num" value="10/10/2026">
+        <span class="hint">La salida tiene que ser posterior a la entrada.</span>
+      </label>
+      <label class="field">
+        <span class="label">Documento</span>
+        <input class="input num" value="38.456.120">
+        <span class="hint">Sin puntos también funciona.</span>
+      </label>
+    </div>
+
+    <h3 class="bb-sub">Badges de estado</h3>
+    <div class="bb-fila">
+      <span class="badge badge--libre">Libre</span>
+      <span class="badge badge--ocupada">Ocupada</span>
+      <span class="badge badge--llega">Llega hoy</span>
+      <span class="badge badge--sale">Sale hoy</span>
+      <span class="badge badge--sucia">Sucia</span>
+      <span class="badge badge--mantenimiento">Mantenimiento</span>
+      <span class="badge badge--bloqueada">Bloqueada</span>
+    </div>
+
+    <h3 class="bb-sub">Mensajes</h3>
+    <div style="display:grid; gap: var(--space-2); max-width: 560px">
+      <div class="flash flash--success">Check-in de la habitación 204 hecho.</div>
+      <div class="flash flash--warning">La habitación 112 está marcada como sucia.</div>
+      <div class="flash flash--danger">La 305 ya está reservada del 12 al 15 de octubre.</div>
+      <div class="flash">Hay 6 llegadas previstas para hoy.</div>
+    </div>
+
+    <h3 class="bb-sub">Tarjeta con tabla</h3>
+    <div class="card">
+      <div class="card__header"><h3>Llegadas de hoy</h3><button class="btn btn--secondary btn--sm">Ver todas</button></div>
+      <table class="table">
+        <thead><tr><th>Hab.</th><th>Huésped</th><th>Noches</th><th>Total</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td>103</td><td>Lucía Fernández</td><td>3</td><td>$ 144.000</td><td><span class="badge badge--llega">Llega hoy</span></td></tr>
+          <tr><td>207</td><td>Martín Sosa</td><td>1</td><td>$ 52.000</td><td><span class="badge badge--llega">Llega hoy</span></td></tr>
+          <tr><td>310</td><td>Ana Rossi</td><td>5</td><td>$ 310.000</td><td><span class="badge badge--ocupada">Ocupada</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MÓDULOS -->
+  <section class="bb-section" id="modulos">
+    <h2>Módulos visuales</h2>
+    <p class="bb-lead">Las dos pantallas centrales del sistema. Se generan con los datos de cada hotel: pisos, habitaciones y reservas.</p>
+
+    <h3 class="bb-sub">Plano de habitaciones · Piso 1</h3>
+    <ul class="leyenda" style="margin-bottom: var(--space-4)">
+      <li><span class="leyenda__muestra" style="--c:var(--estado-libre)"></span>Libre</li>
+      <li><span class="leyenda__muestra" style="--c:var(--estado-ocupada)"></span>Ocupada</li>
+      <li><span class="leyenda__muestra" style="--c:var(--estado-llega)"></span>Llega hoy</li>
+      <li><span class="leyenda__muestra" style="--c:var(--estado-sale)"></span>Sale hoy</li>
+      <li><span class="leyenda__muestra" style="--c:var(--estado-bloqueada)"></span>Bloqueada</li>
+      <li><span class="habitacion__bandera habitacion__bandera--sucia" style="position:static">S</span>Sucia</li>
+      <li><span class="habitacion__bandera habitacion__bandera--mantenimiento" style="position:static">M</span>Mantenimiento</li>
+    </ul>
+    <div class="bb-piso">
+      <button class="habitacion habitacion--libre"><span class="habitacion__numero">101</span><span class="habitacion__tipo">Doble</span><span class="habitacion__estado">Libre</span></button>
+      <button class="habitacion habitacion--ocupada"><span class="habitacion__numero">102</span><span class="habitacion__tipo">Doble</span><span class="habitacion__estado">Ocupada</span><span class="habitacion__huesped">M. García</span></button>
+      <button class="habitacion habitacion--llega"><span class="habitacion__numero">103</span><span class="habitacion__tipo">Triple</span><span class="habitacion__estado">Llega hoy</span><span class="habitacion__huesped">L. Fernández</span></button>
+      <button class="habitacion habitacion--sale"><span class="habitacion__numero">104</span><span class="habitacion__tipo">Simple</span><span class="habitacion__estado">Sale hoy</span><span class="habitacion__huesped">J. Pérez</span></button>
+      <button class="habitacion habitacion--libre"><span class="habitacion__bandera habitacion__bandera--sucia" title="Sucia">S</span><span class="habitacion__numero">105</span><span class="habitacion__tipo">Doble</span><span class="habitacion__estado">Libre</span></button>
+      <button class="habitacion habitacion--ocupada"><span class="habitacion__numero">106</span><span class="habitacion__tipo">Suite</span><span class="habitacion__estado">Ocupada</span><span class="habitacion__huesped">A. Rossi</span></button>
+      <button class="habitacion habitacion--bloqueada"><span class="habitacion__bandera habitacion__bandera--mantenimiento" title="Mantenimiento">M</span><span class="habitacion__numero">107</span><span class="habitacion__tipo">Doble</span><span class="habitacion__estado">Bloqueada</span></button>
+      <button class="habitacion habitacion--libre"><span class="habitacion__numero">108</span><span class="habitacion__tipo">Simple</span><span class="habitacion__estado">Libre</span></button>
+    </div>
+
+    <h3 class="bb-sub">Tape chart de reservas</h3>
+    <div class="bb-tape">
+      <div class="bb-tape__grid">
+        <div class="bb-tape__head"></div>
+        <div class="bb-tape__head">lun<strong>12</strong></div>
+        <div class="bb-tape__head">mar<strong>13</strong></div>
+        <div class="bb-tape__head bb-tape__head--hoy">mié<strong>14</strong></div>
+        <div class="bb-tape__head">jue<strong>15</strong></div>
+        <div class="bb-tape__head">vie<strong>16</strong></div>
+        <div class="bb-tape__head">sáb<strong>17</strong></div>
+        <div class="bb-tape__head">dom<strong>18</strong></div>
+        <div class="bb-tape__head">lun<strong>19</strong></div>
+        <div class="bb-tape__head">mar<strong>20</strong></div>
+        <div class="bb-tape__head">mié<strong>21</strong></div>
+
+        <!-- 101 -->
+        <div class="bb-tape__hab" style="grid-row:2">101<small>Doble</small></div>
+        <!-- 102 -->
+        <div class="bb-tape__hab" style="grid-row:3">102<small>Doble</small></div>
+        <!-- 103 -->
+        <div class="bb-tape__hab" style="grid-row:4">103<small>Triple</small></div>
+        <!-- 104 -->
+        <div class="bb-tape__hab" style="grid-row:5">104<small>Simple</small></div>
+      </div>
+    </div>
+    <p class="muted" style="margin-top: var(--space-3); font-size: var(--text-sm)">Sólida = en curso · suave = confirmada (futura) · gris = finalizada. La columna resaltada es hoy.</p>
+  </section>
+
+  <!-- MARCA BLANCA -->
+  <section class="bb-section" id="marca-blanca">
+    <h2>Marca blanca</h2>
+    <p class="bb-lead">Así se adapta el sistema a cada hotel. Probá otros colores: el texto sobre el acento cambia solo entre blanco y negro para mantener el contraste.</p>
+
+    <div class="bb-wl">
+      <div class="bb-wl__controles">
+        <div class="bb-wl__presets" role="group" aria-label="Temas de ejemplo">
+          <button class="bb-wl__preset" style="--p:#18181B" data-color="#18181B" data-logo="logos/logo-horizontal.svg" data-nombre="Sin configurar" aria-pressed="true"><i></i>Conserje (por defecto)</button>
+          <button class="bb-wl__preset" style="--p:#1F6F5C" data-color="#1F6F5C" data-logo="hotel-demo/logo-hotel-mirador.svg" data-nombre="Hotel Mirador" aria-pressed="false"><i></i>Hotel Mirador (demo)</button>
+          <button class="bb-wl__preset" style="--p:#2563EB" data-color="#2563EB" aria-pressed="false"><i></i>Azul</button>
+          <button class="bb-wl__preset" style="--p:#7F1D1D" data-color="#7F1D1D" aria-pressed="false"><i></i>Bordó</button>
+          <button class="bb-wl__preset" style="--p:#EAB308" data-color="#EAB308" aria-pressed="false"><i></i>Mostaza (claro)</button>
+        </div>
+        <label class="bb-wl__picker">
+          <input type="color" id="wl-color" value="#18181B" aria-label="Color de acento">
+          <span class="label">Elegir otro color</span>
+        </label>
+        <p class="bb-wl__contraste" id="wl-contraste"></p>
+      </div>
+
+      <div class="bb-app" id="wl-app">
+        <aside class="bb-app__side">
+          <img id="wl-logo" src="logos/logo-horizontal.svg" alt="Logo del hotel">
+          <span class="bb-app__item bb-app__item--activo">Plano</span>
+          <span class="bb-app__item">Reservas</span>
+          <span class="bb-app__item">Huéspedes</span>
+          <span class="bb-app__item">Configuración</span>
+          <span class="bb-app__powered">con Conserje</span>
+        </aside>
+        <div class="bb-app__main">
+          <div class="bb-app__top">
+            <h3>Plano de habitaciones</h3>
+            <button class="btn btn--primary btn--sm">+ Nueva reserva</button>
+          </div>
+          <label class="field" style="max-width: 280px">
+            <span class="label">Buscar huésped</span>
+            <input class="input" placeholder="Nombre o documento">
+          </label>
+          <div class="bb-piso">
+            <button class="habitacion habitacion--libre"><span class="habitacion__numero">201</span><span class="habitacion__tipo">Doble</span><span class="habitacion__estado">Libre</span></button>
+            <button class="habitacion habitacion--ocupada"><span class="habitacion__numero">202</span><span class="habitacion__tipo">Suite</span><span class="habitacion__estado">Ocupada</span></button>
+            <button class="habitacion habitacion--llega"><span class="habitacion__numero">203</span><span class="habitacion__tipo">Doble</span><span class="habitacion__estado">Llega hoy</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VOZ Y TONO -->
+  <section class="bb-section" id="voz">
+    <h2>Voz y tono</h2>
+    <p class="bb-lead">El sistema le habla a gente que trabaja en recepción, muchas veces con un huésped adelante. Textos cortos, concretos y en voseo.</p>
+    <div class="bb-voz">
+      <div class="bb-si"><strong>Sí</strong>Check-in de la 204 hecho.</div>
+      <div class="bb-no"><strong>No</strong>¡Éxito! La operación de check-in se ha completado satisfactoriamente.</div>
+      <div class="bb-si"><strong>Sí</strong>La 305 ya está reservada del 12 al 15. Elegí otra habitación o cambiá las fechas.</div>
+      <div class="bb-no"><strong>No</strong>Error 409: conflicto de disponibilidad.</div>
+      <div class="bb-si"><strong>Sí</strong>Botones con verbo: "Hacer check-in", "Guardar reserva".</div>
+      <div class="bb-no"><strong>No</strong>Botones genéricos: "Aceptar", "OK", "Enviar".</div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // --- Tape chart de muestra: ubica las barras en la grilla --------------------
+  // columna 2 = día 12. [fila, desde, hasta (excl.), clase, texto]
+  const reservasMuestra = [
+    [2, 2, 5, "finalizada", "Gómez"],
+    [2, 6, 10, "confirmada", "Ibarra · 4 n"],
+    [3, 2, 7, "en-curso", "M. García · 5 n"],
+    [4, 4, 7, "confirmada", "L. Fernández · 3 n"],
+    [4, 8, 12, "confirmada", "Duarte · 4 n"],
+    [5, 2, 5, "en-curso", "J. Pérez"],
+  ];
+  const tape = document.querySelector(".bb-tape__grid");
+  for (let fila = 2; fila <= 5; fila++) {
+    for (let col = 2; col <= 11; col++) {
+      const celda = document.createElement("div");
+      celda.className = "bb-tape__celda" + (col === 4 ? " bb-tape__celda--hoy" : "");
+      celda.style.gridArea = `${fila} / ${col}`;
+      tape.appendChild(celda);
+    }
+  }
+  for (const [fila, desde, hasta, clase, texto] of reservasMuestra) {
+    const barra = document.createElement("div");
+    barra.className = `barra-reserva barra-reserva--${clase} bb-tape__barra`;
+    barra.style.gridArea = `${fila} / ${desde} / ${fila + 1} / ${hasta}`;
+    barra.textContent = texto;
+    tape.appendChild(barra);
+  }
+
+  // --- Marca blanca: acento + contraste automático -----------------------------
+  // La misma lógica va a vivir en el servidor (context_processor de Flask).
+  function luminancia(hex) {
+    const canal = (i) => {
+      const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    };
+    return 0.2126 * canal(1) + 0.7152 * canal(3) + 0.0722 * canal(5);
+  }
+
+  const INK = "#18181B";
+  function textoSobre(hex) {
+    const L = luminancia(hex);
+    const conBlanco = 1.05 / (L + 0.05);
+    const conNegro = (L + 0.05) / (luminancia(INK) + 0.05);
+    return conBlanco >= conNegro
+      ? { color: "#FFFFFF", nombre: "blanco", ratio: conBlanco }
+      : { color: INK, nombre: "negro", ratio: conNegro };
+  }
+
+  const app = document.getElementById("wl-app");
+  const logo = document.getElementById("wl-logo");
+  const picker = document.getElementById("wl-color");
+  const info = document.getElementById("wl-contraste");
+  const presets = document.querySelectorAll(".bb-wl__preset");
+
+  function aplicar(hex) {
+    const t = textoSobre(hex);
+    app.style.setProperty("--accent", hex);
+    app.style.setProperty("--accent-contrast", t.color);
+    picker.value = hex.toLowerCase();
+    info.textContent = `Texto sobre el acento: ${t.nombre} · contraste ${t.ratio.toFixed(1)}:1`;
+  }
+
+  presets.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      presets.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+      if (btn.dataset.logo) logo.src = btn.dataset.logo;
+      aplicar(btn.dataset.color);
+    });
+  });
+
+  picker.addEventListener("input", () => {
+    presets.forEach((b) => b.setAttribute("aria-pressed", "false"));
+    aplicar(picker.value.toUpperCase());
+  });
+
+  aplicar("#18181B");
+</script>
+</body>
+</html>

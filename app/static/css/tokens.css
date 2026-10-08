@@ -1,0 +1,122 @@
+/* =========================================================================
+   Conserje: tokens de diseño
+   Variables globales del sistema. Los componentes (components.css) usan
+   solo estas variables, nunca colores sueltos.
+   ========================================================================= */
+
+:root {
+  /* --- Neutros -------------------------------------------------------- */
+  --gray-0: #FFFFFF;
+  --gray-50: #FAFAFA;
+  --gray-100: #F4F4F5;
+  --gray-200: #E4E4E7;
+  --gray-300: #D4D4D8;
+  --gray-400: #A1A1AA;
+  --gray-500: #71717A;
+  --gray-600: #52525B;
+  --gray-700: #3F3F46;
+  --gray-800: #27272A;
+  --gray-900: #18181B;
+
+  /* --- Superficies y texto ---------------------------------------------- */
+  --bg: var(--gray-50);
+  --surface: var(--gray-0);
+  --surface-sunken: var(--gray-100);
+  --border: var(--gray-200);
+  --border-strong: var(--gray-300);
+  --text: var(--gray-900);
+  --text-muted: var(--gray-500);
+  --text-subtle: var(--gray-400);
+
+  /* --- Acento ------------------------------------------------------------
+     Lo reemplaza cada hotel desde Configuración (se inyecta en base.html).
+     --accent-contrast es el color del texto sobre el acento: el servidor
+     elige blanco o casi negro según la luminancia del color del hotel.
+     Las variantes se derivan solas, así funcionan con cualquier color. */
+  --accent: #18181B;
+  --accent-contrast: #FFFFFF;
+  --accent-hover: color-mix(in oklab, var(--accent) 86%, var(--accent-contrast));
+  --accent-soft: color-mix(in oklab, var(--accent) 10%, var(--surface));
+  --accent-ring: color-mix(in oklab, var(--accent) 35%, transparent);
+
+  /* --- Feedback (mensajes, validaciones) ---------------------------------- */
+  --success: #15803D;
+  --success-soft: #DCFCE7;
+  --warning: #A16207;
+  --warning-soft: #FEF9C3;
+  --danger: #B91C1C;
+  --danger-soft: #FEE2E2;
+  --info: #1D4ED8;
+  --info-soft: #DBEAFE;
+
+  /* --- Estados de habitación ---------------------------------------------
+     Fijos: no dependen del acento del hotel. Cada estado tiene un color
+     sólido (texto blanco encima ≥ 4.5:1) y uno suave de fondo (el sólido
+     usado como texto encima también pasa 4.5:1). Siempre van con texto,
+     nunca solo color. */
+  --estado-libre: #15803D;
+  --estado-libre-soft: #DCFCE7;
+  --estado-ocupada: #1D4ED8;
+  --estado-ocupada-soft: #DBEAFE;
+  --estado-llega: #6D28D9;
+  --estado-llega-soft: #EDE9FE;
+  --estado-sale: #C2410C;
+  --estado-sale-soft: #FFEDD5;
+  --estado-sucia: #A16207;
+  --estado-sucia-soft: #FEF9C3;
+  --estado-mantenimiento: #B91C1C;
+  --estado-mantenimiento-soft: #FEE2E2;
+  --estado-bloqueada: #52525B;
+  --estado-bloqueada-soft: #F4F4F5;
+
+  /* --- Tipografía --------------------------------------------------------- */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+
+  --text-xs: 0.75rem;     /* 12px: etiquetas, ayudas */
+  --text-sm: 0.8125rem;   /* 13px: tablas, metadatos */
+  --text-base: 0.875rem;  /* 14px: texto de la interfaz */
+  --text-md: 1rem;        /* 16px: texto destacado */
+  --text-lg: 1.125rem;    /* 18px: títulos de tarjeta */
+  --text-xl: 1.25rem;     /* 20px: títulos de sección */
+  --text-2xl: 1.5rem;     /* 24px: título de página */
+  --text-3xl: 1.875rem;   /* 30px: números grandes */
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+
+  /* --- Espaciado (base 4px) ---------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* --- Bordes, sombras y movimiento --------------------------------------- */
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-full: 999px;
+
+  --shadow-sm: 0 1px 2px rgb(24 24 27 / 0.06);
+  --shadow: 0 1px 3px rgb(24 24 27 / 0.08), 0 1px 2px rgb(24 24 27 / 0.04);
+  --shadow-lg: 0 12px 32px -12px rgb(24 24 27 / 0.28);
+
+  --focus-ring: 0 0 0 3px var(--accent-ring);
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --duration: 150ms;
+
+  /* --- Layout de la app --------------------------------------------------- */
+  --sidebar-width: 240px;
+  --topbar-height: 56px;
+}

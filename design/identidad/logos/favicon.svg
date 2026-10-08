@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Conserje">
+  <title>Conserje</title>
+  <style>.t{fill:#18181B}.b{fill:#FFFFFF}@media (prefers-color-scheme:dark){.t{fill:#FAFAFA}.b{fill:#18181B}}</style>
+  <rect class="t" width="64" height="64" rx="14"/>
+  <g transform="translate(7.04 7.43) scale(.78)"><mask id="hl" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+    <rect width="64" height="64" fill="#fff"/>
+    <path d="M18.84 38.21A14 14 0 0 1 26.08 30.31" fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="round"/>
+  </mask>
+  <g class="b">
+    <circle cx="32" cy="15" r="4"/>
+    <rect x="30.5" y="17" width="3" height="6"/>
+    <path d="M11 43a21 21 0 0 1 42 0z" mask="url(#hl)"/>
+    <rect x="6" y="46" width="52" height="6" rx="3"/>
+  </g></g>
+</svg>
