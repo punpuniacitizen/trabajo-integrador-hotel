@@ -31,7 +31,7 @@
       <span class="selector-fecha__rango num">{{ rango_fechas(desde, ultimo_dia) }} {{ ultimo_dia.year }}</span>
     </div>
 
-    <button class="btn btn--primary" type="button" disabled title="Próximamente">{{ icono("mas") }}Nueva reserva</button>
+    <a class="btn btn--primary" href="{{ url_for('reservas.nueva') }}">{{ icono("mas") }}Nueva reserva</a>
   </div>
 </div>
 
@@ -42,12 +42,13 @@
     <li><span class="leyenda__muestra" style="--c: var(--gray-300)"></span>Finalizada</li>
     <li><span class="leyenda__muestra" style="--c: var(--estado-mantenimiento)"></span>Mantenimiento</li>
   </ul>
-  <span class="muted tape-leyenda__ayuda">Hacé clic en una reserva para ver su detalle en el plano.</span>
+  <span class="muted tape-leyenda__ayuda">Clic en una reserva: ver su detalle. Clic o arrastre en un espacio libre: nueva reserva.</span>
 </div>
 
 <div class="tape-scroll" id="tape-scroll"
      data-url-grilla="{{ url_for('reservas.grilla', desde=desde.isoformat(), dias=dias) }}"
      data-url-mover="{{ url_for('api.mover', reserva_id=0) }}"
+     data-url-nueva="{{ url_for('reservas.nueva') }}"
      data-hoy="{{ hoy.isoformat() }}">
   {% include "reservas/_tape.html" %}
 </div>

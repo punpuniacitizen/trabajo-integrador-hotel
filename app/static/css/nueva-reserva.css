@@ -1,0 +1,213 @@
+/* =========================================================================
+   Nueva reserva (administración)
+   ========================================================================= */
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.volver:hover { color: var(--text); }
+.volver .icono { width: 16px; height: 16px; }
+
+/* Pasos a la izquierda, resumen fijo a la derecha */
+.nueva-reserva {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: var(--space-5);
+  max-width: 1180px;
+}
+
+.nueva-reserva__pasos { display: grid; gap: var(--space-5); }
+
+.nr-card { display: grid; gap: var(--space-4); padding: var(--space-5) var(--space-6); }
+.nr-card__cabecera { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.nr-card__titulo { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-lg); }
+
+.nr-paso {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: var(--radius-full);
+  background: var(--accent-soft);
+  color: color-mix(in oklab, var(--accent) 85%, var(--text));
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.nr-fechas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 120px); gap: var(--space-4); }
+.nr-campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.nr-campos__ancho { grid-column: 1 / -1; }
+
+/* --- Habitaciones: una ficha por habitación, agrupadas por tipo -------------------------- */
+.nr-tipos { display: grid; gap: var(--space-4); }
+.nr-tipo { display: grid; gap: var(--space-2); }
+.nr-tipo + .nr-tipo { padding-top: var(--space-4); border-top: 1px solid var(--border); }
+.nr-tipo__nombre { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); font-size: var(--text-sm); }
+
+.nr-habitaciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: var(--space-2); }
+
+.nr-hab {
+  --c: var(--estado-libre);
+  position: relative;
+  display: grid;
+  gap: 1px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--c);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  transition: box-shadow var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+
+/* El radio queda invisible pero se puede usar con el teclado */
+.nr-hab input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: inherit; }
+.nr-hab strong { font-size: var(--text-md); line-height: 1.2; }
+.nr-hab small { overflow: hidden; color: var(--c); font-size: 11px; font-weight: var(--weight-medium); text-overflow: ellipsis; white-space: nowrap; }
+
+.nr-hab:hover { border-color: var(--border-strong); border-top-color: var(--c); box-shadow: var(--shadow); }
+.nr-hab:focus-within { box-shadow: var(--focus-ring); }
+
+.nr-hab:has(input:checked) {
+  --c: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.nr-hab[data-estado="ocupada"] { --c: var(--estado-ocupada); }
+.nr-hab[data-estado="mantenimiento"] { --c: var(--estado-mantenimiento); }
+.nr-hab[data-estado="capacidad"] { --c: var(--text-muted); }
+
+.nr-hab:has(input:disabled) {
+  background: repeating-linear-gradient(135deg, var(--surface-sunken) 0 6px, var(--surface) 6px 12px);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.nr-hab:has(input:disabled) strong { color: var(--text-subtle); }
+.nr-hab:has(input:disabled):hover { border-color: var(--border); border-top-color: var(--c); }
+
+/* Mientras se consulta la disponibilidad de las fechas nuevas */
+.nr-tipos--cargando { opacity: 0.55; pointer-events: none; transition: opacity var(--duration) var(--ease); }
+
+.nr-aviso { margin: 0; }
+
+/* --- Huésped ------------------------------------------------------------------------------ */
+.nr-buscar { position: relative; }
+.nr-buscar__campo { position: relative; display: block; }
+.nr-buscar__campo .icono { position: absolute; top: 50%; left: 11px; width: 16px; height: 16px; color: var(--text-subtle); pointer-events: none; translate: 0 -50%; }
+.nr-buscar__campo .input { padding-left: 34px; }
+
+.nr-resultados {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  z-index: 20;
+  max-height: 320px;
+  margin: 0;
+  padding: var(--space-1);
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  list-style: none;
+}
+
+.nr-resultado {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.nr-resultado:hover,
+.nr-resultado[aria-selected="true"] { background: var(--surface-sunken); }
+.nr-resultado > div { flex: 1; min-width: 0; }
+.nr-resultado p { color: var(--text-muted); font-size: var(--text-xs); overflow-wrap: anywhere; }
+.nr-resultado__estadias { flex: none; color: var(--text-muted); font-size: var(--text-xs); white-space: nowrap; }
+.nr-resultados__vacio { padding: var(--space-3); color: var(--text-muted); font-size: var(--text-sm); }
+
+.nr-elegido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in oklab, var(--accent) 35%, var(--border));
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+}
+
+.nr-nuevo { min-width: 0; margin: 0; padding: 0; border: 0; }
+.nr-nuevo__titulo { margin-bottom: var(--space-3); padding: 0; color: var(--text-muted); font-size: var(--text-sm); }
+
+/* --- Pago ----------------------------------------------------------------------------------- */
+.nr-pago { display: flex; align-items: center; gap: var(--space-2); }
+.nr-pago .input { flex: 1; min-width: 0; }
+.nr-pago .segmentado { flex: none; }
+
+/* --- Resumen -------------------------------------------------------------------------------- */
+.nr-resumen {
+  position: sticky;
+  top: calc(var(--topbar-height) + var(--space-4));
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.nr-resumen h2 { font-size: var(--text-lg); }
+.nr-resumen__datos { display: grid; gap: var(--space-3); margin: 0; }
+.nr-resumen__datos div { display: grid; gap: 1px; }
+.nr-resumen__datos dt { color: var(--text-muted); font-size: 11px; font-weight: var(--weight-medium); letter-spacing: 0.04em; text-transform: uppercase; }
+.nr-resumen__datos dd { margin: 0; font-weight: var(--weight-medium); }
+.nr-resumen__detalle { display: block; color: var(--text-subtle); font-size: 11px; }
+.nr-resumen .importes { background: var(--surface-sunken); }
+
+.nr-checkin {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.nr-checkin input { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--accent); }
+.nr-checkin > span { display: grid; gap: 2px; font-size: var(--text-sm); }
+.nr-checkin:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+
+.nr-error { display: flex; align-items: flex-start; gap: var(--space-2); margin: 0; }
+.nr-error .icono { width: 16px; height: 16px; flex: none; margin-top: 2px; }
+
+.nr-resumen__botones { display: grid; gap: var(--space-2); }
+
+/* --- Pantallas medianas y chicas ---------------------------------------------------------- */
+@media (max-width: 1100px) {
+  .nueva-reserva { grid-template-columns: minmax(0, 1fr); }
+  .nr-resumen { position: static; }
+}
+
+@media (max-width: 600px) {
+  .nr-card { padding: var(--space-4); }
+  .nr-fechas { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .nr-fechas .field:last-child { grid-column: 1 / -1; }
+  .nr-campos { grid-template-columns: minmax(0, 1fr); }
+  .nr-pago { flex-wrap: wrap; }
+  .nr-pago .input { flex-basis: 100%; }
+}

@@ -498,8 +498,10 @@ code {
   text-decoration: none;
 }
 
+button.segmentado__opcion { border: 0; background: none; font-family: inherit; cursor: pointer; }
 .segmentado__opcion:hover { color: var(--text); }
-.segmentado__opcion[aria-current="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+.segmentado__opcion[aria-current="true"],
+.segmentado__opcion[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
 
 /* --- Leyenda --------------------------------------------------------------------------- */
 .leyenda {
@@ -566,6 +568,30 @@ code {
 }
 
 .avatar--sm { width: 32px; height: 32px; font-size: var(--text-xs); }
+
+/* Avatar + nombre + un dato debajo (panel del plano, nueva reserva) */
+.persona { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.persona p { font-size: var(--text-xs); }
+
+/* --- Importes de una reserva: total, pagado y saldo ------------------------------------------ */
+.importes {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: var(--text-sm);
+}
+
+.importes div { display: flex; justify-content: space-between; gap: var(--space-3); }
+.importes dt { color: var(--text-muted); }
+.importes dd { margin: 0; font-weight: var(--weight-semibold); }
+.importes__pagado { color: var(--success); }
+.importes__saldo { padding-top: var(--space-1); border-top: 1px solid var(--border); }
+.importes__saldo--pendiente dt,
+.importes__saldo--pendiente dd { color: var(--estado-sale); font-weight: var(--weight-semibold); }
 
 /* --- Estado vacío -------------------------------------------------------------------------- */
 .vacio {

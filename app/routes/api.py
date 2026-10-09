@@ -7,7 +7,7 @@ from app.auth import login_requerido
 from app.extensions import db
 from app.filtros import moneda, rango_fechas
 from app.models import Habitacion, Reserva
-from app.services import recepcion, reservas
+from app.services import huespedes, recepcion, reservas
 from app.services.recepcion import ErrorDeNegocio, RequiereConfirmacion
 
 bp = Blueprint("api", __name__, url_prefix="/administracion/api")
@@ -43,6 +43,40 @@ def no_encontrado(_error):
 def _ok(mensaje):
     db.session.commit()
     return jsonify(ok=True, mensaje=mensaje)
+
+
+@bp.get("/disponibilidad")
+def disponibilidad():
+    """Qué habitaciones se pueden elegir en la nueva reserva para esas fechas y personas."""
+    try:
+        entrada = date.fromisoformat(request.args.get("entrada", ""))
+        salida = date.fromisoformat(request.args.get("salida", ""))
+    except ValueError:
+        return jsonify(ok=False, error="Elegí las fechas de entrada y salida."), 400
+    if salida <= entrada:
+        return jsonify(ok=False, error="La salida tiene que ser posterior a la entrada."), 400
+    personas = request.args.get("personas", default=1, type=int)
+    opciones = reservas.disponibilidad(entrada, salida, personas)
+    return jsonify(ok=True, habitaciones=[
+        {"id": o.habitacion.id, "estado": o.estado, "motivo": o.motivo} for o in opciones
+    ])
+
+
+@bp.get("/huespedes")
+def buscar_huespedes():
+    """Buscador de huéspedes que ya se alojaron (para no cargarlos de nuevo)."""
+    return jsonify(ok=True, huespedes=[
+        {
+            "id": h.id,
+            "nombre": h.nombre_completo,
+            "documento": h.documento,
+            "email": h.email,
+            "telefono": h.telefono,
+            "pais": huespedes.NOMBRES_PAISES.get(h.pais, h.pais),
+            "estadias": len(h.reservas),
+        }
+        for h in huespedes.buscar(request.args.get("q", ""))
+    ])
 
 
 @bp.post("/reservas/<int:reserva_id>/check-in")

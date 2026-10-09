@@ -84,13 +84,15 @@
 
 .sitio-etiqueta .icono { width: 14px; height: 14px; }
 
-/* Buscador de fechas: lleva a /reservar con las fechas completas */
+/* Buscador de fechas dentro de la portada (fechas arriba, personas y botón abajo):
+   lleva a /reservar con todo completado */
 .buscador-reserva {
   display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 160px) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: end;
-  gap: var(--space-4);
+  gap: var(--space-3);
+  max-width: 500px;
+  margin-top: var(--space-8);
   padding: var(--space-4);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -446,8 +448,6 @@
   .portada, .detalle, .reservar { grid-template-columns: minmax(0, 1fr); }
   .portada { padding-top: var(--space-8); gap: var(--space-8); }
   .hotel-info { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); }
-  .buscador-reserva { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .buscador-reserva .btn { grid-column: 1 / -1; }
   .resumen { position: static; }
   .opciones-tipo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 

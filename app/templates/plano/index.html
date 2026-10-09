@@ -28,7 +28,8 @@
   </div>
 
   <div class="pagina-cabecera__acciones">
-    <button class="btn btn--primary" type="button" disabled title="Próximamente">{{ icono("mas") }}Nueva reserva</button>
+    {# Si se está mirando un día futuro, la reserva arranca ese día #}
+    <a class="btn btn--primary" href="{{ url_for('reservas.nueva', entrada=fecha.isoformat() if fecha > hoy else None, volver='plano') }}">{{ icono("mas") }}Nueva reserva</a>
   </div>
 </div>
 

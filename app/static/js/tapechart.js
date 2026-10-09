@@ -57,23 +57,32 @@
     fila?.classList.add("tape__fila--destino");
   }
 
-  function mostrarTooltip(a) {
-    const noches = contarNoches(a.entrada, a.salida);
-    const accion = a.estirar
-      ? `Salida el ${fechaCorta(a.salida)}`
-      : `Mover a ${a.fila.dataset.numero} · ${rango(a.entrada, a.salida)}`;
+  // Tooltip arriba de una barra: qué va a pasar al soltar y si se puede
+  function tooltipSobre(elemento, accion, motivo) {
     const texto = document.createElement("span");
-    texto.textContent = `${accion} (${noches} ${noches === 1 ? "noche" : "noches"})`;
+    texto.textContent = accion;
     const estado = document.createElement("span");
     estado.className = "tape-tooltip__estado";
-    estado.textContent = a.motivo ? "No disponible" : "Disponible";
+    estado.textContent = motivo ? "No disponible" : "Disponible";
     tooltip.replaceChildren(texto, estado);
-    tooltip.classList.toggle("tape-tooltip--error", Boolean(a.motivo));
+    tooltip.classList.toggle("tape-tooltip--error", Boolean(motivo));
 
-    const caja = a.barra.getBoundingClientRect();
+    const caja = elemento.getBoundingClientRect();
     tooltip.style.left = `${caja.left + caja.width / 2}px`;
     tooltip.style.top = `${caja.top}px`;
     tooltip.hidden = false;
+  }
+
+  const textoNoches = (entrada, salida) => {
+    const noches = contarNoches(entrada, salida);
+    return `${noches} ${noches === 1 ? "noche" : "noches"}`;
+  };
+
+  function mostrarTooltip(a) {
+    const accion = a.estirar
+      ? `Salida el ${fechaCorta(a.salida)}`
+      : `Mover a ${a.fila.dataset.numero} · ${rango(a.entrada, a.salida)}`;
+    tooltipSobre(a.barra, `${accion} (${textoNoches(a.entrada, a.salida)})`, a.motivo);
   }
 
   // Si se arrastra cerca del borde de la grilla, la grilla se desplaza sola
@@ -93,10 +102,80 @@
     marcarDestino(null);
   }
 
+  // --- Nueva reserva: clic o arrastre sobre un espacio libre de una fila ------
+  // Cada día marcado es una noche: del 12 al 14 marcados = entrada el 12 y salida el 15.
+  let seleccion = null;
+
+  function diaBajo(x) {
+    const dias = scroll.querySelectorAll(".tape__dia");
+    const primero = dias[0].getBoundingClientRect();
+    const indice = Math.floor((x - primero.left) / primero.width);
+    return Math.min(Math.max(indice, 0), dias.length - 1);
+  }
+
+  function actualizarSeleccion() {
+    const s = seleccion;
+    const primera = Math.min(s.inicio, s.fin);
+    const ultima = Math.max(s.inicio, s.fin);
+    const tape = scroll.querySelector(".tape");
+    const ultimaLinea = 2 + 2 * Number(tape.dataset.dias);
+    s.entrada = sumarDias(tape.dataset.desde, primera);
+    s.salida = sumarDias(tape.dataset.desde, ultima + 1);
+    s.fantasma.style.gridColumn = `${3 + 2 * primera} / ${Math.min(3 + 2 * (ultima + 1), ultimaLinea)}`;
+
+    const numero = s.fila.dataset.numero;
+    const pisa = [...s.fila.querySelectorAll(".barra-reserva[data-id]")].some(
+      (otra) => otra.dataset.entrada < s.salida && otra.dataset.salida > s.entrada
+    );
+    if (s.fila.dataset.bloqueada) s.motivo = `La ${numero} está en mantenimiento`;
+    else if (s.entrada < hoy) s.motivo = "No se puede reservar en días que ya pasaron";
+    else if (pisa) s.motivo = `La ${numero} está ocupada esas noches`;
+    else s.motivo = null;
+
+    s.fantasma.classList.toggle("barra-reserva--conflicto", Boolean(s.motivo));
+    s.fantasma.textContent = `${numero} · ${textoNoches(s.entrada, s.salida)}`;
+    tooltipSobre(s.fantasma, `Nueva reserva · ${rango(s.entrada, s.salida)}`, s.motivo);
+  }
+
+  function empezarSeleccion(evento) {
+    const fila = evento.target.closest(".tape__fila");
+    if (!fila || evento.target.closest(".tape__hab, .barra-reserva")) return;
+    const fantasma = document.createElement("div");
+    fantasma.className = "barra-reserva barra-reserva--nueva";
+    fila.append(fantasma);
+    const dia = diaBajo(evento.clientX);
+    seleccion = { fila, fantasma, inicio: dia, fin: dia };
+    actualizarSeleccion();
+    fila.setPointerCapture(evento.pointerId); // sigue recibiendo el arrastre aunque salga de la grilla
+  }
+
+  function cancelarSeleccion() {
+    seleccion?.fantasma.remove();
+    seleccion = null;
+    tooltip.hidden = true;
+  }
+
+  function terminarSeleccion() {
+    const s = seleccion;
+    seleccion = null;
+    if (s.motivo) {
+      Conserje.toast(`${s.motivo}.`, "danger");
+      s.fantasma.remove();
+      tooltip.hidden = true;
+      return;
+    }
+    const datos = new URLSearchParams({ habitacion: s.fila.dataset.habitacion, entrada: s.entrada, salida: s.salida });
+    location.href = `${scroll.dataset.urlNueva}?${datos}`;
+  }
+
   // --- Arrastre con pointer events (sirve para mouse y pantallas táctiles) ---
   scroll.addEventListener("pointerdown", (evento) => {
+    if (evento.button !== 0) return;
     const barra = evento.target.closest(".barra-reserva[data-id]");
-    if (!barra || evento.button !== 0) return;
+    if (!barra) {
+      empezarSeleccion(evento);
+      return;
+    }
     const fila = barra.closest(".tape__fila");
     arrastre = {
       barra,
@@ -115,6 +194,14 @@
   });
 
   scroll.addEventListener("pointermove", (evento) => {
+    if (seleccion) {
+      const dia = diaBajo(evento.clientX);
+      if (dia !== seleccion.fin) {
+        seleccion.fin = dia;
+        actualizarSeleccion();
+      }
+      return;
+    }
     const a = arrastre;
     if (!a) return;
     const dx = evento.clientX - a.x0;
@@ -149,6 +236,7 @@
   });
 
   scroll.addEventListener("pointerup", async () => {
+    if (seleccion) return terminarSeleccion();
     const a = arrastre;
     if (!a) return;
     arrastre = null;
@@ -181,9 +269,11 @@
     }
   });
 
+  // Si el navegador toma el gesto (por ejemplo, para desplazar en una pantalla táctil)
   scroll.addEventListener("pointercancel", () => {
     if (arrastre) restaurar(arrastre);
     arrastre = null;
+    cancelarSeleccion();
   });
 
   // Enter sobre una reserva abre su detalle
@@ -215,4 +305,22 @@
   }
 
   buscador.addEventListener("input", aplicarBusqueda);
+
+  // --- Después de crear una reserva se llega con #reserva-123: se muestra resaltada ---
+  const recienCreada = location.hash.match(/^#reserva-(\d+)$/);
+  if (recienCreada) {
+    const barra = scroll.querySelector(`.barra-reserva[data-id="${recienCreada[1]}"]`);
+    if (barra) {
+      barra.scrollIntoView({ block: "center", inline: "nearest" });
+      // Se centra a lo ancho en la parte que no tapa la columna fija de las habitaciones
+      const caja = scroll.getBoundingClientRect();
+      const posicion = barra.getBoundingClientRect();
+      const anchoHab = scroll.querySelector(".tape__hab").offsetWidth;
+      const libre = caja.width - anchoHab;
+      scroll.scrollLeft += posicion.left - caja.left - anchoHab - Math.max((libre - posicion.width) / 2, 8);
+      barra.classList.add("barra-reserva--resaltada");
+      setTimeout(() => barra.classList.remove("barra-reserva--resaltada"), 3000);
+    }
+    history.replaceState(null, "", location.pathname + location.search);
+  }
 })();

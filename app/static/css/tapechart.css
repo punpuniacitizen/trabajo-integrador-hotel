@@ -156,6 +156,9 @@
 }
 
 .tape__fila > * { grid-row: 1; }
+/* En el espacio libre de una fila se hace clic o se arrastra para crear una reserva */
+.tape__fila { cursor: cell; user-select: none; }
+.tape__hab { cursor: default; }
 .tape__fila:hover { background: color-mix(in oklab, var(--surface-sunken) 45%, transparent); }
 
 .tape__fila--destino { background: color-mix(in oklab, var(--accent) 6%, transparent); }
@@ -182,6 +185,30 @@
 .tape .barra-reserva[data-mover] { touch-action: none; }
 .tape .barra-reserva:not([data-mover]) { cursor: pointer; }
 .tape .barra-reserva--atenuada { opacity: 0.2; }
+
+/* Reserva nueva que se está marcando con el mouse */
+.tape .barra-reserva--nueva {
+  z-index: 6;
+  border: 1px dashed var(--accent);
+  background: var(--accent-soft);
+  color: color-mix(in oklab, var(--accent) 85%, var(--text));
+  pointer-events: none;
+}
+
+.tape .barra-reserva--nueva.barra-reserva--conflicto {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+  outline: none;
+}
+
+/* La reserva recién creada se resalta unos segundos */
+.tape .barra-reserva--resaltada { animation: resaltar 1s var(--ease) 3; }
+
+@keyframes resaltar {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 45%, transparent); }
+}
 
 /* --- Tooltip de arrastre -------------------------------------------------------------------- */
 .tape-tooltip {

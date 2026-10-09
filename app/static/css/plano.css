@@ -124,9 +124,6 @@
   background: var(--bg);
 }
 
-.persona { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
-.persona p { font-size: var(--text-xs); }
-
 .datos {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -139,24 +136,6 @@
 .datos dt { color: var(--text-muted); font-size: 11px; }
 .datos dd { margin: 0; font-size: var(--text-sm); font-weight: var(--weight-medium); }
 
-.importes {
-  display: grid;
-  gap: var(--space-1);
-  margin: 0;
-  padding: var(--space-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  font-size: var(--text-sm);
-}
-
-.importes div { display: flex; justify-content: space-between; gap: var(--space-3); }
-.importes dt { color: var(--text-muted); }
-.importes dd { margin: 0; font-weight: var(--weight-semibold); }
-.importes__pagado { color: var(--success); }
-.importes__saldo { padding-top: var(--space-1); border-top: 1px solid var(--border); }
-.importes__saldo--pendiente dt,
-.importes__saldo--pendiente dd { color: var(--estado-sale); font-weight: var(--weight-semibold); }
 
 .panel__seccion { display: grid; gap: var(--space-1); font-size: var(--text-sm); }
 

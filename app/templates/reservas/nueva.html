@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% from "components/macros.html" import icono %}
+
+{% block titulo %}Nueva reserva{% endblock %}
+{% block placeholder_busqueda %}Buscar{% endblock %}
+{% block estilos %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/nueva-reserva.css') }}">
+{% endblock %}
+
+{% macro plural(n, uno, varios) %}{{ n }} {{ uno if n == 1 else varios }}{% endmacro %}
+
+{% block contenido %}
+<a class="volver" href="{{ url_cancelar }}">{{ icono("anterior") }}{{ "Plano" if volver == "plano" else "Reservas" }}</a>
+<div class="pagina-cabecera">
+  <div class="pagina-cabecera__titulo">
+    <h1>Nueva reserva</h1>
+    <p class="muted">Para las reservas que llegan por teléfono, por mail o al mostrador.</p>
+  </div>
+</div>
+
+{% if not grupos %}
+  <div class="card vacio">
+    {{ icono("cama", "vacio__icono") }}
+    <p><strong>Todavía no hay habitaciones cargadas.</strong></p>
+    {% if usuario.rol == "admin" %}
+      <p><a class="btn btn--primary" href="{{ url_for('configuracion.habitaciones') }}">Cargar habitaciones</a></p>
+    {% else %}
+      <p>Un usuario de administración las puede cargar desde Configuración.</p>
+    {% endif %}
+  </div>
+{% else %}
+<form class="nueva-reserva" id="nueva-reserva" method="post"
+      data-url-disponibilidad="{{ url_for('api.disponibilidad') }}"
+      data-url-huespedes="{{ url_for('api.buscar_huespedes') }}"
+      data-hoy="{{ hoy.isoformat() }}" data-moneda="{{ hotel.moneda }}">
+  <input type="hidden" name="volver" value="{{ volver }}">
+
+  <div class="nueva-reserva__pasos">
+    {# --- 1. Fechas y personas --- #}
+    <section class="card nr-card">
+      <h2 class="nr-card__titulo"><span class="nr-paso">1</span>Fechas y personas</h2>
+      <div class="nr-fechas">
+        <label class="field">
+          <span class="label">Entrada</span>
+          <input class="input" type="date" name="entrada" value="{{ entrada.isoformat() }}" min="{{ hoy.isoformat() }}" required>
+        </label>
+        <label class="field">
+          <span class="label">Salida</span>
+          <input class="input" type="date" name="salida" value="{{ salida.isoformat() }}" min="{{ salida_minima.isoformat() }}" required>
+        </label>
+        <label class="field">
+          <span class="label">Personas</span>
+          <select class="select" name="personas">
+            {% for n in range(1, max_personas + 1) %}<option value="{{ n }}"{% if n == personas %} selected{% endif %}>{{ n }}</option>{% endfor %}
+          </select>
+        </label>
+      </div>
+      <p class="hint">Entrada desde las {{ hotel.hora_checkin }} · salida hasta las {{ hotel.hora_checkout }} · hasta {{ maximo_noches }} noches.</p>
+    </section>
+
+    {# --- 2. Habitación: las que no sirven para esas fechas quedan deshabilitadas --- #}
+    <section class="card nr-card">
+      <div class="nr-card__cabecera">
+        <h2 class="nr-card__titulo"><span class="nr-paso">2</span>Habitación</h2>
+        <span class="chip"><span class="chip__punto"></span><span data-libres>{{ libres }}</span> libres de {{ total_habitaciones }}</span>
+      </div>
+      <p class="flash flash--warning nr-aviso" data-aviso-habitacion role="status" hidden></p>
+      <div class="nr-tipos">
+        {% for tipo, opciones in grupos %}
+          <div class="nr-tipo" role="radiogroup" aria-label="{{ tipo.nombre }}">
+            <div class="nr-tipo__nombre">
+              <strong>{{ tipo.nombre }}</strong>
+              <span class="muted">{{ tipo.tarifa_base|moneda }} por noche · hasta {{ plural(tipo.capacidad, "persona", "personas") }}</span>
+            </div>
+            <div class="nr-habitaciones">
+              {% for o in opciones %}
+                {% set h = o.habitacion %}
+                <label class="nr-hab" data-estado="{{ o.estado }}">
+                  <input type="radio" name="habitacion_id" value="{{ h.id }}" required
+                         data-numero="{{ h.numero }}" data-tipo="{{ tipo.nombre }}" data-tarifa="{{ tipo.tarifa_base }}"
+                         {%- if not o.libre %} disabled{% endif %}
+                         {%- if elegida and elegida.habitacion.id == h.id %} checked{% endif %}>
+                  <strong class="num">{{ h.numero }}</strong>
+                  <small data-motivo>{{ o.motivo or "Libre" }}</small>
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    {# --- 3. Huésped: uno que ya vino (buscador) o uno nuevo --- #}
+    <section class="card nr-card">
+      <h2 class="nr-card__titulo"><span class="nr-paso">3</span>Huésped</h2>
+      <input type="hidden" name="huesped_id" value="{{ huesped.id if huesped else '' }}">
+
+      <div class="nr-elegido" data-huesped-elegido{% if not huesped %} hidden{% endif %}>
+        <div class="persona">
+          <span class="avatar" data-avatar>{{ huesped.nombre_completo|iniciales if huesped }}</span>
+          <div>
+            <strong data-nombre>{{ huesped.nombre_completo if huesped }}</strong>
+            <p class="muted" data-detalle>{% if huesped %}{{ "Doc. " ~ huesped.documento if huesped.documento else "Sin documento" }}{% if huesped.email %} · {{ huesped.email }}{% endif %}{% endif %}</p>
+          </div>
+        </div>
+        <button class="btn btn--ghost btn--sm" type="button" data-cambiar-huesped>{{ icono("cerrar") }}Cambiar</button>
+      </div>
+
+      <div class="nr-buscar" data-buscar{% if huesped %} hidden{% endif %}>
+        <label class="field">
+          <span class="label">¿Ya se alojó antes? Buscalo</span>
+          <span class="nr-buscar__campo">
+            {{ icono("buscar") }}
+            <input class="input" type="search" placeholder="Nombre, apellido, documento o email" autocomplete="off"
+                   data-buscar-huesped role="combobox" aria-expanded="false" aria-controls="resultados-huesped" aria-autocomplete="list">
+          </span>
+        </label>
+        <ul class="nr-resultados" id="resultados-huesped" role="listbox" hidden></ul>
+      </div>
+
+      <fieldset class="nr-nuevo" data-huesped-nuevo{% if huesped %} hidden disabled{% endif %}>
+        <legend class="nr-nuevo__titulo">Si es la primera vez, cargalo:</legend>
+        <div class="nr-campos">
+          <label class="field">
+            <span class="label">Nombre</span>
+            <input class="input" name="nombre" value="{{ datos.get('nombre', '') }}" maxlength="80" required autocomplete="off">
+          </label>
+          <label class="field">
+            <span class="label">Apellido</span>
+            <input class="input" name="apellido" value="{{ datos.get('apellido', '') }}" maxlength="80" required autocomplete="off">
+          </label>
+          <label class="field">
+            <span class="label">Documento <span class="muted">(opcional)</span></span>
+            <input class="input" name="documento" value="{{ datos.get('documento', '') }}" maxlength="20" autocomplete="off" placeholder="DNI o pasaporte">
+          </label>
+          <label class="field">
+            <span class="label">País <span class="muted">(opcional)</span></span>
+            <select class="select" name="pais">
+              <option value="">—</option>
+              {% for codigo, nombre in paises %}<option value="{{ codigo }}"{% if datos.get('pais') == codigo %} selected{% endif %}>{{ nombre }}</option>{% endfor %}
+            </select>
+          </label>
+          <label class="field">
+            <span class="label">Email <span class="muted">(opcional)</span></span>
+            <input class="input" type="email" name="email" value="{{ datos.get('email', '') }}" maxlength="120" autocomplete="off">
+          </label>
+          <label class="field">
+            <span class="label">Teléfono <span class="muted">(opcional)</span></span>
+            <input class="input" type="tel" name="telefono" value="{{ datos.get('telefono', '') }}" maxlength="40" autocomplete="off">
+          </label>
+        </div>
+      </fieldset>
+    </section>
+
+    {# --- 4. Pago y notas --- #}
+    <section class="card nr-card">
+      <h2 class="nr-card__titulo"><span class="nr-paso">4</span>Pago y notas</h2>
+      <div class="nr-campos">
+        <div class="field">
+          <label class="label" for="pagado">Pagado ahora ({{ hotel.moneda }})</label>
+          <div class="nr-pago">
+            <input class="input num" id="pagado" type="number" name="pagado" min="0" step="1" inputmode="numeric" value="{{ datos.get('pagado', '0') }}">
+            <div class="segmentado" role="group" aria-label="Completar lo pagado">
+              <button class="segmentado__opcion" type="button" data-pago="0">Nada</button>
+              <button class="segmentado__opcion" type="button" data-pago="50">50%</button>
+              <button class="segmentado__opcion" type="button" data-pago="100">Total</button>
+            </div>
+          </div>
+          <span class="hint">Una seña o el total. Lo que falte se cobra en el hotel.</span>
+        </div>
+        <label class="field nr-campos__ancho">
+          <span class="label">Notas para recepción <span class="muted">(opcional)</span></span>
+          <textarea class="textarea" name="notas" rows="3" maxlength="500" placeholder="Ej.: llega tarde, pidió cuna, necesita factura A…">{{ datos.get('notas', '') }}</textarea>
+        </label>
+      </div>
+    </section>
+  </div>
+
+  {# --- Resumen (se actualiza en vivo con nueva-reserva.js; el servidor recalcula todo) --- #}
+  <aside class="card nr-resumen" aria-label="Resumen de la reserva">
+    <h2>Resumen</h2>
+    <dl class="nr-resumen__datos">
+      <div>
+        <dt>Habitación</dt>
+        <dd data-r-habitacion>{% if elegida %}{{ elegida.habitacion.numero }} · {{ elegida.habitacion.tipo.nombre }}{% else %}<span class="muted">Sin elegir</span>{% endif %}</dd>
+      </div>
+      <div>
+        <dt>Estadía</dt>
+        <dd data-r-estadia>{{ rango_fechas(entrada, salida) }} · {{ plural(noches, "noche", "noches") }}</dd>
+      </div>
+      <div><dt>Personas</dt><dd data-r-personas>{{ personas }}</dd></div>
+      <div>
+        <dt>Huésped</dt>
+        <dd data-r-huesped>{% if huesped %}{{ huesped.nombre_completo }}{% else %}<span class="muted">Sin cargar</span>{% endif %}</dd>
+      </div>
+    </dl>
+
+    <dl class="importes">
+      <div><dt>Total <small class="nr-resumen__detalle" data-r-detalle></small></dt><dd class="num" data-r-total>—</dd></div>
+      <div><dt>Pagado</dt><dd class="num importes__pagado" data-r-pagado>—</dd></div>
+      <div class="importes__saldo" data-r-fila-saldo><dt>Saldo</dt><dd class="num" data-r-saldo>—</dd></div>
+    </dl>
+
+    <label class="nr-checkin" data-checkin{% if entrada != hoy %} hidden{% endif %}>
+      <input type="checkbox" name="checkin" value="1"{% if datos.get('checkin') == '1' %} checked{% endif %}>
+      <span>
+        <strong>Hacer el check-in ahora</strong>
+        <span class="hint">El huésped ya está en el hotel. La habitación tiene que estar limpia.</span>
+      </span>
+    </label>
+
+    {% if error %}<p class="flash flash--danger nr-error" role="alert">{{ icono("alerta") }}<span>{{ error }}</span></p>{% endif %}
+
+    <div class="nr-resumen__botones">
+      <button class="btn btn--primary btn--lg" type="submit">{{ icono("check") }}Crear reserva</button>
+      <a class="btn btn--ghost" href="{{ url_cancelar }}">Cancelar</a>
+    </div>
+  </aside>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/nueva-reserva.js') }}"></script>
+{% endblock %}

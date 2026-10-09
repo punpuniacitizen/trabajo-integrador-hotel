@@ -1,13 +1,17 @@
 """Reglas de las reservas: disponibilidad, capacidad y cambios de fecha o de habitación."""
 import secrets
+from dataclasses import dataclass
 
 from app.extensions import db
-from app.filtros import rango_fechas
+from app.filtros import moneda, rango_fechas
 from app.models import Habitacion, Huesped, Reserva
+from app.services import recepcion
 from app.services.errores import ErrorDeNegocio
 
 # Para que el demostrador no permita estadías absurdas
 MAXIMO_NOCHES_WEB = 30
+# Desde la administración: evita que un error al tipear el año cree una reserva de meses
+MAXIMO_NOCHES = 90
 
 
 def reserva_superpuesta(habitacion, entrada, salida, excluir=None):
@@ -69,6 +73,87 @@ def mover_reserva(reserva, habitacion, entrada, salida, hoy):
     reserva.entrada = entrada
     reserva.salida = salida
     reserva.total = calcular_total(habitacion.tipo, entrada, salida)
+
+
+@dataclass
+class Opcion:
+    """Una habitación en el selector de la nueva reserva.
+
+    estado: "libre", "ocupada", "mantenimiento" o "capacidad" (no entran todos).
+    motivo: texto corto para mostrar cuando no se puede elegir.
+    """
+
+    habitacion: Habitacion
+    estado: str = "libre"
+    motivo: str | None = None
+
+    @property
+    def libre(self):
+        return self.estado == "libre"
+
+
+def disponibilidad(entrada, salida, personas):
+    """Todas las habitaciones, ordenadas por tipo y número, marcando las que no sirven para esas fechas."""
+    ocupadas = set(db.session.scalars(
+        db.select(Reserva.habitacion_id).where(
+            Reserva.estado.notin_(Reserva.INACTIVAS),
+            Reserva.entrada < salida,
+            Reserva.salida > entrada,
+        )
+    ))
+    habitaciones = db.session.scalars(db.select(Habitacion)).all()
+    habitaciones.sort(key=lambda h: (h.tipo.tarifa_base, h.tipo.nombre, h.piso, h.numero))
+
+    opciones = []
+    for habitacion in habitaciones:
+        capacidad = habitacion.tipo.capacidad
+        if habitacion.fuera_de_servicio:
+            opcion = Opcion(habitacion, "mantenimiento", "Mantenimiento")
+        elif habitacion.id in ocupadas:
+            opcion = Opcion(habitacion, "ocupada", "Ocupada")
+        elif personas > capacidad:
+            texto = "Hasta 1 persona" if capacidad == 1 else f"Hasta {capacidad} personas"
+            opcion = Opcion(habitacion, "capacidad", texto)
+        else:
+            opcion = Opcion(habitacion)
+        opciones.append(opcion)
+    return opciones
+
+
+def crear_reserva(habitacion, huesped, entrada, salida, personas, hoy, pagado=0, notas=None, checkin=False):
+    """Reserva cargada por recepción desde la administración (teléfono, mail o mostrador).
+
+    Si el huésped ya está en el mostrador y entra hoy, se puede hacer el check-in en el mismo paso.
+    """
+    if entrada < hoy:
+        raise ErrorDeNegocio("La entrada no puede ser anterior a hoy.")
+    if personas < 1:
+        raise ErrorDeNegocio("La reserva tiene que ser para 1 persona como mínimo.")
+    validar_disponibilidad(habitacion, entrada, salida, personas)
+    if (salida - entrada).days > MAXIMO_NOCHES:
+        raise ErrorDeNegocio(f"Una reserva puede tener hasta {MAXIMO_NOCHES} noches. Revisá las fechas.")
+
+    total = calcular_total(habitacion.tipo, entrada, salida)
+    if pagado < 0:
+        raise ErrorDeNegocio("Lo pagado no puede ser negativo.")
+    if pagado > total:
+        raise ErrorDeNegocio(f"Lo pagado no puede superar el total de la estadía ({moneda(total)}).")
+
+    reserva = Reserva(
+        huesped=huesped,
+        habitacion=habitacion,
+        entrada=entrada,
+        salida=salida,
+        personas=personas,
+        estado=Reserva.CONFIRMADA,
+        total=total,
+        pagado=pagado,
+        notas=(notas or "").strip() or None,
+    )
+    db.session.add(reserva)
+    if checkin:
+        recepcion.hacer_checkin(reserva, hoy)
+    return reserva
 
 
 def habitacion_libre(tipo, entrada, salida):

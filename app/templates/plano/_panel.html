@@ -56,6 +56,11 @@
     {% endif %}
   {% else %}
     <p class="muted">Sin huésped {{ "hoy" if es_hoy else "el " ~ fecha|fecha_corta }}.</p>
+    {% if not h.fuera_de_servicio and fecha >= hoy %}
+      <a class="btn btn--secondary" href="{{ url_for('reservas.nueva', habitacion=h.id, entrada=fecha.isoformat(), volver='plano') }}">
+        {{ icono("mas") }}Reservar la {{ h.numero }} desde {{ "hoy" if es_hoy else "el " ~ fecha|fecha_corta }}
+      </a>
+    {% endif %}
   {% endif %}
 
   {% for titulo, otra in [("Después llega", e.llega_despues), ("Próxima reserva", d.proxima)] if otra %}

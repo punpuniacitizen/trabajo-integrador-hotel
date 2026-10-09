@@ -13,30 +13,30 @@
       <h1>{{ hotel.eslogan or hotel.nombre }}</h1>
       {% if hotel.eslogan %}<p class="portada__lugar">{{ hotel.nombre }}</p>{% endif %}
       {% if presentacion %}<p class="portada__bajada">{{ presentacion[0] }}</p>{% endif %}
+      {% if tipos %}
+        <form class="buscador-reserva" action="{{ url_for('sitio.reservar') }}" method="get">
+          <label class="buscador-reserva__campo">
+            <span>Llegada</span>
+            <input type="date" name="entrada" value="{{ manana.isoformat() }}" min="{{ hoy.isoformat() }}" required>
+          </label>
+          <label class="buscador-reserva__campo">
+            <span>Salida</span>
+            <input type="date" name="salida" value="{{ pasado.isoformat() }}" min="{{ manana.isoformat() }}" required>
+          </label>
+          <label class="buscador-reserva__campo">
+            <span>Personas</span>
+            <select name="personas">
+              {% for n in range(1, max_personas + 1) %}<option value="{{ n }}"{% if n == 2 %} selected{% endif %}>{{ n }}</option>{% endfor %}
+            </select>
+          </label>
+          <button class="btn btn--primary btn--lg" type="submit">{{ icono("buscar") }}Ver disponibilidad</button>
+        </form>
+      {% endif %}
     </div>
     {% if hotel.portada %}
       <div class="portada__imagen">
         <img src="{{ url_media(hotel.portada) }}" alt="{{ hotel.nombre }}">
       </div>
-    {% endif %}
-    {% if tipos %}
-      <form class="buscador-reserva" action="{{ url_for('sitio.reservar') }}" method="get">
-        <label class="buscador-reserva__campo">
-          <span>Llegada</span>
-          <input type="date" name="entrada" value="{{ manana.isoformat() }}" min="{{ hoy.isoformat() }}" required>
-        </label>
-        <label class="buscador-reserva__campo">
-          <span>Salida</span>
-          <input type="date" name="salida" value="{{ pasado.isoformat() }}" min="{{ manana.isoformat() }}" required>
-        </label>
-        <label class="buscador-reserva__campo">
-          <span>Personas</span>
-          <select name="personas">
-            {% for n in range(1, max_personas + 1) %}<option value="{{ n }}"{% if n == 2 %} selected{% endif %}>{{ n }}</option>{% endfor %}
-          </select>
-        </label>
-        <button class="btn btn--primary btn--lg" type="submit">Ver disponibilidad</button>
-      </form>
     {% endif %}
   </section>
 </div>
