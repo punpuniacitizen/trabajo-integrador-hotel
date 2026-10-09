@@ -16,12 +16,13 @@ def create_app(config_class=Config):
     from app import contexto, filtros
     from app.comandos import crear_usuario_command
     from app.demo import demo_command
-    from app.routes import api, auth, media, plano
+    from app.routes import api, auth, media, plano, reservas
 
     contexto.registrar(app)
     filtros.registrar(app)
     app.register_blueprint(auth.bp)
     app.register_blueprint(plano.bp)
+    app.register_blueprint(reservas.bp)
     app.register_blueprint(api.bp)
     app.register_blueprint(media.bp)
     app.cli.add_command(demo_command)

@@ -1,0 +1,74 @@
+{% from "components/macros.html" import icono %}
+{% set dias_semana = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"] %}
+<div class="tape" id="tape" data-desde="{{ desde.isoformat() }}" data-dias="{{ dias }}"
+     style="--dias: {{ dias }}; --medias: {{ dias * 2 }}; --ancho-dia: {{ 72 if dias == 14 else 46 }}px">
+
+  {# Fondo: columnas de los días (fines de semana y hoy resaltados) #}
+  <div class="tape__fondo" aria-hidden="true">
+    {% for fecha in fechas %}
+      <div class="tape__columna{% if fecha.weekday() >= 5 %} tape__columna--finde{% endif %}{% if fecha == hoy %} tape__columna--hoy{% endif %}"
+           style="grid-column: {{ 2 + 2 * loop.index0 }} / span 2"></div>
+    {% endfor %}
+  </div>
+
+  <div class="tape__cabecera">
+    <div class="tape__esquina">
+      <span>Habitación</span>
+      <small>Tipo</small>
+    </div>
+    {% for fecha in fechas %}
+      <div class="tape__dia{% if fecha == hoy %} tape__dia--hoy{% endif %}">
+        {% if fecha == hoy %}
+          <span class="tape__hoy">Hoy {{ fecha.day }}</span>
+        {% else %}
+          <span>{{ dias_semana[fecha.weekday()] }}</span>
+          <strong class="num">{{ fecha.day }}</strong>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  {% for piso, habitaciones in pisos %}
+    <div class="tape__piso">
+      <span>{{ icono("plano") }}Piso {{ piso }} · {{ habitaciones|length }} habitaciones</span>
+    </div>
+    {% for h in habitaciones %}
+      <div class="tape__fila" data-habitacion="{{ h.id }}" data-numero="{{ h.numero }}" data-capacidad="{{ h.tipo.capacidad }}"
+           {% if h.fuera_de_servicio %}data-bloqueada="1"{% endif %}>
+        <div class="tape__hab">
+          <strong class="num">{{ h.numero }}</strong>
+          <small>{{ h.tipo.nombre }}</small>
+        </div>
+        {% for b in barras[h.id] %}
+          {% set clases = "barra-reserva" ~ (" barra-reserva--corta-izq" if b.corta_izquierda else "") ~ (" barra-reserva--corta-der" if b.corta_derecha else "") %}
+          {% if b.reserva %}
+            {% set r = b.reserva %}
+            {% set movible = r.estado in ("confirmada", "en_curso") %}
+            <div class="{{ clases }} barra-reserva--{{ r.estado|replace('_', '-') }}"
+                 style="grid-column: {{ b.columna_desde }} / {{ b.columna_hasta }}"
+                 role="button" tabindex="0"
+                 data-id="{{ r.id }}" data-habitacion="{{ h.id }}" data-entrada="{{ r.entrada.isoformat() }}" data-salida="{{ r.salida.isoformat() }}"
+                 data-personas="{{ r.personas }}" data-huesped="{{ r.huesped.apellido }}" data-detalle="{{ b.detalle_url }}"
+                 data-busqueda="{{ h.numero }} {{ r.huesped.nombre_completo|lower }}"
+                 {% if movible %}data-mover="{{ 'habitacion' if r.estado == 'en_curso' else 'todo' }}"{% endif %}
+                 title="{{ r.huesped.nombre_completo }} · {{ rango_fechas(r.entrada, r.salida) }} · {{ r.noches }} {{ 'noche' if r.noches == 1 else 'noches' }} · {{ r.personas }} {{ 'persona' if r.personas == 1 else 'personas' }} · Reserva {{ r.codigo }}">
+              <span class="barra-reserva__texto">{{ r.huesped.apellido }} · {{ r.noches }} n</span>
+              {% if r.estado == "confirmada" and r.entrada == hoy %}
+                <span class="barra-reserva__extra">Llega hoy</span>
+              {% elif r.estado == "en_curso" and r.salida == hoy %}
+                <span class="barra-reserva__extra">Sale hoy</span>
+              {% endif %}
+              {% if movible and not b.corta_derecha %}<span class="barra-reserva__estirar" aria-hidden="true"></span>{% endif %}
+            </div>
+          {% else %}
+            <div class="{{ clases }} barra-reserva--bloqueo" style="grid-column: {{ b.columna_desde }} / {{ b.columna_hasta }}">
+              {{ icono("mantenimiento") }}<span class="barra-reserva__texto">{{ h.nota_mantenimiento or "Mantenimiento" }}</span>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="vacio"><p><strong>Todavía no hay habitaciones cargadas.</strong></p></div>
+  {% endfor %}
+</div>

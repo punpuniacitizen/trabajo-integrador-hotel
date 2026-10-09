@@ -5,8 +5,9 @@ from flask import Blueprint, jsonify, request
 
 from app.auth import login_requerido
 from app.extensions import db
+from app.filtros import moneda, rango_fechas
 from app.models import Habitacion, Reserva
-from app.services import recepcion
+from app.services import recepcion, reservas
 from app.services.recepcion import ErrorDeNegocio, RequiereConfirmacion
 
 bp = Blueprint("api", __name__, url_prefix="/administracion/api")
@@ -63,6 +64,29 @@ def no_show(reserva_id):
     reserva = db.get_or_404(Reserva, reserva_id)
     recepcion.marcar_no_show(reserva, date.today())
     return _ok(f"{reserva.huesped.apellido} quedó como no presentado. La {reserva.habitacion.numero} se liberó.")
+
+
+@bp.post("/reservas/<int:reserva_id>/mover")
+def mover(reserva_id):
+    """Cambio de habitación y/o fechas desde el tape chart."""
+    reserva = db.get_or_404(Reserva, reserva_id)
+    try:
+        habitacion_id = int(request.json.get("habitacion_id"))
+        entrada = date.fromisoformat(request.json.get("entrada"))
+        salida = date.fromisoformat(request.json.get("salida"))
+    except (TypeError, ValueError):
+        raise ErrorDeNegocio("Datos inválidos.")
+    habitacion = db.get_or_404(Habitacion, habitacion_id)
+
+    total_anterior = reserva.total
+    reservas.mover_reserva(reserva, habitacion, entrada, salida, date.today())
+    mensaje = (
+        f"{reserva.huesped.apellido}: {habitacion.numero}, del {rango_fechas(entrada, salida)} "
+        f"({reserva.noches} {'noche' if reserva.noches == 1 else 'noches'})."
+    )
+    if reserva.total != total_anterior:
+        mensaje += f" Nuevo total: {moneda(reserva.total)}."
+    return _ok(mensaje)
 
 
 @bp.post("/habitaciones/<int:habitacion_id>/limpieza")

@@ -413,6 +413,84 @@ code {
   outline-offset: 1px;
 }
 
+.barra-reserva--bloqueo {
+  gap: var(--space-1);
+  border-color: var(--estado-mantenimiento-soft);
+  background: repeating-linear-gradient(45deg, var(--estado-mantenimiento-soft), var(--estado-mantenimiento-soft) 6px, var(--surface) 6px, var(--surface) 12px);
+  color: var(--estado-mantenimiento);
+  cursor: default;
+}
+
+.barra-reserva--bloqueo .icono { width: 14px; height: 14px; }
+
+/* La barra sigue antes o después del período visible */
+.barra-reserva--corta-izq { border-top-left-radius: 0; border-bottom-left-radius: 0; border-left-style: dashed; }
+.barra-reserva--corta-der { border-top-right-radius: 0; border-bottom-right-radius: 0; border-right-style: dashed; }
+
+.barra-reserva__texto { overflow: hidden; text-overflow: ellipsis; }
+
+.barra-reserva__extra {
+  margin-left: auto;
+  padding-left: var(--space-2);
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+/* Agarradera para estirar la salida (borde derecho) */
+.barra-reserva__estirar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 10px;
+  cursor: ew-resize;
+}
+
+.barra-reserva__estirar::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  right: 3px;
+  width: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--duration) var(--ease);
+}
+
+.barra-reserva:hover .barra-reserva__estirar::after { opacity: 0.5; }
+
+.barra-reserva--arrastrando {
+  z-index: 50;
+  box-shadow: var(--shadow-lg), 0 0 0 2px var(--accent);
+  cursor: grabbing;
+  opacity: 0.92;
+}
+
+/* --- Selector segmentado ----------------------------------------------------------------- */
+.segmentado {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius);
+  background: var(--surface-sunken);
+}
+
+.segmentado__opcion {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}
+
+.segmentado__opcion:hover { color: var(--text); }
+.segmentado__opcion[aria-current="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+
 /* --- Leyenda --------------------------------------------------------------------------- */
 .leyenda {
   display: flex;

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "components/macros.html" import icono %}
+
+{% block titulo %}Reservas{% endblock %}
+{% block placeholder_busqueda %}Buscá huésped o habitación…{% endblock %}
+{% block estilos %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tapechart.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<div class="pagina-cabecera">
+  <div class="pagina-cabecera__titulo">
+    <div class="tape-titulo">
+      <h1>Reservas</h1>
+      <span class="chip"><span class="chip__punto"></span>Ocupación del período · {{ ocupacion }}%</span>
+    </div>
+    <p class="muted">Arrastrá una reserva para cambiarla de fecha o de habitación. Estirá su borde derecho para cambiar la salida.</p>
+  </div>
+
+  <div class="pagina-cabecera__acciones tape-controles">
+    <div class="segmentado" role="group" aria-label="Días a mostrar">
+      {% for opcion in (14, 30) %}
+        <a class="segmentado__opcion" href="{{ url_for('reservas.index', desde=desde.isoformat(), dias=opcion) }}"{% if dias == opcion %} aria-current="true"{% endif %}>{{ opcion }} días</a>
+      {% endfor %}
+    </div>
+
+    <div class="selector-fecha" role="group" aria-label="Período">
+      <a class="btn btn--ghost btn--icono btn--sm" href="{{ url_for('reservas.index', desde=anterior.isoformat(), dias=dias) }}" aria-label="Semana anterior">{{ icono("anterior") }}</a>
+      <a class="btn btn--ghost btn--sm" href="{{ url_for('reservas.index', dias=dias) }}">Hoy</a>
+      <a class="btn btn--ghost btn--icono btn--sm" href="{{ url_for('reservas.index', desde=siguiente.isoformat(), dias=dias) }}" aria-label="Semana siguiente">{{ icono("siguiente") }}</a>
+      <span class="selector-fecha__rango num">{{ rango_fechas(desde, ultimo_dia) }} {{ ultimo_dia.year }}</span>
+    </div>
+
+    <button class="btn btn--primary" type="button" disabled title="Próximamente">{{ icono("mas") }}Nueva reserva</button>
+  </div>
+</div>
+
+<div class="tape-leyenda">
+  <ul class="leyenda" aria-label="Referencias">
+    <li><span class="leyenda__muestra" style="--c: var(--estado-ocupada)"></span>En curso</li>
+    <li><span class="leyenda__muestra leyenda__muestra--suave"></span>Confirmada</li>
+    <li><span class="leyenda__muestra" style="--c: var(--gray-300)"></span>Finalizada</li>
+    <li><span class="leyenda__muestra" style="--c: var(--estado-mantenimiento)"></span>Mantenimiento</li>
+  </ul>
+  <span class="muted tape-leyenda__ayuda">Hacé clic en una reserva para ver su detalle en el plano.</span>
+</div>
+
+<div class="tape-scroll" id="tape-scroll"
+     data-url-grilla="{{ url_for('reservas.grilla', desde=desde.isoformat(), dias=dias) }}"
+     data-url-mover="{{ url_for('api.mover', reserva_id=0) }}"
+     data-hoy="{{ hoy.isoformat() }}">
+  {% include "reservas/_tape.html" %}
+</div>
+
+<div class="tape-tooltip" id="tape-tooltip" role="status" hidden></div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/tapechart.js') }}"></script>
+{% endblock %}

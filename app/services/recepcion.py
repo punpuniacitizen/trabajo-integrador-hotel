@@ -7,17 +7,12 @@ from datetime import timedelta
 from app.extensions import db
 from app.filtros import fecha_corta
 from app.models import Habitacion, Reserva
+from app.services.errores import ErrorDeNegocio, RequiereConfirmacion
+
+__all__ = ["ErrorDeNegocio", "RequiereConfirmacion"]  # se importan desde acá en rutas y tests
 
 # Antes de bloquear una habitación se avisa de las reservas de estos próximos días
 DIAS_AVISO_MANTENIMIENTO = 7
-
-
-class ErrorDeNegocio(Exception):
-    """Una operación que no se puede hacer. El mensaje se le muestra tal cual al usuario."""
-
-
-class RequiereConfirmacion(ErrorDeNegocio):
-    """Se puede hacer, pero el usuario tiene que confirmarlo (el mensaje es la pregunta)."""
 
 
 def huesped_alojado(habitacion):
