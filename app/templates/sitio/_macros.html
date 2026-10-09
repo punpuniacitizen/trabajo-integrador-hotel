@@ -1,0 +1,12 @@
+{% macro imagen_tipo(tipo, clase="") -%}
+  {%- if tipo.slug -%}
+    <img class="{{ clase }}" src="{{ url_for('static', filename='img/habitaciones/' ~ tipo.slug ~ '.png') }}"
+         alt="Ilustración 3D de la habitación {{ tipo.nombre }}" loading="lazy">
+  {%- else -%}
+    <span class="{{ clase }} sitio-sin-imagen" aria-hidden="true"></span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro capacidad(tipo) -%}
+  Hasta {{ tipo.capacidad }} {{ "persona" if tipo.capacidad == 1 else "personas" }}{% if tipo.metros %} · {{ tipo.metros }} m²{% endif %}
+{%- endmacro %}

@@ -24,6 +24,7 @@ class Reserva(db.Model):
     total = db.Column(db.Integer, nullable=False, default=0)
     pagado = db.Column(db.Integer, nullable=False, default=0)
     notas = db.Column(db.Text)
+    token = db.Column(db.String(24), unique=True, index=True)  # link de confirmación de las reservas web
     creada = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     huesped = db.relationship("Huesped", back_populates="reservas")

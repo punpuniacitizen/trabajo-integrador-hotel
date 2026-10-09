@@ -1,0 +1,56 @@
+{% from "components/macros.html" import icono %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}{{ hotel.nombre }}{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='brand/favicon.svg') }}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sitio.css') }}">
+  {# Tema del hotel: el mismo color de acento que la administración #}
+  <style>:root { --accent: {{ acento }}; --accent-contrast: {{ acento_texto }}; }</style>
+</head>
+<body class="sitio">
+{% include "components/iconos.html" %}
+
+<header class="sitio-cabecera">
+  <div class="sitio-contenedor sitio-cabecera__fila">
+    <a class="sitio-marca" href="{{ url_for('sitio.inicio') }}">
+      {% if hotel.logo %}
+        <img src="{{ url_for('media.archivo', nombre=hotel.logo) }}" alt="{{ hotel.nombre }}">
+      {% else %}
+        <span>{{ hotel.nombre }}</span>
+      {% endif %}
+    </a>
+    <nav class="sitio-nav" aria-label="Secciones">
+      <a href="{{ url_for('sitio.inicio') }}#habitaciones">Habitaciones</a>
+      <a class="btn btn--primary" href="{{ url_for('sitio.reservar') }}">Reservar</a>
+    </nav>
+  </div>
+</header>
+
+<main class="sitio-main">
+  {% block contenido %}{% endblock %}
+</main>
+
+<footer class="sitio-pie">
+  <div class="sitio-contenedor sitio-pie__fila">
+    <div>
+      <strong>{{ hotel.nombre }}</strong>
+      {% if hotel.ciudad %}<p class="muted">{{ hotel.ciudad }}</p>{% endif %}
+    </div>
+    <p class="muted">Check-in desde las {{ hotel.hora_checkin }} · Check-out hasta las {{ hotel.hora_checkout }}</p>
+    <p class="sitio-pie__conserje">
+      <img src="{{ url_for('static', filename='brand/isotipo.svg') }}" alt="" width="14" height="14">
+      con Conserje · <a href="{{ url_for('plano.index') }}">Acceso del personal</a>
+    </p>
+  </div>
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,2 @@
+model-viewer.min.js: @google/model-viewer 4.3.1 (licencia Apache-2.0), visor 3D del sitio público.
+Se guarda acá para que funcione sin internet. Origen: https://cdn.jsdelivr.net/npm/@google/model-viewer@4.3.1/dist/model-viewer.min.js

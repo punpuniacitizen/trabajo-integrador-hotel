@@ -8,8 +8,18 @@ class TipoHabitacion(db.Model):
     nombre = db.Column(db.String(60), nullable=False, unique=True)
     capacidad = db.Column(db.Integer, nullable=False)
     tarifa_base = db.Column(db.Integer, nullable=False)  # por noche, en pesos enteros
+    # Para el sitio público: el slug arma la URL y el nombre de los archivos 3D
+    # (static/modelos/<slug>.glb y static/img/habitaciones/<slug>.png)
+    slug = db.Column(db.String(60), unique=True)
+    metros = db.Column(db.Integer)
+    descripcion = db.Column(db.Text)
+    comodidades = db.Column(db.Text)  # una por línea
 
     habitaciones = db.relationship("Habitacion", back_populates="tipo")
+
+    @property
+    def lista_comodidades(self):
+        return [c.strip() for c in (self.comodidades or "").splitlines() if c.strip()]
 
 
 class Habitacion(db.Model):

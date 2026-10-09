@@ -1,0 +1,58 @@
+{% extends "sitio/base.html" %}
+{% from "components/macros.html" import icono %}
+{% from "sitio/_macros.html" import imagen_tipo, capacidad %}
+
+{% block titulo %}{{ tipo.nombre }} · {{ hotel.nombre }}{% endblock %}
+
+{% block contenido %}
+<div class="sitio-contenedor detalle">
+  <div class="detalle__visor">
+    <div class="visor">
+      {# model-viewer muestra el render como imagen mientras carga el modelo (o si no hay JS) #}
+      <model-viewer class="visor__modelo"
+                    src="{{ url_for('static', filename='modelos/' ~ tipo.slug ~ '.glb') }}"
+                    poster="{{ url_for('static', filename='img/habitaciones/' ~ tipo.slug ~ '.png') }}"
+                    alt="Modelo 3D de la habitación {{ tipo.nombre }}"
+                    camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="2500" rotation-per-second="12deg"
+                    camera-orbit="45deg 60deg auto" min-camera-orbit="auto 15deg auto" max-camera-orbit="auto 85deg auto"
+                    shadow-intensity="0.6" exposure="1.05" interaction-prompt="none">
+      </model-viewer>
+      <p class="visor__pista">Arrastrá para girar · rueda o pellizco para acercar</p>
+    </div>
+
+    <nav class="miniaturas" aria-label="Otras habitaciones">
+      {% for otro in tipos %}
+        <a class="miniatura" href="{{ url_for('sitio.habitacion', slug=otro.slug) }}"{% if otro.id == tipo.id %} aria-current="page"{% endif %}>
+          {{ imagen_tipo(otro) }}
+          <span>{{ otro.nombre }}</span>
+        </a>
+      {% endfor %}
+    </nav>
+  </div>
+
+  <div class="detalle__info">
+    <h1>{{ tipo.nombre }}</h1>
+    <p class="detalle__datos">
+      <span>{{ icono("persona") }}Hasta {{ tipo.capacidad }} {{ "persona" if tipo.capacidad == 1 else "personas" }}</span>
+      {% if tipo.metros %}<span>{{ icono("metros") }}{{ tipo.metros }} m²</span>{% endif %}
+    </p>
+    {% if tipo.descripcion %}<p>{{ tipo.descripcion }}</p>{% endif %}
+
+    {% if tipo.lista_comodidades %}
+      <ul class="comodidades">
+        {% for comodidad in tipo.lista_comodidades %}<li>{{ icono("check") }}{{ comodidad }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="detalle__reservar">
+      <p class="detalle__precio"><strong class="num">{{ tipo.tarifa_base|moneda }}</strong> por noche</p>
+      <a class="btn btn--primary btn--lg" href="{{ url_for('sitio.reservar', tipo=tipo.slug) }}">Reservar esta habitación{{ icono("flecha") }}</a>
+      <p class="muted">Check-in desde las {{ hotel.hora_checkin }} · Check-out hasta las {{ hotel.hora_checkout }}</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script type="module" src="{{ url_for('static', filename='vendor/model-viewer.min.js') }}"></script>
+{% endblock %}

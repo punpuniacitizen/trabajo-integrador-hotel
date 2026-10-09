@@ -1,0 +1,96 @@
+{% extends "sitio/base.html" %}
+{% from "components/macros.html" import icono %}
+{% from "sitio/_macros.html" import imagen_tipo %}
+
+{% block titulo %}Reservar · {{ hotel.nombre }}{% endblock %}
+
+{% block contenido %}
+{% set noches = (salida - entrada).days %}
+<div class="sitio-contenedor reservar">
+  <form class="card reservar__form" method="post" action="{{ url_for('sitio.reservar') }}" id="form-reserva" novalidate>
+    <div>
+      <h1>Tu reserva</h1>
+      <p class="muted">Elegí la habitación, las fechas y poné tu nombre. Nada más.</p>
+    </div>
+
+    <fieldset class="reservar__grupo">
+      <legend class="label">Habitación</legend>
+      <div class="opciones-tipo">
+        {% for t in tipos %}
+          <label class="opcion-tipo">
+            <input type="radio" name="tipo" value="{{ t.slug }}"{% if t.id == tipo.id %} checked{% endif %}
+                   data-nombre="{{ t.nombre }}" data-precio="{{ t.tarifa_base }}" data-capacidad="{{ t.capacidad }}"
+                   data-imagen="{{ url_for('static', filename='img/habitaciones/' ~ t.slug ~ '.png') }}">
+            {{ imagen_tipo(t) }}
+            <span class="opcion-tipo__nombre">{{ t.nombre }}</span>
+            <span class="opcion-tipo__precio num">{{ t.tarifa_base|moneda }} / noche</span>
+          </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <div class="reservar__fila">
+      <label class="field">
+        <span class="label">Llegada</span>
+        <input class="input" type="date" name="entrada" value="{{ entrada.isoformat() }}" min="{{ hoy.isoformat() }}" required>
+      </label>
+      <label class="field">
+        <span class="label">Salida</span>
+        <input class="input" type="date" name="salida" value="{{ salida.isoformat() }}" min="{{ hoy.isoformat() }}" required>
+      </label>
+      <fieldset class="field">
+        <legend class="label">Personas</legend>
+        <div class="segmentado segmentado--personas">
+          {% for n in range(1, 5) %}
+            <label class="segmentado__opcion">
+              <input type="radio" name="personas" value="{{ n }}"{% if n == personas %} checked{% endif %}>{{ n }}
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="reservar__fila reservar__fila--2">
+      <label class="field">
+        <span class="label">Nombre y apellido</span>
+        <input class="input" name="nombre" value="{{ nombre }}" autocomplete="name" placeholder="Ej.: Lucía Fernández" required>
+      </label>
+      <label class="field">
+        <span class="label">Email <span class="muted">(opcional)</span></span>
+        <input class="input" type="email" name="email" value="{{ email }}" autocomplete="email" placeholder="lucia@ejemplo.com">
+      </label>
+    </div>
+
+    <div class="aviso-pago">
+      {{ icono("tarjeta") }}
+      <p><strong>Pago:</strong> esta es una demo, no se cobra nada. En un hotel real acá irían los datos de pago.</p>
+    </div>
+
+    {% if error %}
+      <div class="flash flash--danger reservar__error" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <button class="btn btn--primary btn--lg reservar__boton" type="submit">Confirmar reserva{{ icono("flecha") }}</button>
+  </form>
+
+  <aside class="card resumen" aria-live="polite">
+    <h2>Resumen</h2>
+    <div class="resumen__tipo">
+      <img id="resumen-imagen" src="{{ url_for('static', filename='img/habitaciones/' ~ tipo.slug ~ '.png') }}" alt="">
+      <strong id="resumen-nombre">{{ tipo.nombre }}</strong>
+    </div>
+    <dl class="resumen__datos">
+      <div><dt>Fechas</dt><dd id="resumen-fechas">{{ rango_fechas(entrada, salida) if noches > 0 else "—" }}</dd></div>
+      <div><dt>Noches</dt><dd id="resumen-noches" class="num">{{ noches if noches > 0 else "—" }}</dd></div>
+      <div><dt>Por noche</dt><dd id="resumen-precio" class="num">{{ tipo.tarifa_base|moneda }}</dd></div>
+    </dl>
+    <p class="resumen__total">Total <strong id="resumen-total" class="num">{{ (tipo.tarifa_base * noches)|moneda if noches > 0 else "—" }}</strong></p>
+    <p class="muted resumen__nota">Se paga en el hotel.</p>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script>window.MONEDA = {{ hotel.moneda|tojson }};</script>
+  <script src="{{ url_for('static', filename='js/reservar.js') }}"></script>
+{% endblock %}

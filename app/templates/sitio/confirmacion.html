@@ -1,0 +1,33 @@
+{% extends "sitio/base.html" %}
+{% from "components/macros.html" import icono %}
+{% from "sitio/_macros.html" import imagen_tipo, capacidad %}
+
+{% block titulo %}Reserva confirmada · {{ hotel.nombre }}{% endblock %}
+
+{% block contenido %}
+{% set r = reserva %}
+<div class="sitio-contenedor confirmacion">
+  <span class="confirmacion__tilde">{{ icono("check") }}</span>
+  <h1>¡Listo, {{ r.huesped.nombre.split()[0] }}! Tu reserva está hecha</h1>
+  <p class="muted">Código de reserva <strong class="num">{{ r.codigo }}</strong></p>
+
+  <div class="card confirmacion__resumen">
+    <div class="confirmacion__tipo">
+      {{ imagen_tipo(tipo) }}
+      <div>
+        <strong>{{ tipo.nombre }}</strong>
+        <p class="muted">{{ capacidad(tipo) }}</p>
+      </div>
+    </div>
+    <dl class="confirmacion__datos">
+      <div><dt>Llegada</dt><dd>{{ (r.entrada|fecha_larga)|capitalize }}<span class="muted">desde las {{ hotel.hora_checkin }}</span></dd></div>
+      <div><dt>Salida</dt><dd>{{ (r.salida|fecha_larga)|capitalize }}<span class="muted">hasta las {{ hotel.hora_checkout }}</span></dd></div>
+      <div><dt>Noches</dt><dd class="num">{{ r.noches }}</dd></div>
+      <div><dt>Personas</dt><dd class="num">{{ r.personas }}</dd></div>
+    </dl>
+    <p class="confirmacion__total">A pagar en el hotel <strong class="num">{{ r.total|moneda }}</strong></p>
+  </div>
+
+  <a class="btn btn--primary btn--lg" href="{{ url_for('sitio.inicio') }}">Volver al inicio</a>
+</div>
+{% endblock %}

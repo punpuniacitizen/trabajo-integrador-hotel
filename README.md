@@ -7,6 +7,7 @@ Módulos principales:
 - **Plano de habitaciones:** el estado de cada habitación (libre, ocupada, llega hoy, sale hoy, sucia, mantenimiento) de un vistazo.
 - **Tape chart de reservas:** una línea de tiempo con las reservas, que se arrastran para cambiarles las fechas o la habitación.
 - ABM de huéspedes, habitaciones y reservas, con check-in y check-out.
+- **Sitio público del hotel** (`/`, sin login): habitaciones con visor 3D y reserva online simple (sin pago real). La reserva aparece al instante en el plano y el tape chart.
 
 El plan completo está en [docs/plan.md](docs/plan.md) y el sistema de diseño en [design/identidad/brandbook.html](design/identidad/brandbook.html).
 

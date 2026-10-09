@@ -16,11 +16,20 @@ from flask.cli import with_appcontext
 from app.extensions import db
 from app.models import ConfiguracionHotel, Habitacion, Huesped, Reserva, TipoHabitacion, Usuario
 
+# (nombre, capacidad, tarifa, slug, m², descripción, comodidades)
 TIPOS = [
-    ("Simple", 1, 38000),
-    ("Doble estándar", 2, 48000),
-    ("Doble superior", 2, 56000),
-    ("Suite Mirador", 4, 92000),
+    ("Simple", 1, 38000, "simple", 11,
+     "Compacta y cálida, pensada para quien viaja solo.",
+     ["Cama de una plaza", "Escritorio", "Baño privado con ducha", "Wi-Fi"]),
+    ("Doble estándar", 2, 48000, "doble-estandar", 15,
+     "Cómoda y luminosa, para dos personas.",
+     ["Cama doble", "Mesas de luz", "Smart TV", "Baño privado con ducha"]),
+    ("Doble superior", 2, 56000, "doble-superior", 20,
+     "Más amplia, con un rincón de lectura junto a la ventana.",
+     ["Cama queen", "Sillón de lectura", "Escritorio", "Ventana al lago"]),
+    ("Suite Mirador", 4, 92000, "suite-mirador", 30,
+     "La más grande del hotel: dormitorio, living y baño con bañera.",
+     ["Cama king", "Living con sofá y TV", "Baño con bañera", "Dos ventanas al lago"]),
 ]
 # Tipo según la posición de la habitación en el piso (01 a 08)
 DISTRIBUCION = ["Doble estándar"] * 3 + ["Simple"] + ["Doble superior"] * 3 + ["Suite Mirador"]
@@ -116,6 +125,7 @@ def cargar_demo(hoy, semilla=7):
         logo=logo,
         color_acento="#1F6F5C",
         ciudad="San Carlos de Bariloche",
+        eslogan="Tu lugar frente al lago",
         moneda="$",
         hora_checkin="14:00",
         hora_checkout="10:00",
@@ -127,7 +137,11 @@ def cargar_demo(hoy, semilla=7):
         usuario.set_password(password)
         db.session.add(usuario)
 
-    tipos = {nombre: TipoHabitacion(nombre=nombre, capacidad=cap, tarifa_base=tarifa) for nombre, cap, tarifa in TIPOS}
+    tipos = {
+        nombre: TipoHabitacion(nombre=nombre, capacidad=cap, tarifa_base=tarifa, slug=slug, metros=metros,
+                               descripcion=descripcion, comodidades="\n".join(comodidades))
+        for nombre, cap, tarifa, slug, metros, descripcion, comodidades in TIPOS
+    }
     db.session.add_all(tipos.values())
 
     habitaciones = []

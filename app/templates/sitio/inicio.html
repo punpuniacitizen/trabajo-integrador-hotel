@@ -1,0 +1,43 @@
+{% extends "sitio/base.html" %}
+{% from "components/macros.html" import icono %}
+{% from "sitio/_macros.html" import imagen_tipo, capacidad %}
+
+{% block contenido %}
+<section class="sitio-contenedor portada">
+  <div class="portada__texto">
+    <h1>{{ hotel.eslogan or hotel.nombre }}</h1>
+    <p class="portada__lugar">{{ hotel.nombre }}{% if hotel.ciudad %} · {{ hotel.ciudad }}{% endif %}</p>
+    <div class="portada__acciones">
+      <a class="btn btn--primary btn--lg" href="{{ url_for('sitio.reservar') }}">{{ icono("calendario") }}Reservar</a>
+      <a class="btn btn--ghost btn--lg" href="#habitaciones">Ver habitaciones</a>
+    </div>
+  </div>
+  <div class="portada__imagen">
+    <img src="{{ url_for('static', filename='img/habitaciones/hero.png') }}" alt="Ilustración 3D de la suite del hotel">
+  </div>
+</section>
+
+<section class="sitio-seccion" id="habitaciones">
+  <div class="sitio-contenedor">
+    <h2>Nuestras habitaciones</h2>
+    <div class="tarjetas-tipo">
+      {% for tipo in tipos %}
+        <article class="tarjeta-tipo">
+          <a class="tarjeta-tipo__imagen" href="{{ url_for('sitio.habitacion', slug=tipo.slug) }}">{{ imagen_tipo(tipo) }}</a>
+          <div class="tarjeta-tipo__cuerpo">
+            <h3>{{ tipo.nombre }}</h3>
+            <p class="muted">{{ capacidad(tipo) }}</p>
+            <p class="tarjeta-tipo__precio"><strong class="num">{{ tipo.tarifa_base|moneda }}</strong> por noche</p>
+          </div>
+          <div class="tarjeta-tipo__acciones">
+            <a class="btn btn--secondary" href="{{ url_for('sitio.habitacion', slug=tipo.slug) }}">{{ icono("3d") }}Ver en 3D</a>
+            <a class="btn btn--primary" href="{{ url_for('sitio.reservar', tipo=tipo.slug) }}">Reservar</a>
+          </div>
+        </article>
+      {% else %}
+        <p class="muted">Todavía no hay habitaciones cargadas.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
