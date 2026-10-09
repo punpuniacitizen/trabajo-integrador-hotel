@@ -3,11 +3,13 @@ from itertools import groupby
 
 from flask import Blueprint, render_template, request
 
+from app.auth import login_requerido
 from app.extensions import db
 from app.models import Habitacion, TipoHabitacion
 from app.services import ocupacion
 
-bp = Blueprint("plano", __name__)
+bp = Blueprint("plano", __name__, url_prefix="/administracion")
+bp.before_request(login_requerido)
 
 
 def _fecha_pedida():

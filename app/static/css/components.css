@@ -115,6 +115,9 @@ code {
 }
 .btn--danger:hover:not(:disabled) { background: color-mix(in oklab, var(--danger) 85%, black); }
 
+.btn--ghost-danger { color: var(--danger); }
+.btn--ghost-danger:hover:not(:disabled) { background: var(--danger-soft); }
+
 .btn--sm { height: 30px; padding: 0 var(--space-3); font-size: var(--text-sm); }
 .btn--lg { height: 44px; padding: 0 var(--space-6); font-size: var(--text-md); }
 
@@ -473,6 +476,8 @@ code {
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
 }
+
+.avatar--sm { width: 32px; height: 32px; font-size: var(--text-xs); }
 
 /* --- Estado vacío -------------------------------------------------------------------------- */
 .vacio {

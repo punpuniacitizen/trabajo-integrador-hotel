@@ -10,6 +10,9 @@ class Reserva(db.Model):
     EN_CURSO = "en_curso"  # hizo el check-in
     FINALIZADA = "finalizada"  # hizo el check-out
     CANCELADA = "cancelada"
+    NO_SHOW = "no_show"  # tenía que llegar y no se presentó
+
+    INACTIVAS = (CANCELADA, NO_SHOW)  # no ocupan la habitación
 
     id = db.Column(db.Integer, primary_key=True)
     huesped_id = db.Column(db.Integer, db.ForeignKey("huespedes.id"), nullable=False)

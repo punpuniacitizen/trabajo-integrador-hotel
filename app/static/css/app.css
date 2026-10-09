@@ -89,6 +89,30 @@
   text-transform: uppercase;
 }
 
+.sidebar__usuario {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.sidebar__usuario-datos {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-tight);
+}
+
+.sidebar__usuario-datos strong,
+.sidebar__usuario-datos span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar__usuario-datos span { color: var(--text-muted); font-size: var(--text-xs); }
+
+.sidebar__usuario + .sidebar__pie { margin-top: 0; }
+
 .sidebar__pie {
   display: flex;
   align-items: center;
@@ -311,6 +335,48 @@
 }
 
 .kpi__pie .icono { width: 14px; height: 14px; color: var(--c); }
+
+/* --- Login ------------------------------------------------------------------------------ */
+.login {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--space-6) var(--space-4);
+}
+
+.login__caja {
+  display: grid;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login__marca { display: flex; justify-content: center; align-items: center; gap: var(--space-3); }
+.login__marca img { max-height: 56px; max-width: 100%; }
+
+.login__form {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  box-shadow: var(--shadow);
+}
+
+.login__form h1 { font-size: var(--text-xl); }
+.login__form p { margin-top: var(--space-1); font-size: var(--text-sm); }
+
+.login__demo { display: grid; gap: var(--space-2); padding: var(--space-4); }
+.login__demo .table td { padding: var(--space-2); }
+
+.login__pie {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-subtle);
+  font-size: var(--text-xs);
+}
+
+.login__pie img { opacity: 0.5; }
 
 /* --- Pantallas chicas: la barra lateral pasa a ser un menú desplegable --------------- */
 @media (max-width: 900px) {

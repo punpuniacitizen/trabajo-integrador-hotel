@@ -44,7 +44,13 @@ flask --app app demo
 python run.py
 ```
 
-`flask --app app demo` borra la base local y carga el hotel de ejemplo "Hotel Mirador" (24 habitaciones y reservas alrededor de la fecha de hoy). Después abrir http://127.0.0.1:5000
+`flask --app app demo` borra la base local y carga el hotel de ejemplo "Hotel Mirador" (24 habitaciones y reservas alrededor de la fecha de hoy). Después abrir http://127.0.0.1:5000/administracion
+
+La administración pide login. Con la demo cargada, la pantalla de ingreso muestra los usuarios de prueba (están definidos en `USUARIOS_DEMO`, en `app/demo.py`). Sin la demo, el primer usuario se crea con:
+
+```bash
+flask --app app crear-usuario
+```
 
 Para correr los tests:
 

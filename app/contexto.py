@@ -1,9 +1,10 @@
-"""Variables que tienen todas las plantillas: el hotel, su color y la fecha."""
+"""Variables que tienen todas las plantillas: el hotel, su color, el usuario y la fecha."""
 from datetime import datetime
 
-from flask import g
+from flask import g, session
 
-from app.models import ConfiguracionHotel
+from app.extensions import db
+from app.models import ConfiguracionHotel, Usuario
 from app.services.tema import TINTA, es_color_valido, texto_sobre
 
 
@@ -17,8 +18,10 @@ def turno(hora):
 
 def registrar(app):
     @app.before_request
-    def cargar_hotel():
+    def cargar_hotel_y_usuario():
         g.hotel = ConfiguracionHotel.actual()
+        usuario_id = session.get("usuario_id")
+        g.usuario = db.session.get(Usuario, usuario_id) if usuario_id else None
 
     @app.context_processor
     def variables_globales():
@@ -28,6 +31,7 @@ def registrar(app):
         ahora = datetime.now()
         return {
             "hotel": hotel,
+            "usuario": g.get("usuario"),
             "acento": acento,
             "acento_texto": texto_sobre(acento),
             "hoy": ahora.date(),

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ingresar · {{ hotel.nombre }}</title>
+  <link rel="icon" href="{{ url_for('static', filename='brand/favicon.svg') }}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <style>:root { --accent: {{ acento }}; --accent-contrast: {{ acento_texto }}; }</style>
+</head>
+<body class="login">
+<main class="login__caja">
+  <div class="login__marca">
+    {% if hotel.logo %}
+      <img src="{{ url_for('media.archivo', nombre=hotel.logo) }}" alt="{{ hotel.nombre }}">
+    {% else %}
+      <span class="sidebar__iniciales">{{ hotel.nombre|iniciales }}</span>
+      <span class="sidebar__nombre">{{ hotel.nombre }}</span>
+    {% endif %}
+  </div>
+
+  <form class="card login__form" method="post" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+    <div>
+      <h1>Ingresá a tu cuenta</h1>
+      <p class="muted">Administración de {{ hotel.nombre }}</p>
+    </div>
+
+    {% for categoria, mensaje in get_flashed_messages(with_categories=true) %}
+      <div class="flash flash--{{ categoria }}">{{ mensaje }}</div>
+    {% endfor %}
+
+    <label class="field">
+      <span class="label">Email</span>
+      <input class="input" type="email" name="email" value="{{ email }}" autocomplete="username" required autofocus>
+    </label>
+    <label class="field">
+      <span class="label">Contraseña</span>
+      <input class="input" type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <button class="btn btn--primary btn--lg" type="submit">Ingresar</button>
+  </form>
+
+  {% if usuarios_demo %}
+    <div class="card login__demo">
+      <p class="label">Usuarios de prueba</p>
+      <table class="table">
+        <tbody>
+          {% for email, password, rol in usuarios_demo %}
+            <tr>
+              <td>{{ "Administración" if rol == "admin" else "Recepción" }}</td>
+              <td><code>{{ email }}</code></td>
+              <td><code>{{ password }}</code></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif not hay_usuarios %}
+    <div class="flash flash--warning">
+      Todavía no hay usuarios. Creá el primero con <code>flask --app app crear-usuario</code>.
+    </div>
+  {% endif %}
+
+  <p class="login__pie">
+    <img src="{{ url_for('static', filename='brand/isotipo.svg') }}" alt="" width="16" height="16">
+    Conserje · gestión hotelera
+  </p>
+</main>
+</body>
+</html>

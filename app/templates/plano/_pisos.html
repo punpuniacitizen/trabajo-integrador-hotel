@@ -1,6 +1,7 @@
 {% macro detalle(e) -%}
   {%- set r = e.reserva -%}
-  {%- if e.estado == "llega" and e.es_hoy -%}Check-in pendiente
+  {%- if e.atrasada -%}Debía llegar el {{ r.entrada|fecha_corta }}
+  {%- elif e.estado == "llega" and e.es_hoy -%}Check-in pendiente
   {%- elif e.estado in ("ocupada", "llega") -%}Hasta el {{ r.salida|fecha_corta }}
   {%- elif e.estado == "sale" -%}
     {%- if e.llega_despues -%}Luego entra {{ e.llega_despues.huesped.apellido }}{%- else -%}Check-out pendiente{%- endif -%}

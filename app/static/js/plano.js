@@ -14,6 +14,13 @@
   const fecha = plano.dataset.fecha;
   let seleccion = null; // número de la habitación abierta en el panel
 
+  // Si la sesión se venció, el servidor redirige al login: se navega ahí en vez de pegar ese HTML
+  function sesionVencida(respuesta) {
+    if (!respuesta.redirected) return false;
+    location.href = respuesta.url;
+    return true;
+  }
+
   const tarjetas = () => plano.querySelectorAll(".habitacion");
   const conFecha = (url) => `${url}?fecha=${fecha}`;
 
@@ -54,6 +61,7 @@
     panel.setAttribute("aria-busy", "true");
     try {
       const respuesta = await fetch(conFecha(tarjeta.dataset.url));
+      if (sesionVencida(respuesta)) return;
       if (!respuesta.ok) throw new Error();
       panel.innerHTML = await respuesta.text();
       history.replaceState(null, "", `#hab-${numero}`);
@@ -86,6 +94,7 @@
   // Vuelve a pedir los indicadores y los pisos sin recargar la página.
   async function refrescar() {
     const respuesta = await fetch(conFecha(plano.dataset.urlContenido));
+    if (sesionVencida(respuesta)) return;
     const nuevo = new DOMParser().parseFromString(await respuesta.text(), "text/html");
     for (const id of ["plano-kpis", "plano-pisos"]) {
       document.getElementById(id).replaceWith(nuevo.getElementById(id));
@@ -101,7 +110,11 @@
       Conserje.toast(mensaje);
       await refrescar();
     } catch (error) {
-      Conserje.toast(error.message, "danger");
+      // El servidor puede pedir confirmación (por ejemplo, bloquear una habitación con reservas)
+      if (error.requiereConfirmacion && confirm(error.message)) {
+        return ejecutar(boton, url, { ...datos, confirmado: true });
+      }
+      if (!error.requiereConfirmacion) Conserje.toast(error.message, "danger");
       boton.disabled = false;
     }
   }

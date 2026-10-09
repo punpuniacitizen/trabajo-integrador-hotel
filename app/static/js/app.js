@@ -41,6 +41,11 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datos),
     });
+    // Sesión vencida: al recargar, el servidor manda al login
+    if (respuesta.status === 401) {
+      location.reload();
+      return new Promise(() => {});
+    }
     let cuerpo = {};
     try {
       cuerpo = await respuesta.json();
@@ -48,7 +53,9 @@
       // La respuesta no era JSON: se usa el mensaje genérico
     }
     if (!respuesta.ok || cuerpo.ok === false) {
-      throw new Error(cuerpo.error || "No se pudo completar la acción.");
+      const error = new Error(cuerpo.error || "No se pudo completar la acción.");
+      error.requiereConfirmacion = Boolean(cuerpo.requiere_confirmacion);
+      throw error;
     }
     return cuerpo;
   }

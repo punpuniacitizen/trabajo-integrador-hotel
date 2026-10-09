@@ -2,7 +2,7 @@ import pytest
 
 from app import create_app
 from app.extensions import db
-from app.models import Habitacion, Huesped, Reserva, TipoHabitacion
+from app.models import Habitacion, Huesped, Reserva, TipoHabitacion, Usuario
 
 
 class ConfigPruebas:
@@ -22,8 +22,27 @@ def app():
 
 
 @pytest.fixture
-def cliente(app):
+def usuario(app):
+    usuario = Usuario(nombre="Sofía Martínez", email="sofia@hotel.test", rol=Usuario.RECEPCION)
+    usuario.set_password("clave-de-prueba")
+    db.session.add(usuario)
+    db.session.commit()
+    return usuario
+
+
+@pytest.fixture
+def anonimo(app):
+    """Cliente sin sesión iniciada."""
     return app.test_client()
+
+
+@pytest.fixture
+def cliente(app, usuario):
+    """Cliente con la sesión de recepción iniciada."""
+    cliente = app.test_client()
+    with cliente.session_transaction() as sesion:
+        sesion["usuario_id"] = usuario.id
+    return cliente
 
 
 @pytest.fixture

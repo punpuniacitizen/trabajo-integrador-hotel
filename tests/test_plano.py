@@ -5,7 +5,14 @@ import pytest
 from app.extensions import db
 from app.models import Habitacion, Reserva
 from app.services import ocupacion
-from app.services.recepcion import ErrorDeNegocio, hacer_checkin, hacer_checkout
+from app.services.recepcion import (
+    ErrorDeNegocio,
+    RequiereConfirmacion,
+    hacer_checkin,
+    hacer_checkout,
+    marcar_no_show,
+    poner_en_mantenimiento,
+)
 
 HOY = date(2026, 10, 14)
 
@@ -79,22 +86,70 @@ def test_api_rechaza_checkin_con_habitacion_sucia(cliente, habitacion, reservar)
     habitacion.estado_limpieza = Habitacion.SUCIA
     db.session.commit()
 
-    respuesta = cliente.post(f"/api/reservas/{reserva.id}/check-in", json={})
+    respuesta = cliente.post(f"/administracion/api/reservas/{reserva.id}/check-in", json={})
     assert respuesta.status_code == 409
     assert "sucia" in respuesta.get_json()["error"]
 
 
 def test_api_exige_json(cliente, habitacion):
-    respuesta = cliente.post(f"/api/habitaciones/{habitacion.id}/limpieza", data={"estado": "sucia"})
+    respuesta = cliente.post(f"/administracion/api/habitaciones/{habitacion.id}/limpieza", data={"estado": "sucia"})
     assert respuesta.status_code == 415
 
 
 def test_el_plano_se_renderiza(cliente, habitacion, reservar):
     hoy = date.today()
     reservar(habitacion, hoy - timedelta(days=1), hoy + timedelta(days=2), Reserva.EN_CURSO)
-    respuesta = cliente.get("/")
+    respuesta = cliente.get("/administracion/")
     assert respuesta.status_code == 200
     assert "Rossi" in respuesta.get_data(as_text=True)
 
-    panel = cliente.get(f"/plano/habitaciones/{habitacion.id}")
+    panel = cliente.get(f"/administracion/plano/habitaciones/{habitacion.id}")
     assert "Hacer check-out" in panel.get_data(as_text=True)
+
+
+def test_llegada_atrasada(habitacion, reservar):
+    reservar(habitacion, dia(-1), dia(2))
+    estado = estado_en(HOY)
+    assert estado.estado == ocupacion.LLEGA
+    assert estado.etiqueta == "Atrasada"
+
+
+def test_no_show_libera_la_habitacion(habitacion, reservar):
+    reserva = reservar(habitacion, dia(-1), dia(2))
+    marcar_no_show(reserva, HOY)
+    db.session.commit()
+    assert estado_en(HOY).estado == ocupacion.LIBRE
+
+
+def test_no_show_no_se_puede_antes_de_la_llegada(habitacion, reservar):
+    reserva = reservar(habitacion, dia(2), dia(4))
+    with pytest.raises(ErrorDeNegocio):
+        marcar_no_show(reserva, HOY)
+
+
+def test_mantenimiento_con_reservas_pide_confirmacion(habitacion, reservar):
+    reservar(habitacion, dia(3), dia(5))
+    with pytest.raises(RequiereConfirmacion, match="1 reserva"):
+        poner_en_mantenimiento(habitacion, "Pintura", HOY)
+    poner_en_mantenimiento(habitacion, "Pintura", HOY, confirmado=True)
+    assert habitacion.fuera_de_servicio
+
+
+def test_mantenimiento_sin_reservas_cercanas_no_pregunta(habitacion, reservar):
+    reservar(habitacion, dia(20), dia(22))
+    poner_en_mantenimiento(habitacion, "Pintura", HOY)
+    assert habitacion.fuera_de_servicio
+
+
+def test_api_de_mantenimiento_devuelve_la_pregunta(cliente, habitacion, reservar):
+    hoy = date.today()
+    reservar(habitacion, hoy + timedelta(days=1), hoy + timedelta(days=3))
+    url = f"/administracion/api/habitaciones/{habitacion.id}/mantenimiento"
+
+    respuesta = cliente.post(url, json={"activo": True, "nota": "Pintura"})
+    assert respuesta.status_code == 409
+    assert respuesta.get_json()["requiere_confirmacion"] is True
+
+    respuesta = cliente.post(url, json={"activo": True, "nota": "Pintura", "confirmado": True})
+    assert respuesta.status_code == 200
+

@@ -14,7 +14,7 @@ from flask import current_app
 from flask.cli import with_appcontext
 
 from app.extensions import db
-from app.models import ConfiguracionHotel, Habitacion, Huesped, Reserva, TipoHabitacion
+from app.models import ConfiguracionHotel, Habitacion, Huesped, Reserva, TipoHabitacion, Usuario
 
 TIPOS = [
     ("Simple", 1, 38000),
@@ -51,6 +51,11 @@ NOTAS = [
     "Reservó cochera cubierta.",
 ]
 HABITACION_EN_MANTENIMIENTO = ("107", "Pierde agua el aire acondicionado")
+# Usuarios de prueba (nombre, email, contraseña, rol). Se muestran en la pantalla de login.
+USUARIOS_DEMO = [
+    ("Sofía Martínez", "admin@mirador.demo", "admin123", Usuario.ADMIN),
+    ("Martín Gómez", "recepcion@mirador.demo", "recepcion123", Usuario.RECEPCION),
+]
 
 
 def _sin_tildes(texto):
@@ -116,6 +121,11 @@ def cargar_demo(hoy, semilla=7):
         hora_checkout="10:00",
         setup_completo=True,
     ))
+
+    for nombre, email, password, rol in USUARIOS_DEMO:
+        usuario = Usuario(nombre=nombre, email=email, rol=rol)
+        usuario.set_password(password)
+        db.session.add(usuario)
 
     tipos = {nombre: TipoHabitacion(nombre=nombre, capacidad=cap, tarifa_base=tarifa) for nombre, cap, tarifa in TIPOS}
     db.session.add_all(tipos.values())

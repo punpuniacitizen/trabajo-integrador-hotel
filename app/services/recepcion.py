@@ -2,13 +2,22 @@
 
 Las funciones modifican los objetos y validan las reglas; el commit lo hace la ruta.
 """
+from datetime import timedelta
+
 from app.extensions import db
 from app.filtros import fecha_corta
 from app.models import Habitacion, Reserva
 
+# Antes de bloquear una habitación se avisa de las reservas de estos próximos días
+DIAS_AVISO_MANTENIMIENTO = 7
+
 
 class ErrorDeNegocio(Exception):
     """Una operación que no se puede hacer. El mensaje se le muestra tal cual al usuario."""
+
+
+class RequiereConfirmacion(ErrorDeNegocio):
+    """Se puede hacer, pero el usuario tiene que confirmarlo (el mensaje es la pregunta)."""
 
 
 def huesped_alojado(habitacion):
@@ -47,17 +56,51 @@ def hacer_checkout(reserva, hoy):
     reserva.habitacion.estado_limpieza = Habitacion.SUCIA
 
 
+def marcar_no_show(reserva, hoy):
+    """El huésped no se presentó: la reserva deja de ocupar la habitación."""
+    if reserva.estado != Reserva.CONFIRMADA:
+        raise ErrorDeNegocio("Esta reserva no está pendiente de llegada.")
+    if reserva.entrada > hoy:
+        raise ErrorDeNegocio(f"La reserva empieza el {fecha_corta(reserva.entrada)}: todavía no se puede marcar.")
+    reserva.estado = Reserva.NO_SHOW
+
+
 def marcar_limpieza(habitacion, estado):
     if estado not in (Habitacion.LIMPIA, Habitacion.SUCIA):
         raise ErrorDeNegocio("Estado de limpieza inválido.")
     habitacion.estado_limpieza = estado
 
 
-def poner_en_mantenimiento(habitacion, nota):
+def reservas_por_llegar(habitacion, hoy):
+    """Reservas confirmadas de la habitación que se superponen con los próximos días."""
+    limite = hoy + timedelta(days=DIAS_AVISO_MANTENIMIENTO)
+    return db.session.scalars(
+        db.select(Reserva)
+        .where(
+            Reserva.habitacion_id == habitacion.id,
+            Reserva.estado == Reserva.CONFIRMADA,
+            Reserva.entrada < limite,
+            Reserva.salida > hoy,
+        )
+        .order_by(Reserva.entrada)
+    ).all()
+
+
+def poner_en_mantenimiento(habitacion, nota, hoy, confirmado=False):
     if huesped_alojado(habitacion):
         raise ErrorDeNegocio(
             f"Hay un huésped alojado en la {habitacion.numero}. "
             "Hacé el check-out o cambialo de habitación antes de bloquearla."
+        )
+    afectadas = reservas_por_llegar(habitacion, hoy)
+    if afectadas and not confirmado:
+        primera = afectadas[0]
+        cuando = "hoy" if primera.entrada <= hoy else f"el {fecha_corta(primera.entrada)}"
+        cantidad = "1 reserva" if len(afectadas) == 1 else f"{len(afectadas)} reservas"
+        raise RequiereConfirmacion(
+            f"La {habitacion.numero} tiene {cantidad} en los próximos {DIAS_AVISO_MANTENIMIENTO} días "
+            f"(la primera: {primera.huesped.apellido}, llega {cuando}). "
+            "Si la bloqueás, vas a tener que cambiarlas de habitación. ¿Bloquearla igual?"
         )
     habitacion.fuera_de_servicio = True
     habitacion.nota_mantenimiento = nota or None

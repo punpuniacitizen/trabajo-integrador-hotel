@@ -48,6 +48,18 @@
         {% endif %}
       {% endfor %}
     </nav>
+    {% if usuario %}
+      <div class="sidebar__usuario">
+        <span class="avatar avatar--sm">{{ usuario.nombre|iniciales }}</span>
+        <span class="sidebar__usuario-datos">
+          <strong>{{ usuario.nombre }}</strong>
+          <span>{{ "Administración" if usuario.rol == "admin" else "Recepción" }}</span>
+        </span>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <button class="btn btn--ghost btn--icono btn--sm" type="submit" aria-label="Cerrar sesión" title="Cerrar sesión">{{ icono("salida") }}</button>
+        </form>
+      </div>
+    {% endif %}
     <div class="sidebar__pie">
       <img src="{{ url_for('static', filename='brand/isotipo.svg') }}" alt="" width="16" height="16">
       <span>con Conserje</span>
