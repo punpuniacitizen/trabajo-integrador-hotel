@@ -5,7 +5,8 @@
       "name": "flask",
       "runtimeExecutable": ".venv/Scripts/python.exe",
       "runtimeArgs": ["run.py"],
-      "port": 5000
+      "port": 5000,
+      "autoPort": true
     },
     {
       "name": "estaticos",

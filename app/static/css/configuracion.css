@@ -3,18 +3,20 @@
    ========================================================================= */
 
 /* --- Pestañas ------------------------------------------------------------------ */
+/* La línea de abajo es una sombra interna: así el subrayado de la pestaña activa la tapa
+   sin desbordar (con un borde y margen negativo aparecía una barra de scroll) */
 .pestanas {
   display: flex;
   gap: var(--space-1);
   margin-bottom: var(--space-6);
-  border-bottom: 1px solid var(--border);
+  box-shadow: inset 0 -1px 0 var(--border);
   overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .pestanas__item {
   padding: var(--space-2) var(--space-4);
   border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
   color: var(--text-muted);
   font-weight: var(--weight-medium);
   text-decoration: none;

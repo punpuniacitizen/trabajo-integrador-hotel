@@ -110,19 +110,31 @@ def _pagado(rnd, estado, total):
     return rnd.choice([0, 0, total // 2, total])
 
 
+def _subir(origen, nombre):
+    """Copia un archivo del repo a instance/uploads/, como si el hotel lo hubiera subido desde Configuración."""
+    if not origen.exists():
+        return None
+    shutil.copy(origen, Path(current_app.instance_path) / "uploads" / nombre)
+    return nombre
+
+
+def _vaciar_subidas():
+    for archivo in (Path(current_app.instance_path) / "uploads").iterdir():
+        if archivo.is_file():
+            archivo.unlink()
+
+
 def cargar_demo(hoy, semilla=7):
     rnd = random.Random(semilla)
+    repo = Path(current_app.root_path).parent
+    renders = Path(current_app.static_folder) / "img" / "habitaciones"
+    modelos = Path(current_app.static_folder) / "modelos"
 
-    # Logo del hotel demo: se copia a instance/uploads/ como si lo hubiera subido el hotel
-    origen = Path(current_app.root_path).parent / "design" / "identidad" / "hotel-demo" / "logo-hotel-mirador.svg"
-    logo = None
-    if origen.exists():
-        logo = origen.name
-        shutil.copy(origen, Path(current_app.instance_path) / "uploads" / logo)
-
+    _vaciar_subidas()
     db.session.add(ConfiguracionHotel(
         nombre="Hotel Mirador",
-        logo=logo,
+        logo=_subir(repo / "design" / "identidad" / "hotel-demo" / "logo-hotel-mirador.svg", "logo-hotel-mirador.svg"),
+        portada=_subir(renders / "hero.png", "portada-hotel-mirador.png"),
         color_acento="#1F6F5C",
         ciudad="San Carlos de Bariloche",
         eslogan="Tu lugar frente al lago",
@@ -137,9 +149,12 @@ def cargar_demo(hoy, semilla=7):
         usuario.set_password(password)
         db.session.add(usuario)
 
+    # Los renders y los modelos 3D de Blender se cargan como si el hotel los hubiera subido
     tipos = {
         nombre: TipoHabitacion(nombre=nombre, capacidad=cap, tarifa_base=tarifa, slug=slug, metros=metros,
-                               descripcion=descripcion, comodidades="\n".join(comodidades))
+                               descripcion=descripcion, comodidades="\n".join(comodidades),
+                               imagen=_subir(renders / f"{slug}.png", f"tipo-{slug}.png"),
+                               modelo=_subir(modelos / f"{slug}.glb", f"tipo-{slug}.glb"))
         for nombre, cap, tarifa, slug, metros, descripcion, comodidades in TIPOS
     }
     db.session.add_all(tipos.values())
@@ -195,9 +210,9 @@ def cargar_demo(hoy, semilla=7):
 @click.option("--si", is_flag=True, help="No pedir confirmación.")
 @with_appcontext
 def demo_command(si):
-    """Borra la base y carga el Hotel Mirador de ejemplo."""
+    """Borra la base y los archivos subidos, y carga el Hotel Mirador de ejemplo."""
     if not si:
-        click.confirm("Esto borra la base de datos y carga el Hotel Mirador de ejemplo. ¿Seguir?", abort=True)
+        click.confirm("Esto borra la base de datos y los archivos subidos, y carga el Hotel Mirador de ejemplo. ¿Seguir?", abort=True)
     db.drop_all()
     db.create_all()
     cargar_demo(date.today())

@@ -1,7 +1,7 @@
+{# Foto del tipo de habitación (subida desde Configuración), o un recuadro vacío si no tiene #}
 {% macro imagen_tipo(tipo, clase="") -%}
-  {%- if tipo.slug -%}
-    <img class="{{ clase }}" src="{{ url_for('static', filename='img/habitaciones/' ~ tipo.slug ~ '.png') }}"
-         alt="Ilustración 3D de la habitación {{ tipo.nombre }}" loading="lazy">
+  {%- if tipo.imagen -%}
+    <img class="{{ clase }}" src="{{ url_media(tipo.imagen) }}" alt="Habitación {{ tipo.nombre }}" loading="lazy">
   {%- else -%}
     <span class="{{ clase }} sitio-sin-imagen" aria-hidden="true"></span>
   {%- endif -%}

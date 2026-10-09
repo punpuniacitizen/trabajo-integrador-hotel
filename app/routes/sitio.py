@@ -16,7 +16,10 @@ bp = Blueprint("sitio", __name__)
 
 
 def _tipos():
-    return db.session.scalars(db.select(TipoHabitacion).order_by(TipoHabitacion.tarifa_base)).all()
+    """Los tipos que se ofrecen en el sitio: los que tienen al menos una habitación."""
+    return db.session.scalars(
+        db.select(TipoHabitacion).where(TipoHabitacion.habitaciones.any()).order_by(TipoHabitacion.tarifa_base)
+    ).all()
 
 
 def _fecha(texto, por_defecto):

@@ -13,8 +13,11 @@ class ConfigPruebas:
 
 
 @pytest.fixture
-def app():
+def app(tmp_path):
     app = create_app(ConfigPruebas)
+    # Los archivos subidos en las pruebas van a una carpeta temporal, no a instance/uploads/
+    app.instance_path = str(tmp_path)
+    (tmp_path / "uploads").mkdir()
     with app.app_context():
         yield app
         db.session.remove()

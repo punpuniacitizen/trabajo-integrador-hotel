@@ -9,7 +9,8 @@ from app.models import Habitacion, Reserva, TipoHabitacion
 @pytest.fixture
 def tipo(app):
     tipo = TipoHabitacion(nombre="Doble superior", capacidad=2, tarifa_base=56000, slug="doble-superior",
-                          metros=20, comodidades="Cama queen\nEscritorio")
+                          metros=20, comodidades="Cama queen\nEscritorio",
+                          imagen="tipo-doble-superior.png", modelo="tipo-doble-superior.glb")
     db.session.add_all([Habitacion(numero="201", piso=2, tipo=tipo), Habitacion(numero="202", piso=2, tipo=tipo)])
     db.session.commit()
     return tipo
@@ -37,9 +38,25 @@ def test_el_inicio_no_pide_login(anonimo, tipo):
 
 def test_detalle_con_visor_3d(anonimo, tipo):
     html = anonimo.get("/habitaciones/doble-superior").get_data(as_text=True)
-    assert "doble-superior.glb" in html
+    assert 'src="/media/tipo-doble-superior.glb"' in html
+    assert 'poster="/media/tipo-doble-superior.png"' in html
     assert "Cama queen" in html
     assert anonimo.get("/habitaciones/no-existe").status_code == 404
+
+
+def test_detalle_solo_con_foto_no_carga_el_visor(anonimo, tipo):
+    tipo.modelo = None
+    db.session.commit()
+    html = anonimo.get("/habitaciones/doble-superior").get_data(as_text=True)
+    assert "<model-viewer" not in html
+    assert "model-viewer.min.js" not in html
+    assert 'class="visor__imagen" src="/media/tipo-doble-superior.png"' in html
+
+
+def test_los_tipos_sin_habitaciones_no_se_ofrecen(anonimo, tipo):
+    db.session.add(TipoHabitacion(nombre="Suite nueva", capacidad=4, tarifa_base=90000, slug="suite-nueva"))
+    db.session.commit()
+    assert "Suite nueva" not in anonimo.get("/").get_data(as_text=True)
 
 
 def test_reservar_crea_la_reserva_y_asigna_habitacion(anonimo, tipo):

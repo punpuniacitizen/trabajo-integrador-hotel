@@ -20,7 +20,7 @@
           <label class="opcion-tipo">
             <input type="radio" name="tipo" value="{{ t.slug }}"{% if t.id == tipo.id %} checked{% endif %}
                    data-nombre="{{ t.nombre }}" data-precio="{{ t.tarifa_base }}" data-capacidad="{{ t.capacidad }}"
-                   data-imagen="{{ url_for('static', filename='img/habitaciones/' ~ t.slug ~ '.png') }}">
+                   data-imagen="{{ url_media(t.imagen) }}">
             {{ imagen_tipo(t) }}
             <span class="opcion-tipo__nombre">{{ t.nombre }}</span>
             <span class="opcion-tipo__precio num">{{ t.tarifa_base|moneda }} / noche</span>
@@ -76,7 +76,7 @@
   <aside class="card resumen" aria-live="polite">
     <h2>Resumen</h2>
     <div class="resumen__tipo">
-      <img id="resumen-imagen" src="{{ url_for('static', filename='img/habitaciones/' ~ tipo.slug ~ '.png') }}" alt="">
+      <img id="resumen-imagen" {% if tipo.imagen %}src="{{ url_media(tipo.imagen) }}"{% else %}hidden{% endif %} alt="">
       <strong id="resumen-nombre">{{ tipo.nombre }}</strong>
     </div>
     <dl class="resumen__datos">

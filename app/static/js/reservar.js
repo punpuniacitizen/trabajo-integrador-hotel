@@ -47,7 +47,9 @@
     limitarPersonas(Number(tipo.dataset.capacidad));
 
     const precio = Number(tipo.dataset.precio);
-    resumen.imagen.src = tipo.dataset.imagen;
+    // Un tipo puede no tener foto: en ese caso se oculta la miniatura
+    if (tipo.dataset.imagen) resumen.imagen.src = tipo.dataset.imagen;
+    resumen.imagen.hidden = !tipo.dataset.imagen;
     resumen.nombre.textContent = tipo.dataset.nombre;
     resumen.precio.textContent = moneda(precio);
 

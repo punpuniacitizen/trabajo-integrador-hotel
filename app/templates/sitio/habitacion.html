@@ -8,18 +8,24 @@
 <div class="sitio-contenedor detalle">
   <div class="detalle__visor">
     <div class="visor">
-      {# model-viewer muestra el render como imagen mientras carga el modelo (o si no hay JS).
-         La luz ya viene horneada en la textura: sin tone mapping ni sombra propia, y la órbita
-         queda del lado abierto del diorama para no ver las paredes por detrás. #}
-      <model-viewer class="visor__modelo"
-                    src="{{ url_for('static', filename='modelos/' ~ tipo.slug ~ '.glb') }}"
-                    poster="{{ url_for('static', filename='img/habitaciones/' ~ tipo.slug ~ '.png') }}"
-                    alt="Modelo 3D de la habitación {{ tipo.nombre }}"
-                    camera-controls disable-pan touch-action="pan-y"
-                    camera-orbit="45deg 60deg auto" min-camera-orbit="-5deg 30deg auto" max-camera-orbit="95deg 80deg auto"
-                    tone-mapping="none" exposure="1" shadow-intensity="0" interaction-prompt="none">
-      </model-viewer>
-      <p class="visor__pista">Arrastrá para girar · rueda o pellizco para acercar</p>
+      {% if tipo.modelo %}
+        {# model-viewer muestra la foto mientras carga el modelo (o si no hay JS).
+           Los modelos del hotel demo traen la luz horneada en la textura: sin tone mapping ni
+           sombra propia, y la órbita queda del lado abierto del diorama. #}
+        <model-viewer class="visor__modelo"
+                      src="{{ url_media(tipo.modelo) }}"
+                      {% if tipo.imagen %}poster="{{ url_media(tipo.imagen) }}"{% endif %}
+                      alt="Modelo 3D de la habitación {{ tipo.nombre }}"
+                      camera-controls disable-pan touch-action="pan-y"
+                      camera-orbit="45deg 60deg auto" min-camera-orbit="-5deg 30deg auto" max-camera-orbit="95deg 80deg auto"
+                      tone-mapping="none" exposure="1" shadow-intensity="0" interaction-prompt="none">
+        </model-viewer>
+        <p class="visor__pista">Arrastrá para girar · rueda o pellizco para acercar</p>
+      {% elif tipo.imagen %}
+        <img class="visor__imagen" src="{{ url_media(tipo.imagen) }}" alt="Habitación {{ tipo.nombre }}">
+      {% else %}
+        <span class="visor__vacio" aria-hidden="true">{{ icono("cama") }}</span>
+      {% endif %}
     </div>
 
     <nav class="miniaturas" aria-label="Otras habitaciones">
@@ -56,5 +62,7 @@
 {% endblock %}
 
 {% block scripts %}
-  <script type="module" src="{{ url_for('static', filename='vendor/model-viewer.min.js') }}"></script>
+  {% if tipo.modelo %}
+    <script type="module" src="{{ url_for('static', filename='vendor/model-viewer.min.js') }}"></script>
+  {% endif %}
 {% endblock %}

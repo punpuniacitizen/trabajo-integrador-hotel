@@ -8,6 +8,7 @@ Módulos principales:
 - **Tape chart de reservas:** una línea de tiempo con las reservas, que se arrastran para cambiarles las fechas o la habitación.
 - ABM de huéspedes, habitaciones y reservas, con check-in y check-out.
 - **Sitio público del hotel** (`/`, sin login): habitaciones con visor 3D y reserva online simple (sin pago real). La reserva aparece al instante en el plano y el tape chart.
+- **Configuración** (solo administración): datos e identidad del hotel (logo, color, portada), tipos de habitación con foto y/o modelo 3D `.glb`, pisos y habitaciones, y usuarios.
 
 El plan completo está en [docs/plan.md](docs/plan.md) y el sistema de diseño en [design/identidad/brandbook.html](design/identidad/brandbook.html).
 
@@ -45,7 +46,7 @@ flask --app app demo
 python run.py
 ```
 
-`flask --app app demo` borra la base local y carga el hotel de ejemplo "Hotel Mirador" (24 habitaciones y reservas alrededor de la fecha de hoy). Después abrir http://127.0.0.1:5000/administracion
+`flask --app app demo` borra la base local y los archivos subidos, y carga el hotel de ejemplo "Hotel Mirador" (24 habitaciones, reservas alrededor de la fecha de hoy, y los renders y modelos 3D de `app/static/` como si el hotel los hubiera subido). Después abrir http://127.0.0.1:5000/administracion
 
 La administración pide login. Con la demo cargada, la pantalla de ingreso muestra los usuarios de prueba (están definidos en `USUARIOS_DEMO`, en `app/demo.py`). Sin la demo, el primer usuario se crea con:
 

@@ -49,6 +49,8 @@
 .portada__lugar { margin-top: var(--space-2); color: var(--accent); font-size: var(--text-lg); font-weight: var(--weight-medium); }
 .portada__acciones { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
 
+.portada--sin-imagen { grid-template-columns: minmax(0, 1fr); }
+
 .portada__imagen {
   padding: var(--space-4);
   border-radius: 16px;
@@ -100,6 +102,11 @@
 
 .visor { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: var(--gray-100); }
 .visor__modelo { display: block; width: 100%; height: clamp(320px, 52vw, 540px); --poster-color: transparent; }
+
+/* Tipo con foto y sin modelo, o sin ninguno de los dos */
+.visor__imagen { display: block; width: 100%; height: clamp(320px, 52vw, 540px); object-fit: contain; }
+.visor__vacio { display: grid; place-items: center; height: clamp(320px, 52vw, 540px); color: var(--text-subtle); }
+.visor__vacio .icono { width: 48px; height: 48px; }
 
 .visor__pista {
   position: absolute;

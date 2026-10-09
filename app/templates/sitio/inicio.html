@@ -3,7 +3,7 @@
 {% from "sitio/_macros.html" import imagen_tipo, capacidad %}
 
 {% block contenido %}
-<section class="sitio-contenedor portada">
+<section class="sitio-contenedor portada{% if not hotel.portada %} portada--sin-imagen{% endif %}">
   <div class="portada__texto">
     <h1>{{ hotel.eslogan or hotel.nombre }}</h1>
     <p class="portada__lugar">{{ hotel.nombre }}{% if hotel.ciudad %} · {{ hotel.ciudad }}{% endif %}</p>
@@ -12,9 +12,11 @@
       <a class="btn btn--ghost btn--lg" href="#habitaciones">Ver habitaciones</a>
     </div>
   </div>
-  <div class="portada__imagen">
-    <img src="{{ url_for('static', filename='img/habitaciones/hero.png') }}" alt="Ilustración 3D de la suite del hotel">
-  </div>
+  {% if hotel.portada %}
+    <div class="portada__imagen">
+      <img src="{{ url_media(hotel.portada) }}" alt="{{ hotel.nombre }}">
+    </div>
+  {% endif %}
 </section>
 
 <section class="sitio-seccion" id="habitaciones">
