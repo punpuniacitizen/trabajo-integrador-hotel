@@ -49,6 +49,46 @@
     actualizar();
   }
 
+  // --- Vista previa del mapa (mismas reglas que app/services/hotel.py) --------
+  const vistaMapa = document.querySelector("[data-mapa-vista]");
+  if (vistaMapa) {
+    const iframe = vistaMapa.querySelector("iframe");
+    const vacio = vistaMapa.querySelector(".ubicacion-config__vacio");
+    const campos = {
+      direccion: document.querySelector("[data-mapa-direccion]"),
+      ciudad: document.querySelector("[data-mapa-ciudad]"),
+      coordenadas: document.querySelector("[data-mapa-coordenadas]"),
+    };
+
+    const coordenadas = (texto) => {
+      const coincidencia =
+        texto.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/) ||
+        texto.match(/(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)/);
+      return coincidencia ? `${coincidencia[1]},${coincidencia[2]}` : null;
+    };
+
+    const consulta = () => {
+      const punto = coordenadas(campos.coordenadas.value.trim());
+      if (punto) return punto;
+      const direccion = campos.direccion.value.trim();
+      if (!direccion) return null;
+      return [direccion, campos.ciudad.value.trim()].filter(Boolean).join(", ");
+    };
+
+    let espera;
+    const actualizarMapa = () => {
+      clearTimeout(espera);
+      // Se espera a que termine de escribir para no recargar el mapa en cada tecla
+      espera = setTimeout(() => {
+        const q = consulta();
+        iframe.hidden = !q;
+        vacio.hidden = Boolean(q);
+        if (q) iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=15&output=embed`;
+      }, 700);
+    };
+    Object.values(campos).forEach((campo) => campo.addEventListener("input", actualizarMapa));
+  }
+
   // --- Cambiar el tipo de una habitación con solo elegirlo --------------------
   document.querySelectorAll("[data-solo-sin-js]").forEach((boton) => (boton.hidden = true));
   document.querySelectorAll("select[data-autoenviar]").forEach((select) => {

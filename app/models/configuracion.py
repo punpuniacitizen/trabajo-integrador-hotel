@@ -1,4 +1,11 @@
+import re
+from urllib.parse import quote
+
 from app.extensions import db
+
+
+def _lineas(texto):
+    return [linea.strip() for linea in (texto or "").splitlines() if linea.strip()]
 
 
 class ConfiguracionHotel(db.Model):
@@ -18,6 +25,22 @@ class ConfiguracionHotel(db.Model):
     hora_checkout = db.Column(db.String(5), nullable=False, default="10:00")
     setup_completo = db.Column(db.Boolean, nullable=False, default=False)
 
+    # Sitio público: textos (una entrada por línea en servicios e información útil)
+    presentacion = db.Column(db.Text)  # párrafos separados por una línea en blanco
+    servicios = db.Column(db.Text)
+    informacion = db.Column(db.Text)
+
+    # Ubicación: si hay coordenadas, el mapa usa esas; si no, busca la dirección
+    direccion = db.Column(db.String(200))
+    latitud = db.Column(db.Float)
+    longitud = db.Column(db.Float)
+
+    # Contacto
+    telefono = db.Column(db.String(40))
+    email = db.Column(db.String(120))
+    whatsapp = db.Column(db.String(30))  # solo dígitos, con código de país (5492944000000)
+    instagram = db.Column(db.String(60))  # usuario, sin @
+
     @classmethod
     def actual(cls):
         """La configuración guardada o, si todavía no hay, una con valores por defecto (sin guardar)."""
@@ -32,3 +55,62 @@ class ConfiguracionHotel(db.Model):
             hora_checkout="10:00",
             setup_completo=False,
         )
+
+    # --- Textos del sitio --------------------------------------------------------
+
+    @property
+    def parrafos_presentacion(self):
+        return [" ".join(p.split()) for p in re.split(r"\n\s*\n", self.presentacion or "") if p.strip()]
+
+    @property
+    def lista_servicios(self):
+        return _lineas(self.servicios)
+
+    @property
+    def lista_informacion(self):
+        return _lineas(self.informacion)
+
+    # --- Mapa (Google Maps, sin clave de API) --------------------------------------
+
+    @property
+    def tiene_coordenadas(self):
+        return self.latitud is not None and self.longitud is not None
+
+    @property
+    def consulta_mapa(self):
+        """Lo que se busca en el mapa: las coordenadas o "dirección, ciudad"."""
+        if self.tiene_coordenadas:
+            return f"{self.latitud},{self.longitud}"
+        if self.direccion:
+            return ", ".join(p for p in (self.direccion, self.ciudad) if p)
+        return None
+
+    @property
+    def url_mapa(self):
+        if not self.consulta_mapa:
+            return None
+        return f"https://maps.google.com/maps?q={quote(self.consulta_mapa)}&z=15&output=embed"
+
+    @property
+    def url_como_llegar(self):
+        if not self.consulta_mapa:
+            return None
+        return f"https://www.google.com/maps/dir/?api=1&destination={quote(self.consulta_mapa)}"
+
+    # --- Contacto -------------------------------------------------------------------
+
+    @property
+    def url_telefono(self):
+        return "tel:" + re.sub(r"[^\d+]", "", self.telefono) if self.telefono else None
+
+    @property
+    def url_whatsapp(self):
+        return f"https://wa.me/{self.whatsapp}" if self.whatsapp else None
+
+    @property
+    def url_instagram(self):
+        return f"https://www.instagram.com/{self.instagram}/" if self.instagram else None
+
+    @property
+    def tiene_contacto(self):
+        return any((self.telefono, self.email, self.whatsapp, self.instagram))

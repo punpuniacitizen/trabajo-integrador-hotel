@@ -3,25 +3,63 @@
 {% from "sitio/_macros.html" import imagen_tipo, capacidad %}
 
 {% block contenido %}
-<section class="sitio-contenedor portada{% if not hotel.portada %} portada--sin-imagen{% endif %}">
-  <div class="portada__texto">
-    <h1>{{ hotel.eslogan or hotel.nombre }}</h1>
-    <p class="portada__lugar">{{ hotel.nombre }}{% if hotel.ciudad %} · {{ hotel.ciudad }}{% endif %}</p>
-    <div class="portada__acciones">
-      <a class="btn btn--primary btn--lg" href="{{ url_for('sitio.reservar') }}">{{ icono("calendario") }}Reservar</a>
-      <a class="btn btn--ghost btn--lg" href="#habitaciones">Ver habitaciones</a>
-    </div>
-  </div>
-  {% if hotel.portada %}
-    <div class="portada__imagen">
-      <img src="{{ url_media(hotel.portada) }}" alt="{{ hotel.nombre }}">
-    </div>
-  {% endif %}
-</section>
+{% set presentacion = hotel.parrafos_presentacion %}
 
+{# --- Portada con buscador de fechas (lleva a /reservar con todo completado) --- #}
+<div class="portada-fondo">
+  <section class="sitio-contenedor portada{% if not hotel.portada %} portada--sin-imagen{% endif %}">
+    <div class="portada__texto">
+      {% if hotel.ciudad %}<p class="sitio-etiqueta">{{ icono("mapa") }}{{ hotel.ciudad }}</p>{% endif %}
+      <h1>{{ hotel.eslogan or hotel.nombre }}</h1>
+      {% if hotel.eslogan %}<p class="portada__lugar">{{ hotel.nombre }}</p>{% endif %}
+      {% if presentacion %}<p class="portada__bajada">{{ presentacion[0] }}</p>{% endif %}
+    </div>
+    {% if hotel.portada %}
+      <div class="portada__imagen">
+        <img src="{{ url_media(hotel.portada) }}" alt="{{ hotel.nombre }}">
+      </div>
+    {% endif %}
+    {% if tipos %}
+      <form class="buscador-reserva" action="{{ url_for('sitio.reservar') }}" method="get">
+        <label class="buscador-reserva__campo">
+          <span>Llegada</span>
+          <input type="date" name="entrada" value="{{ manana.isoformat() }}" min="{{ hoy.isoformat() }}" required>
+        </label>
+        <label class="buscador-reserva__campo">
+          <span>Salida</span>
+          <input type="date" name="salida" value="{{ pasado.isoformat() }}" min="{{ manana.isoformat() }}" required>
+        </label>
+        <label class="buscador-reserva__campo">
+          <span>Personas</span>
+          <select name="personas">
+            {% for n in range(1, max_personas + 1) %}<option value="{{ n }}"{% if n == 2 %} selected{% endif %}>{{ n }}</option>{% endfor %}
+          </select>
+        </label>
+        <button class="btn btn--primary btn--lg" type="submit">Ver disponibilidad</button>
+      </form>
+    {% endif %}
+  </section>
+</div>
+
+{# --- Servicios --- #}
+{% if hotel.lista_servicios %}
+  <section class="sitio-contenedor servicios" id="servicios" aria-label="Servicios del hotel">
+    {% for servicio in hotel.lista_servicios %}
+      <div class="servicio">
+        <span class="servicio__icono">{{ icono(icono_servicio(servicio)) }}</span>
+        <span>{{ servicio }}</span>
+      </div>
+    {% endfor %}
+  </section>
+{% endif %}
+
+{# --- Habitaciones --- #}
 <section class="sitio-seccion" id="habitaciones">
   <div class="sitio-contenedor">
-    <h2>Nuestras habitaciones</h2>
+    <header class="sitio-seccion__cabecera">
+      <p class="sitio-etiqueta">Habitaciones</p>
+      <h2>Elegí dónde quedarte</h2>
+    </header>
     <div class="tarjetas-tipo">
       {% for tipo in tipos %}
         <article class="tarjeta-tipo">
@@ -32,7 +70,9 @@
             <p class="tarjeta-tipo__precio"><strong class="num">{{ tipo.tarifa_base|moneda }}</strong> por noche</p>
           </div>
           <div class="tarjeta-tipo__acciones">
-            <a class="btn btn--secondary" href="{{ url_for('sitio.habitacion', slug=tipo.slug) }}">{{ icono("3d") }}Ver en 3D</a>
+            <a class="btn btn--secondary" href="{{ url_for('sitio.habitacion', slug=tipo.slug) }}">
+              {% if tipo.modelo %}{{ icono("3d") }}Ver en 3D{% else %}Ver habitación{% endif %}
+            </a>
             <a class="btn btn--primary" href="{{ url_for('sitio.reservar', tipo=tipo.slug) }}">Reservar</a>
           </div>
         </article>
@@ -42,4 +82,64 @@
     </div>
   </div>
 </section>
+
+{# --- El hotel: presentación, información útil, ubicación y contacto --- #}
+{% set hay_texto = presentacion|length > 1 or hotel.lista_informacion %}
+{% set hay_ubicacion = hotel.url_mapa or hotel.tiene_contacto %}
+{% if hay_texto or hay_ubicacion %}
+  <section class="sitio-seccion sitio-seccion--suave" id="ubicacion">
+    <div class="sitio-contenedor hotel-info{% if not (hay_texto and hay_ubicacion) %} hotel-info--una-columna{% endif %}">
+      {% if hay_texto %}
+        <div class="hotel-info__texto">
+          <p class="sitio-etiqueta">El hotel</p>
+          <h2>Sobre {{ hotel.nombre }}</h2>
+          {% for parrafo in presentacion[1:] %}<p>{{ parrafo }}</p>{% endfor %}
+          {% if hotel.lista_informacion %}
+            <h3>Bueno saber</h3>
+            <ul class="lista-info">
+              {% for dato in hotel.lista_informacion %}<li>{{ icono("check") }}{{ dato }}</li>{% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if hay_ubicacion %}
+        <div class="card ubicacion">
+          {% if hotel.url_mapa %}
+            <iframe class="ubicacion__mapa" src="{{ hotel.url_mapa }}" title="Mapa con la ubicación de {{ hotel.nombre }}"
+                    loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          {% endif %}
+          <div class="ubicacion__datos">
+            <h3>Dónde estamos</h3>
+            {% if hotel.direccion %}
+              <p class="ubicacion__direccion">{{ icono("mapa") }}<span>{{ hotel.direccion }}{% if hotel.ciudad %}<br><span class="muted">{{ hotel.ciudad }}</span>{% endif %}</span></p>
+            {% endif %}
+            <ul class="contacto">
+              {% if hotel.telefono %}<li><a href="{{ hotel.url_telefono }}">{{ icono("telefono") }}{{ hotel.telefono }}</a></li>{% endif %}
+              {% if hotel.email %}<li><a href="mailto:{{ hotel.email }}">{{ icono("mail") }}{{ hotel.email }}</a></li>{% endif %}
+              {% if hotel.whatsapp %}<li><a href="{{ hotel.url_whatsapp }}" target="_blank" rel="noopener">{{ icono("whatsapp") }}WhatsApp</a></li>{% endif %}
+              {% if hotel.instagram %}<li><a href="{{ hotel.url_instagram }}" target="_blank" rel="noopener">{{ icono("instagram") }}@{{ hotel.instagram }}</a></li>{% endif %}
+            </ul>
+            {% if hotel.url_como_llegar %}
+              <a class="btn btn--secondary" href="{{ hotel.url_como_llegar }}" target="_blank" rel="noopener">{{ icono("mapa") }}Cómo llegar</a>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endif %}
+
+{# --- Cierre --- #}
+{% if tipos %}
+  <section class="cierre">
+    <div class="sitio-contenedor cierre__fila">
+      <div>
+        <h2>¿Te esperamos?</h2>
+        <p>Elegí las fechas y la habitación. Se paga en el hotel.</p>
+      </div>
+      <a class="btn btn--lg cierre__boton" href="{{ url_for('sitio.reservar') }}">{{ icono("calendario") }}Reservar ahora</a>
+    </div>
+  </section>
+{% endif %}
 {% endblock %}

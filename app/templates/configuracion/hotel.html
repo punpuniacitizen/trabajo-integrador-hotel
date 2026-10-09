@@ -1,23 +1,27 @@
 {% extends "configuracion/_layout.html" %}
+{% from "components/macros.html" import icono %}
 {% from "configuracion/_macros.html" import v, subida %}
 
 {% block cuerpo %}
+<nav class="config-indice" aria-label="Secciones de esta página">
+  <a href="#datos">Datos</a>
+  <a href="#identidad">Identidad</a>
+  <a href="#sitio">Sitio público</a>
+  <a href="#contacto">Contacto</a>
+  <a href="#ubicacion">Ubicación</a>
+</nav>
+
 <form class="config-form" method="post" enctype="multipart/form-data">
-  <section class="card config-card">
+  <section class="card config-card" id="datos">
     <h2>Datos del hotel</h2>
     <div class="config-campos">
       <label class="field config-campos__ancho">
         <span class="label">Nombre</span>
         <input class="input" name="nombre" value="{{ v(datos, 'nombre', hotel.nombre) }}" required maxlength="120">
       </label>
-      <label class="field config-campos__ancho">
-        <span class="label">Eslogan <span class="muted">(opcional)</span></span>
-        <input class="input" name="eslogan" value="{{ v(datos, 'eslogan', hotel.eslogan) }}" maxlength="160" placeholder="Ej.: Tu lugar frente al lago">
-        <span class="hint">Es el título grande de la portada del sitio público.</span>
-      </label>
       <label class="field">
         <span class="label">Ciudad <span class="muted">(opcional)</span></span>
-        <input class="input" name="ciudad" value="{{ v(datos, 'ciudad', hotel.ciudad) }}" maxlength="120">
+        <input class="input" name="ciudad" value="{{ v(datos, 'ciudad', hotel.ciudad) }}" maxlength="120" data-mapa-ciudad>
       </label>
       <label class="field">
         <span class="label">Moneda</span>
@@ -35,7 +39,7 @@
     </div>
   </section>
 
-  <section class="card config-card">
+  <section class="card config-card" id="identidad">
     <h2>Identidad</h2>
     <p class="muted">El sistema y el sitio público toman el logo y el color del hotel.</p>
 
@@ -61,7 +65,86 @@
     </div>
   </section>
 
-  <div class="config-acciones">
+  <section class="card config-card" id="sitio">
+    <h2>Sitio público</h2>
+    <p class="muted">Lo que lee un cliente en la página de inicio. Todo es opcional: lo que quede vacío no se muestra.</p>
+    <div class="config-campos">
+      <label class="field config-campos__ancho">
+        <span class="label">Eslogan</span>
+        <input class="input" name="eslogan" value="{{ v(datos, 'eslogan', hotel.eslogan) }}" maxlength="160" placeholder="Ej.: Tu lugar frente al lago">
+        <span class="hint">El título grande de la portada. Si queda vacío, va el nombre del hotel.</span>
+      </label>
+      <label class="field config-campos__ancho">
+        <span class="label">Presentación</span>
+        <textarea class="textarea" name="presentacion" rows="5" maxlength="2000"
+                  placeholder="Contá en dos o tres frases cómo es el hotel.">{{ v(datos, 'presentacion', hotel.presentacion) }}</textarea>
+        <span class="hint">Para separar párrafos, dejá una línea en blanco.</span>
+      </label>
+      <label class="field">
+        <span class="label">Servicios</span>
+        <textarea class="textarea" name="servicios" rows="6"
+                  placeholder="Desayuno incluido&#10;Wi-Fi en todo el hotel&#10;Estacionamiento">{{ v(datos, 'servicios', hotel.servicios) }}</textarea>
+        <span class="hint">Uno por línea. El ícono se elige solo según el texto (desayuno, wi-fi, estacionamiento, pileta, mascotas…).</span>
+      </label>
+      <label class="field">
+        <span class="label">Información útil</span>
+        <textarea class="textarea" name="informacion" rows="6"
+                  placeholder="Se puede dejar el equipaje antes del check-in.&#10;No se puede fumar dentro del hotel.">{{ v(datos, 'informacion', hotel.informacion) }}</textarea>
+        <span class="hint">Una por línea: reglas de la casa, qué incluye la tarifa, etc.</span>
+      </label>
+    </div>
+  </section>
+
+  <section class="card config-card" id="contacto">
+    <h2>Contacto</h2>
+    <p class="muted">Aparece en el inicio y en el pie del sitio público.</p>
+    <div class="config-campos">
+      <label class="field">
+        <span class="label">{{ icono("telefono") }}Teléfono</span>
+        <input class="input" type="tel" name="telefono" value="{{ v(datos, 'telefono', hotel.telefono) }}" maxlength="40" placeholder="+54 294 400-0000">
+      </label>
+      <label class="field">
+        <span class="label">{{ icono("mail") }}Email</span>
+        <input class="input" type="email" name="email" value="{{ v(datos, 'email', hotel.email) }}" maxlength="120" placeholder="reservas@tuhotel.com">
+      </label>
+      <label class="field">
+        <span class="label">{{ icono("whatsapp") }}WhatsApp</span>
+        <input class="input" type="tel" name="whatsapp" value="{{ v(datos, 'whatsapp', ('+' ~ hotel.whatsapp) if hotel.whatsapp) }}" maxlength="30" placeholder="+54 9 294 400-0000">
+        <span class="hint">Con código de país. El botón abre un chat con ese número.</span>
+      </label>
+      <label class="field">
+        <span class="label">{{ icono("instagram") }}Instagram</span>
+        <input class="input" name="instagram" value="{{ v(datos, 'instagram', ('@' ~ hotel.instagram) if hotel.instagram) }}" maxlength="80" placeholder="@tuhotel">
+      </label>
+    </div>
+  </section>
+
+  <section class="card config-card" id="ubicacion">
+    <h2>Ubicación</h2>
+    <p class="muted">El mapa del sitio usa las coordenadas si las cargás; si no, busca la dirección y la ciudad en Google Maps.</p>
+    <div class="ubicacion-config">
+      <div class="ubicacion-config__campos">
+        <label class="field">
+          <span class="label">{{ icono("mapa") }}Dirección</span>
+          <input class="input" name="direccion" value="{{ v(datos, 'direccion', hotel.direccion) }}" maxlength="200"
+                 placeholder="Av. Siempre Viva 742" data-mapa-direccion>
+        </label>
+        <label class="field">
+          <span class="label">Coordenadas <span class="muted">(opcional, para marcar el punto exacto)</span></span>
+          <input class="input num" name="coordenadas" placeholder="-41.1262, -71.3476" data-mapa-coordenadas
+                 value="{{ v(datos, 'coordenadas', (hotel.latitud ~ ', ' ~ hotel.longitud) if hotel.tiene_coordenadas) }}">
+          <span class="hint">En Google Maps, hacé clic derecho sobre el hotel y elegí las coordenadas (se copian solas). También podés pegar el link del lugar.</span>
+        </label>
+      </div>
+      <div class="ubicacion-config__mapa" data-mapa-vista>
+        <iframe title="Vista previa del mapa" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                {% if hotel.url_mapa %}src="{{ hotel.url_mapa }}"{% else %}hidden{% endif %}></iframe>
+        <span class="ubicacion-config__vacio"{% if hotel.url_mapa %} hidden{% endif %}>{{ icono("mapa") }}Escribí la dirección para ver el mapa</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="config-acciones config-acciones--fija">
     <button class="btn btn--primary btn--lg" type="submit">Guardar cambios</button>
   </div>
 </form>

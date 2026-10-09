@@ -8,6 +8,7 @@ from app.auth import admin_requerido
 from app.extensions import db
 from app.models import Habitacion, TipoHabitacion, Usuario
 from app.services import archivos, configuracion
+from app.services import hotel as hotel_servicio
 from app.services.errores import ErrorDeNegocio
 from app.services.tema import es_color_valido
 
@@ -19,6 +20,12 @@ HORA = re.compile(r"([01]\d|2[0-3]):[0-5]\d")
 
 def _texto(campo):
     return request.form.get(campo, "").strip()
+
+
+def _lista(campo):
+    """Textarea de "una por línea": saca las líneas vacías y los espacios de más."""
+    lineas = [linea.strip() for linea in request.form.get(campo, "").splitlines() if linea.strip()]
+    return "\n".join(lineas) or None
 
 
 def _entero(campo):
@@ -66,6 +73,10 @@ def hotel():
                 raise ErrorDeNegocio("Los horarios tienen que tener el formato 14:00.")
             if len(moneda) > 8:
                 raise ErrorDeNegocio("El símbolo de la moneda puede tener hasta 8 caracteres.")
+            coordenadas = hotel_servicio.parsear_coordenadas(_texto("coordenadas"))
+            email = hotel_servicio.normalizar_email(_texto("email"))
+            whatsapp = hotel_servicio.normalizar_whatsapp(_texto("whatsapp"))
+            instagram = hotel_servicio.normalizar_instagram(_texto("instagram"))
             nuevos = _guardar_archivos([("logo", "logo", "logo"), ("portada", "imagen", "portada")])
         except ErrorDeNegocio as error:
             flash(str(error), "danger")
@@ -77,6 +88,13 @@ def hotel():
         config.ciudad = _texto("ciudad") or None
         config.color_acento = color
         config.hora_checkin, config.hora_checkout, config.moneda = checkin, checkout, moneda
+        config.presentacion = request.form.get("presentacion", "").strip() or None
+        config.servicios = _lista("servicios")
+        config.informacion = _lista("informacion")
+        config.direccion = _texto("direccion") or None
+        config.latitud, config.longitud = coordenadas or (None, None)
+        config.telefono = _texto("telefono") or None
+        config.email, config.whatsapp, config.instagram = email, whatsapp, instagram
         _reemplazar(config, "logo", nuevos["logo"], "quitar_logo" in request.form, viejos)
         _reemplazar(config, "portada", nuevos["portada"], "quitar_portada" in request.form, viejos)
         if config.id is None:

@@ -38,6 +38,64 @@
 
 .config-acciones { display: flex; justify-content: flex-end; gap: var(--space-3); }
 
+/* En la página del hotel (larga) el botón de guardar queda siempre a mano */
+.config-acciones--fija {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin: 0 calc(-1 * var(--space-2));
+  padding: var(--space-3) var(--space-2);
+  border-top: 1px solid var(--border);
+  background: color-mix(in oklab, var(--bg) 92%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+/* Índice de secciones de la página del hotel */
+.config-indice {
+  position: sticky;
+  top: calc(var(--topbar-height) + var(--space-2));
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  max-width: 960px;
+  margin-bottom: var(--space-4);
+}
+
+.config-indice a {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.config-indice a:hover { border-color: var(--border-strong); color: var(--text); }
+.config-card { scroll-margin-top: calc(var(--topbar-height) + 64px); }
+
+.config-campos .label { display: inline-flex; align-items: center; gap: 6px; }
+.config-campos .label .icono { width: 15px; height: 15px; color: var(--text-muted); }
+
+/* Ubicación: campos + vista previa del mapa */
+.ubicacion-config { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+.ubicacion-config__campos { display: grid; gap: var(--space-4); }
+
+.ubicacion-config__mapa {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--gray-100);
+}
+
+.ubicacion-config__mapa iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.ubicacion-config__vacio { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-4); color: var(--text-muted); font-size: var(--text-sm); text-align: center; }
+
 .config-volver { margin-bottom: var(--space-4); }
 .config-volver a { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; }
 .config-volver a:hover { color: var(--text); }
@@ -200,7 +258,8 @@
 }
 
 @media (max-width: 700px) {
-  .config-campos, .subidas { grid-template-columns: minmax(0, 1fr); }
+  .config-campos, .subidas, .ubicacion-config { grid-template-columns: minmax(0, 1fr); }
+  .config-indice { position: static; }
   .subida { grid-template-columns: minmax(0, 1fr); }
   .config-card { padding: var(--space-4); }
   .usuarios-config .table th:nth-child(2), .usuarios-config .table td:nth-child(2) { display: none; }

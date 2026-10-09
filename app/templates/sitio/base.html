@@ -29,6 +29,8 @@
     </a>
     <nav class="sitio-nav" aria-label="Secciones">
       <a href="{{ url_for('sitio.inicio') }}#habitaciones">Habitaciones</a>
+      {% if hotel.lista_servicios %}<a href="{{ url_for('sitio.inicio') }}#servicios">Servicios</a>{% endif %}
+      {% if hotel.url_mapa or hotel.tiene_contacto %}<a href="{{ url_for('sitio.inicio') }}#ubicacion">Ubicación</a>{% endif %}
       <a class="btn btn--primary" href="{{ url_for('sitio.reservar') }}">Reservar</a>
     </nav>
   </div>
@@ -42,9 +44,20 @@
   <div class="sitio-contenedor sitio-pie__fila">
     <div>
       <strong>{{ hotel.nombre }}</strong>
-      {% if hotel.ciudad %}<p class="muted">{{ hotel.ciudad }}</p>{% endif %}
+      {% if hotel.direccion or hotel.ciudad %}
+        <p class="muted">{{ hotel.direccion }}{% if hotel.direccion and hotel.ciudad %} · {% endif %}{{ hotel.ciudad or "" }}</p>
+      {% endif %}
     </div>
-    <p class="muted">Check-in desde las {{ hotel.hora_checkin }} · Check-out hasta las {{ hotel.hora_checkout }}</p>
+    <div class="muted">
+      <p>Check-in desde las {{ hotel.hora_checkin }} · Check-out hasta las {{ hotel.hora_checkout }}</p>
+      {% if hotel.telefono or hotel.email %}
+        <p class="sitio-pie__contacto">
+          {% if hotel.telefono %}<a href="{{ hotel.url_telefono }}">{{ hotel.telefono }}</a>{% endif %}
+          {% if hotel.telefono and hotel.email %} · {% endif %}
+          {% if hotel.email %}<a href="mailto:{{ hotel.email }}">{{ hotel.email }}</a>{% endif %}
+        </p>
+      {% endif %}
+    </div>
     <p class="sitio-pie__conserje">
       <img src="{{ url_for('static', filename='brand/isotipo.svg') }}" alt="" width="14" height="14">
       con Conserje · <a href="{{ url_for('plano.index') }}">Acceso del personal</a>

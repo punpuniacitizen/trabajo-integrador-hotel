@@ -38,7 +38,16 @@ def _entero(texto, por_defecto):
 
 @bp.get("/")
 def inicio():
-    return render_template("sitio/inicio.html", tipos=_tipos())
+    tipos = _tipos()
+    hoy = date.today()
+    return render_template(
+        "sitio/inicio.html",
+        tipos=tipos,
+        hoy=hoy,
+        manana=hoy + timedelta(days=1),
+        pasado=hoy + timedelta(days=3),
+        max_personas=max((t.capacidad for t in tipos), default=2),
+    )
 
 
 @bp.get("/habitaciones/<slug>")
@@ -58,10 +67,14 @@ def reservar():
     datos = request.form if request.method == "POST" else request.args
 
     slug = datos.get("tipo")
-    tipo = next((t for t in tipos if t.slug == slug), None) or next((t for t in tipos if t.capacidad >= 2), tipos[0])
+    pedidas = _entero(datos.get("personas"), None)
+    # Sin tipo elegido (por ejemplo, desde el buscador de la portada): el más barato donde entren
+    tipo = next((t for t in tipos if t.slug == slug), None) or next(
+        (t for t in tipos if t.capacidad >= (pedidas or 2)), tipos[-1]
+    )
     entrada = _fecha(datos.get("entrada"), hoy + timedelta(days=1))
     salida = _fecha(datos.get("salida"), entrada + timedelta(days=2))
-    personas = _entero(datos.get("personas"), min(2, tipo.capacidad))
+    personas = pedidas or min(2, tipo.capacidad)
     nombre = datos.get("nombre", "")
     email = datos.get("email", "")
 

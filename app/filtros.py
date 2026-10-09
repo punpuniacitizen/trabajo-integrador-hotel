@@ -1,6 +1,8 @@
 """Filtros de Jinja para mostrar fechas, montos y nombres en castellano."""
 from flask import g, url_for
 
+from app.services.hotel import icono_servicio
+
 DIAS = ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")
 MESES = (
     "enero", "febrero", "marzo", "abril", "mayo", "junio",
@@ -58,3 +60,4 @@ def registrar(app):
         app.add_template_filter(filtro)
     app.add_template_global(rango_fechas)
     app.add_template_global(url_media)
+    app.add_template_global(icono_servicio)

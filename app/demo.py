@@ -138,6 +138,31 @@ def cargar_demo(hoy, semilla=7):
         color_acento="#1F6F5C",
         ciudad="San Carlos de Bariloche",
         eslogan="Tu lugar frente al lago",
+        presentacion=(
+            "Un hotel chico frente al lago Nahuel Huapi, a minutos del centro de Bariloche, "
+            "con desayuno casero y la tranquilidad del bosque.\n\n"
+            "Tenemos 24 habitaciones en tres pisos, todas con maderas, textiles cálidos y ventanas "
+            "para mirar el lago. Te ayudamos a armar excursiones y traslados desde la recepción."
+        ),
+        servicios="\n".join([
+            "Desayuno casero incluido",
+            "Wi-Fi en todo el hotel",
+            "Estacionamiento sin cargo",
+            "Calefacción central",
+            "Recepción las 24 horas",
+            "Mascotas chicas bienvenidas",
+        ]),
+        informacion="\n".join([
+            "Podés dejar el equipaje antes del check-in y después del check-out.",
+            "El desayuno se sirve de 7:30 a 10:30.",
+            "No se puede fumar dentro del hotel.",
+            "Las mascotas chicas pagan un adicional en el hotel.",
+        ]),
+        direccion="Av. Exequiel Bustillo 4200",
+        telefono="+54 294 400-0000",
+        email="reservas@hotelmirador.example",
+        whatsapp="5492944000000",
+        instagram="hotelmirador.demo",
         moneda="$",
         hora_checkin="14:00",
         hora_checkout="10:00",
