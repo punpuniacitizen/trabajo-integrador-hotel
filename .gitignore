@@ -17,6 +17,9 @@ instance/
 # Variables de entorno (claves de APIs)
 .env
 
+# Copias de respaldo de Blender
+*.blend1
+
 # Editores y sistema
 .claude/settings.local.json
 .vscode/

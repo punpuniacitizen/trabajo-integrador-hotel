@@ -41,6 +41,23 @@ Slugs: `simple`, `doble-estandar`, `doble-superior`, `suite-mirador`.
 
 Render: Eevee, una luz de sol suave de costado y luz ambiente clara. En el visor, la vista inicial imita la cámara isométrica (por ejemplo, `camera-orbit="45deg 60deg"`).
 
+## Cómo se armaron
+
+Todo sale de `design/3d/armar_habitaciones.py`, que se corre dentro de Blender (con el MCP o desde la consola de Python):
+
+```python
+ruta = r"<repo>\design\3d\armar_habitaciones.py"
+g = {"__file__": ruta, "__name__": "__main__"}
+exec(open(ruta, encoding="utf-8").read(), g)    # borra el archivo abierto y arma todo
+g["renderizar"](); g["exportar"](); g["guardar"]()
+```
+
+- En el `.blend` hay una escena por habitación (con su cámara), `portada` para el hero y `Resumen`, que muestra las cuatro en fila.
+- Escala del kit: 0,175. Las paredes miden 2,26 m de alto (la altura de los tramos de Kenney) y 0,14 m de espesor.
+- `wallWindowSlide` es una ventana guillotina chica: para que funcione como ventanal se estira al doble de ancho.
+- El baño de la suite se separa con `wallHalf` cortados a 1,1 m de alto. Con tabiques de altura completa, la cámara isométrica no lo vería.
+- Las tarjetas comparten la escala de la cámara (calculada para que entre la suite), así que la simple se ve más chica a propósito.
+
 ## Después de los modelos (paso 4)
 
 - Agregar a `TipoHabitacion`: `slug`, `metros`, `descripcion` y `comodidades`. Cargarlos en `app/demo.py`.
