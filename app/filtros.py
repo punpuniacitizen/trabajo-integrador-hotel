@@ -1,5 +1,5 @@
 """Filtros de Jinja para mostrar fechas, montos y nombres en castellano."""
-from flask import g
+from flask import g, url_for
 
 DIAS = ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")
 MESES = (
@@ -48,7 +48,13 @@ def documento_oculto(documento):
     return "···" + documento[-3:]
 
 
+def url_media(nombre):
+    """URL de un archivo subido (instance/uploads/), o cadena vacía si no hay."""
+    return url_for("media.archivo", nombre=nombre) if nombre else ""
+
+
 def registrar(app):
     for filtro in (fecha_larga, dia_mes, fecha_corta, moneda, iniciales, documento_oculto):
         app.add_template_filter(filtro)
     app.add_template_global(rango_fechas)
+    app.add_template_global(url_media)

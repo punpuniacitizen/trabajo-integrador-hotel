@@ -1,0 +1,77 @@
+{% extends "configuracion/_layout.html" %}
+{% from "components/macros.html" import icono %}
+{% from "configuracion/_macros.html" import v, subida %}
+
+{% block cuerpo %}
+<p class="config-volver"><a href="{{ url_for('configuracion.habitaciones') }}#tipos">{{ icono("anterior") }}Tipos de habitación</a></p>
+
+<form class="config-form" method="post" enctype="multipart/form-data">
+  <div class="tipo-form">
+    <section class="card config-card">
+      <h2>{{ tipo.nombre if tipo.id else "Nuevo tipo de habitación" }}</h2>
+      <div class="config-campos">
+        <label class="field config-campos__ancho">
+          <span class="label">Nombre</span>
+          <input class="input" name="nombre" value="{{ v(datos, 'nombre', tipo.nombre) }}" required maxlength="60" placeholder="Ej.: Doble superior">
+        </label>
+        <label class="field">
+          <span class="label">Capacidad (personas)</span>
+          <input class="input num" type="number" name="capacidad" min="1" max="20" value="{{ v(datos, 'capacidad', tipo.capacidad or 2) }}" required>
+        </label>
+        <label class="field">
+          <span class="label">Tarifa por noche ({{ hotel.moneda }})</span>
+          <input class="input num" type="number" name="tarifa" min="1" step="1" value="{{ v(datos, 'tarifa', tipo.tarifa_base) }}" required>
+        </label>
+        <label class="field">
+          <span class="label">Superficie (m²) <span class="muted">(opcional)</span></span>
+          <input class="input num" type="number" name="metros" min="1" max="1000" value="{{ v(datos, 'metros', tipo.metros) }}">
+        </label>
+        <label class="field config-campos__ancho">
+          <span class="label">Descripción <span class="muted">(opcional)</span></span>
+          <textarea class="textarea" name="descripcion" rows="3" maxlength="600" placeholder="Una o dos frases para el sitio.">{{ v(datos, 'descripcion', tipo.descripcion) }}</textarea>
+        </label>
+        <label class="field config-campos__ancho">
+          <span class="label">Comodidades <span class="muted">(opcional)</span></span>
+          <textarea class="textarea" name="comodidades" rows="5" placeholder="Cama queen&#10;Escritorio&#10;Baño privado con ducha">{{ v(datos, 'comodidades', tipo.comodidades) }}</textarea>
+          <span class="hint">Una por línea. En el sitio se muestran como lista.</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="card config-card">
+      <h2>Foto y modelo 3D</h2>
+      <p class="muted">Podés subir una foto, un modelo .glb o los dos. Si hay modelo, el sitio muestra el visor 3D y usa la foto mientras carga.</p>
+      <div class="subidas subidas--columna">
+        {{ subida("imagen", "Foto o render", tipo.imagen, ".png,.jpg,.jpeg,.webp",
+                  ayuda="PNG, JPG o WebP, hasta 8 MB.") }}
+        {{ subida("modelo", "Modelo 3D", tipo.modelo, ".glb", clase="modelo",
+                  ayuda="Archivo .glb, hasta 20 MB. Arrastrá la vista previa para girarlo.") }}
+      </div>
+    </section>
+  </div>
+
+  <div class="config-acciones">
+    <a class="btn btn--ghost btn--lg" href="{{ url_for('configuracion.habitaciones') }}#tipos">Cancelar</a>
+    <button class="btn btn--primary btn--lg" type="submit">{{ "Guardar cambios" if tipo.id else "Crear tipo" }}</button>
+  </div>
+</form>
+
+{% if tipo.id %}
+  <form class="card zona-peligro" method="post" action="{{ url_for('configuracion.eliminar_tipo', tipo_id=tipo.id) }}"
+        data-confirmar="¿Eliminar el tipo «{{ tipo.nombre }}»? No se puede deshacer.">
+    <div>
+      <h3>Eliminar este tipo</h3>
+      {% if tipo.habitaciones %}
+        <p class="muted">Tiene {{ tipo.habitaciones|length }} {{ "habitación" if tipo.habitaciones|length == 1 else "habitaciones" }}. Para eliminarlo, primero pasalas a otro tipo o borralas.</p>
+      {% else %}
+        <p class="muted">No tiene habitaciones, así que se puede eliminar.</p>
+      {% endif %}
+    </div>
+    <button class="btn btn--danger" type="submit"{% if tipo.habitaciones %} disabled{% endif %}>Eliminar tipo</button>
+  </form>
+{% endif %}
+{% endblock %}
+
+{% block scripts_config %}
+  <script type="module" src="{{ url_for('static', filename='vendor/model-viewer.min.js') }}"></script>
+{% endblock %}

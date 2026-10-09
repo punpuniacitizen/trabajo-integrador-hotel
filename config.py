@@ -10,3 +10,7 @@ class Config:
     # Ruta relativa a la carpeta instance/ (SQLite por defecto)
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///hotel.db")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Tope de un pedido (subida de fotos y modelos 3D desde Configuración)
+    MAX_CONTENT_LENGTH = 25 * 1024 * 1024
+    # La cookie de sesión no viaja en formularios enviados desde otros sitios
+    SESSION_COOKIE_SAMESITE = "Lax"

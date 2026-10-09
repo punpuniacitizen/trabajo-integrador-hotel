@@ -1,0 +1,112 @@
+{% extends "configuracion/_layout.html" %}
+{% from "components/macros.html" import icono %}
+
+{% block cuerpo %}
+<section class="config-seccion" id="tipos">
+  <header class="config-seccion__cabecera">
+    <div>
+      <h2>Tipos de habitación</h2>
+      <p class="muted">Las categorías que ven los clientes en el sitio: características, precio, foto y modelo 3D.</p>
+    </div>
+    <a class="btn btn--primary" href="{{ url_for('configuracion.tipo_nuevo') }}">{{ icono("mas") }}Nuevo tipo</a>
+  </header>
+
+  <div class="tipos-config">
+    {% for t in tipos %}
+      <a class="tipo-config" href="{{ url_for('configuracion.tipo', tipo_id=t.id) }}">
+        <span class="tipo-config__imagen">
+          {% if t.imagen %}<img src="{{ url_media(t.imagen) }}" alt="" loading="lazy">{% else %}{{ icono("cama") }}{% endif %}
+        </span>
+        <span class="tipo-config__datos">
+          <strong>{{ t.nombre }}</strong>
+          <span class="muted">Hasta {{ t.capacidad }} {{ "persona" if t.capacidad == 1 else "personas" }}{% if t.metros %} · {{ t.metros }} m²{% endif %}</span>
+          <span class="num">{{ t.tarifa_base|moneda }} por noche</span>
+        </span>
+        <span class="tipo-config__pie">
+          <span class="muted">{{ t.habitaciones|length }} {{ "habitación" if t.habitaciones|length == 1 else "habitaciones" }}</span>
+          <span class="tipo-config__archivos">
+            {% if t.imagen %}<span class="chip">Foto</span>{% endif %}
+            {% if t.modelo %}<span class="chip">3D</span>{% endif %}
+          </span>
+        </span>
+      </a>
+    {% else %}
+      <div class="vacio card">
+        <p><strong>Todavía no hay tipos de habitación.</strong></p>
+        <p class="muted">Creá el primero para poder agregar habitaciones.</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="config-seccion" id="pisos">
+  <header class="config-seccion__cabecera">
+    <div>
+      <h2>Pisos y habitaciones</h2>
+      <p class="muted">El número de cada habitación es el piso seguido de su posición: piso 2, posición 05 → 205.</p>
+    </div>
+  </header>
+
+  {% if tipos %}
+    <form class="card agregar-habs" method="post" action="{{ url_for('configuracion.agregar_habitaciones') }}" id="agregar-habs">
+      <div class="agregar-habs__titulo">
+        <h3>Agregar habitaciones</h3>
+        <button class="btn btn--ghost btn--sm" type="button" data-nuevo-piso="{{ siguiente_piso }}">{{ icono("mas") }}Nuevo piso ({{ siguiente_piso }})</button>
+      </div>
+      <div class="agregar-habs__campos">
+        <label class="field">
+          <span class="label">Piso</span>
+          <input class="input num" type="number" name="piso" min="1" max="99" value="{{ piso_sugerido }}" required>
+        </label>
+        <label class="field">
+          <span class="label">Cantidad</span>
+          <input class="input num" type="number" name="cantidad" min="1" max="50" value="1" required>
+        </label>
+        <label class="field">
+          <span class="label">Tipo</span>
+          <select class="select" name="tipo_id" required>
+            {% for t in tipos %}<option value="{{ t.id }}">{{ t.nombre }}</option>{% endfor %}
+          </select>
+        </label>
+        <label class="field">
+          <span class="label">Desde la posición <span class="muted">(opcional)</span></span>
+          <input class="input num" type="number" name="desde" min="1" max="99" placeholder="La siguiente libre">
+        </label>
+        <button class="btn btn--primary" type="submit">Agregar</button>
+      </div>
+    </form>
+  {% endif %}
+
+  {% for piso, habitaciones in pisos %}
+    <div class="piso-config" id="piso-{{ piso }}">
+      <h3>Piso {{ piso }} <span class="muted">· {{ habitaciones|length }} {{ "habitación" if habitaciones|length == 1 else "habitaciones" }}</span></h3>
+      <div class="habs-config">
+        {% for h in habitaciones %}
+          <div class="hab-config{% if h.fuera_de_servicio %} hab-config--mantenimiento{% endif %}">
+            <div class="hab-config__cabecera">
+              <strong class="num">{{ h.numero }}</strong>
+              <form method="post" action="{{ url_for('configuracion.eliminar_habitacion', habitacion_id=h.id) }}"
+                    data-confirmar="¿Borrar la habitación {{ h.numero }}?">
+                <button class="btn btn--ghost btn--icono btn--sm btn--ghost-danger" type="submit"
+                        aria-label="Borrar la habitación {{ h.numero }}" title="Borrar">{{ icono("cerrar") }}</button>
+              </form>
+            </div>
+            <form method="post" action="{{ url_for('configuracion.cambiar_tipo', habitacion_id=h.id) }}" class="hab-config__tipo">
+              <select class="select" name="tipo_id" data-autoenviar aria-label="Tipo de la habitación {{ h.numero }}">
+                {% for t in tipos %}<option value="{{ t.id }}"{% if t.id == h.tipo_id %} selected{% endif %}>{{ t.nombre }}</option>{% endfor %}
+              </select>
+              <button class="btn btn--secondary btn--sm" type="submit" data-solo-sin-js>Cambiar</button>
+            </form>
+            {% if h.fuera_de_servicio %}<span class="badge badge--mantenimiento">Mantenimiento</span>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="vacio card">
+      <p><strong>Todavía no hay habitaciones.</strong></p>
+      <p class="muted">Agregalas con el formulario de arriba: elegí el piso, la cantidad y el tipo.</p>
+    </div>
+  {% endfor %}
+</section>
+{% endblock %}

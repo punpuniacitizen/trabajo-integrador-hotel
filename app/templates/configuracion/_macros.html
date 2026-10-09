@@ -1,0 +1,35 @@
+{# Valor de un campo: lo que mandó el formulario (si hubo un error) o el guardado #}
+{% macro v(datos, campo, actual) -%}
+  {%- if datos is not none and campo in datos -%}{{ datos[campo] }}
+  {%- elif actual is not none -%}{{ actual }}
+  {%- endif -%}
+{%- endmacro %}
+
+{# Subida de un archivo con vista previa (configuracion.js la actualiza al elegir el archivo).
+   clase: "imagen" o "modelo" #}
+{% macro subida(campo, titulo, actual, accept, clase="imagen", ayuda="") -%}
+<div class="subida" data-subida>
+  <div class="subida__vista subida__vista--{{ clase }}">
+    {% if clase == "modelo" %}
+      <model-viewer class="subida__modelo" {% if actual %}src="{{ url_media(actual) }}"{% endif %}
+                    camera-controls disable-pan camera-orbit="45deg 60deg auto" tone-mapping="none"
+                    shadow-intensity="0" interaction-prompt="none"{% if not actual %} hidden{% endif %}></model-viewer>
+    {% else %}
+      <img class="subida__imagen" {% if actual %}src="{{ url_media(actual) }}"{% else %}hidden{% endif %} alt="">
+    {% endif %}
+    <span class="subida__vacia"{% if actual %} hidden{% endif %}>Sin {{ "modelo" if clase == "modelo" else "imagen" }}</span>
+  </div>
+  <div class="subida__controles">
+    <p class="label">{{ titulo }}</p>
+    <label class="btn btn--secondary btn--sm subida__boton">
+      {{ "Cambiar" if actual else "Elegir" }} archivo
+      <input class="subida__input" type="file" name="{{ campo }}" accept="{{ accept }}" data-preview>
+    </label>
+    <span class="subida__nombre hint" aria-live="polite"></span>
+    {% if actual %}
+      <label class="subida__quitar"><input type="checkbox" name="quitar_{{ campo }}"> Quitar</label>
+    {% endif %}
+    {% if ayuda %}<p class="hint">{{ ayuda }}</p>{% endif %}
+  </div>
+</div>
+{%- endmacro %}

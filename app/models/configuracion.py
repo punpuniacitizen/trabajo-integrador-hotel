@@ -12,6 +12,7 @@ class ConfiguracionHotel(db.Model):
     color_acento = db.Column(db.String(7), nullable=False, default="#18181B")
     ciudad = db.Column(db.String(120))
     eslogan = db.Column(db.String(160))  # título de la portada del sitio público
+    portada = db.Column(db.String(255))  # imagen de la portada del sitio público (en instance/uploads/)
     moneda = db.Column(db.String(8), nullable=False, default="$")
     hora_checkin = db.Column(db.String(5), nullable=False, default="14:00")
     hora_checkout = db.Column(db.String(5), nullable=False, default="10:00")

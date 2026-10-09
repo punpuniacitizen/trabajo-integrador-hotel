@@ -1,0 +1,68 @@
+{% extends "configuracion/_layout.html" %}
+{% from "components/macros.html" import icono %}
+{% from "configuracion/_macros.html" import v %}
+
+{% block cuerpo %}
+<div class="usuarios-config">
+  <section class="card">
+    <div class="card__header">
+      <h2>Usuarios</h2>
+      <span class="muted">{{ usuarios|length }} en total</span>
+    </div>
+    <table class="table">
+      <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th><span class="sr-only">Acciones</span></th></tr></thead>
+      <tbody>
+        {% for u in usuarios %}
+          <tr>
+            <td>
+              <span class="usuario-celda">
+                <span class="avatar avatar--sm">{{ u.nombre|iniciales }}</span>
+                {{ u.nombre }}{% if u.id == usuario.id %} <span class="chip">Vos</span>{% endif %}
+              </span>
+            </td>
+            <td>{{ u.email }}</td>
+            <td>
+              {% if u.rol == "admin" %}<span class="badge badge--ocupada">Administración</span>
+              {% else %}<span class="badge badge--bloqueada">Recepción</span>{% endif %}
+            </td>
+            <td class="usuarios-config__accion">
+              {% if u.id != usuario.id %}
+                <form method="post" action="{{ url_for('configuracion.eliminar_usuario', usuario_id=u.id) }}"
+                      data-confirmar="¿Eliminar el usuario de {{ u.nombre }}? Ya no va a poder ingresar.">
+                  <button class="btn btn--ghost btn--sm btn--ghost-danger" type="submit">Eliminar</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <form class="card config-card" method="post">
+    <h2>Nuevo usuario</h2>
+    <label class="field">
+      <span class="label">Nombre</span>
+      <input class="input" name="nombre" value="{{ v(datos, 'nombre', none) }}" required maxlength="80" autocomplete="off">
+    </label>
+    <label class="field">
+      <span class="label">Email</span>
+      <input class="input" type="email" name="email" value="{{ v(datos, 'email', none) }}" required maxlength="120" autocomplete="off">
+    </label>
+    <label class="field">
+      <span class="label">Rol</span>
+      <select class="select" name="rol">
+        {% set rol = v(datos, 'rol', 'recepcion') %}
+        <option value="recepcion"{% if rol == "recepcion" %} selected{% endif %}>Recepción: plano y reservas</option>
+        <option value="admin"{% if rol == "admin" %} selected{% endif %}>Administración: todo, incluida la configuración</option>
+      </select>
+    </label>
+    <label class="field">
+      <span class="label">Contraseña</span>
+      <input class="input" type="password" name="password" minlength="6" required autocomplete="new-password">
+      <span class="hint">Al menos 6 caracteres. Pasásela a la persona para que pueda entrar.</span>
+    </label>
+    <button class="btn btn--primary" type="submit">{{ icono("mas") }}Crear usuario</button>
+  </form>
+</div>
+{% endblock %}

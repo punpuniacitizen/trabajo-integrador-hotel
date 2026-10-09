@@ -18,13 +18,14 @@
 </head>
 <body>
 {% include "components/iconos.html" %}
+{# (título, ícono, endpoint o None si todavía no existe, solo para administración) #}
 {% set secciones = [
-  ("Plano", "plano", "plano.index"),
-  ("Reservas", "calendario", "reservas.index"),
-  ("Huéspedes", "huespedes", None),
-  ("Habitaciones", "cama", None),
-  ("Configuración", "ajustes", None),
+  ("Plano", "plano", "plano.index", false),
+  ("Reservas", "calendario", "reservas.index", false),
+  ("Huéspedes", "huespedes", None, false),
+  ("Configuración", "ajustes", "configuracion.hotel", true),
 ] %}
+{% set es_admin = usuario and usuario.rol == "admin" %}
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <a class="sidebar__marca" href="{{ url_for('plano.index') }}">
@@ -36,9 +37,9 @@
       {% endif %}
     </a>
     <nav class="sidebar__nav" aria-label="Secciones">
-      {% for titulo, nombre_icono, endpoint in secciones %}
+      {% for titulo, nombre_icono, endpoint, solo_admin in secciones if es_admin or not solo_admin %}
         {% if endpoint %}
-          <a class="sidebar__item" href="{{ url_for(endpoint) }}"{% if request.endpoint == endpoint %} aria-current="page"{% endif %}>
+          <a class="sidebar__item" href="{{ url_for(endpoint) }}"{% if request.blueprint == endpoint.split(".")[0] %} aria-current="page"{% endif %}>
             {{ icono(nombre_icono) }}<span>{{ titulo }}</span>
           </a>
         {% else %}
@@ -87,7 +88,11 @@
   </div>
 </div>
 
-<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<div class="toasts" id="toasts" role="status" aria-live="polite">
+  {% for categoria, mensaje in get_flashed_messages(with_categories=true) %}
+    <div class="toast toast--{{ categoria }}">{{ mensaje }}</div>
+  {% endfor %}
+</div>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>

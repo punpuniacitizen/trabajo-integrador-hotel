@@ -25,14 +25,23 @@
   // --- Avisos flotantes -----------------------------------------------------
   const contenedor = document.getElementById("toasts");
 
+  // Los errores quedan más tiempo en pantalla
+  function programarSalida(aviso) {
+    const espera = aviso.classList.contains("toast--danger") ? 7000 : 4000;
+    setTimeout(() => aviso.classList.add("toast--saliendo"), espera);
+    setTimeout(() => aviso.remove(), espera + 300);
+  }
+
   function toast(mensaje, tipo = "success") {
     const aviso = document.createElement("div");
     aviso.className = `toast toast--${tipo}`;
     aviso.textContent = mensaje;
     contenedor.appendChild(aviso);
-    setTimeout(() => aviso.classList.add("toast--saliendo"), 4000);
-    setTimeout(() => aviso.remove(), 4300);
+    programarSalida(aviso);
   }
+
+  // Los mensajes que manda el servidor (flash) ya vienen en el HTML
+  contenedor.querySelectorAll(".toast").forEach(programarSalida);
 
   // --- POST con JSON a la API (ver app/routes/api.py) -----------------------
   async function postJSON(url, datos = {}) {

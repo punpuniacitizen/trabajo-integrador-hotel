@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block titulo %}Configuración{% endblock %}
+{% block estilos %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/configuracion.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<div class="pagina-cabecera">
+  <div class="pagina-cabecera__titulo">
+    <h1>Configuración</h1>
+    <p class="muted">Datos del hotel, habitaciones y usuarios. Solo la ve el rol administración.</p>
+  </div>
+</div>
+
+<nav class="pestanas" aria-label="Secciones de la configuración">
+  {% for clave, titulo, endpoint in [("hotel", "Hotel", "configuracion.hotel"),
+                                      ("habitaciones", "Habitaciones", "configuracion.habitaciones"),
+                                      ("usuarios", "Usuarios", "configuracion.usuarios")] %}
+    <a class="pestanas__item" href="{{ url_for(endpoint) }}"{% if seccion == clave %} aria-current="page"{% endif %}>{{ titulo }}</a>
+  {% endfor %}
+</nav>
+
+{% block cuerpo %}{% endblock %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/configuracion.js') }}"></script>
+  {% block scripts_config %}{% endblock %}
+{% endblock %}

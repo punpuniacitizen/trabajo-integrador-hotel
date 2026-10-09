@@ -1,0 +1,68 @@
+{% extends "configuracion/_layout.html" %}
+{% from "configuracion/_macros.html" import v, subida %}
+
+{% block cuerpo %}
+<form class="config-form" method="post" enctype="multipart/form-data">
+  <section class="card config-card">
+    <h2>Datos del hotel</h2>
+    <div class="config-campos">
+      <label class="field config-campos__ancho">
+        <span class="label">Nombre</span>
+        <input class="input" name="nombre" value="{{ v(datos, 'nombre', hotel.nombre) }}" required maxlength="120">
+      </label>
+      <label class="field config-campos__ancho">
+        <span class="label">Eslogan <span class="muted">(opcional)</span></span>
+        <input class="input" name="eslogan" value="{{ v(datos, 'eslogan', hotel.eslogan) }}" maxlength="160" placeholder="Ej.: Tu lugar frente al lago">
+        <span class="hint">Es el título grande de la portada del sitio público.</span>
+      </label>
+      <label class="field">
+        <span class="label">Ciudad <span class="muted">(opcional)</span></span>
+        <input class="input" name="ciudad" value="{{ v(datos, 'ciudad', hotel.ciudad) }}" maxlength="120">
+      </label>
+      <label class="field">
+        <span class="label">Moneda</span>
+        <input class="input" name="moneda" value="{{ v(datos, 'moneda', hotel.moneda) }}" maxlength="8" placeholder="$">
+        <span class="hint">El símbolo que se muestra antes de los precios.</span>
+      </label>
+      <label class="field">
+        <span class="label">Check-in desde</span>
+        <input class="input" type="time" name="hora_checkin" value="{{ v(datos, 'hora_checkin', hotel.hora_checkin) }}" required>
+      </label>
+      <label class="field">
+        <span class="label">Check-out hasta</span>
+        <input class="input" type="time" name="hora_checkout" value="{{ v(datos, 'hora_checkout', hotel.hora_checkout) }}" required>
+      </label>
+    </div>
+  </section>
+
+  <section class="card config-card">
+    <h2>Identidad</h2>
+    <p class="muted">El sistema y el sitio público toman el logo y el color del hotel.</p>
+
+    <div class="color-acento">
+      <label class="field">
+        <span class="label">Color de acento</span>
+        <span class="color-acento__control">
+          <input type="color" name="color_acento" value="{{ v(datos, 'color_acento', acento) }}" data-color-acento>
+          <code data-color-texto>{{ v(datos, 'color_acento', acento) }}</code>
+        </span>
+      </label>
+      <div class="color-acento__muestra" data-color-muestra>
+        <span class="btn btn--primary btn--sm">Botón principal</span>
+        <span class="chip"><span class="chip__punto"></span>Detalle</span>
+      </div>
+    </div>
+
+    <div class="subidas">
+      {{ subida("logo", "Logo", hotel.logo, ".png,.jpg,.jpeg,.webp,.svg",
+                ayuda="PNG, JPG, WebP o SVG, hasta 2 MB. Se ve en la barra lateral, el login y el sitio.") }}
+      {{ subida("portada", "Imagen de portada", hotel.portada, ".png,.jpg,.jpeg,.webp",
+                ayuda="PNG, JPG o WebP, hasta 8 MB. Es la imagen grande del inicio del sitio público.") }}
+    </div>
+  </section>
+
+  <div class="config-acciones">
+    <button class="btn btn--primary btn--lg" type="submit">Guardar cambios</button>
+  </div>
+</form>
+{% endblock %}

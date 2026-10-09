@@ -43,6 +43,16 @@ a { color: inherit; }
 /* hidden tiene que ganarle a cualquier display de los componentes */
 [hidden] { display: none !important; }
 
+/* Solo para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 :focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
