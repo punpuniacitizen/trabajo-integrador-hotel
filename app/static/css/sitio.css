@@ -88,7 +88,7 @@
 
 .tarjeta-tipo__acciones { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: auto; padding: var(--space-4) var(--space-5) var(--space-5); }
 
-/* --- Detalle de una habitación --------------------------------------------------- */
+/* --- Detalle de una habitación (visor 3D) ------------------------------------------ */
 .detalle {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
@@ -99,7 +99,21 @@
 }
 
 .visor { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: var(--gray-100); }
-.visor__imagen { display: block; width: 100%; height: clamp(320px, 52vw, 540px); object-fit: contain; }
+.visor__modelo { display: block; width: 100%; height: clamp(320px, 52vw, 540px); --poster-color: transparent; }
+
+.visor__pista {
+  position: absolute;
+  bottom: var(--space-3);
+  left: 50%;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--surface) 90%, transparent);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
 
 .miniaturas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin-top: var(--space-4); }
 

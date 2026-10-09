@@ -8,14 +8,16 @@
 <div class="sitio-contenedor detalle">
   <div class="detalle__visor">
     <div class="visor">
-      {# model-viewer muestra el render como imagen mientras carga el modelo (o si no hay JS) #}
+      {# model-viewer muestra el render como imagen mientras carga el modelo (o si no hay JS).
+         La luz ya viene horneada en la textura: sin tone mapping ni sombra propia, y la órbita
+         queda del lado abierto del diorama para no ver las paredes por detrás. #}
       <model-viewer class="visor__modelo"
                     src="{{ url_for('static', filename='modelos/' ~ tipo.slug ~ '.glb') }}"
                     poster="{{ url_for('static', filename='img/habitaciones/' ~ tipo.slug ~ '.png') }}"
                     alt="Modelo 3D de la habitación {{ tipo.nombre }}"
-                    camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="2500" rotation-per-second="12deg"
-                    camera-orbit="45deg 60deg auto" min-camera-orbit="auto 15deg auto" max-camera-orbit="auto 85deg auto"
-                    shadow-intensity="0.6" exposure="1.05" interaction-prompt="none">
+                    camera-controls disable-pan touch-action="pan-y"
+                    camera-orbit="45deg 60deg auto" min-camera-orbit="-5deg 30deg auto" max-camera-orbit="95deg 80deg auto"
+                    tone-mapping="none" exposure="1" shadow-intensity="0" interaction-prompt="none">
       </model-viewer>
       <p class="visor__pista">Arrastrá para girar · rueda o pellizco para acercar</p>
     </div>
