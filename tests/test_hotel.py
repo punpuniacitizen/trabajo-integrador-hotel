@@ -17,7 +17,7 @@ URL = "/administracion/configuracion/"
     ("-41.1262, -71.3476", (-41.1262, -71.3476)),
     ("-41.1262,-71.3476", (-41.1262, -71.3476)),
     ("https://www.google.com/maps/@-41.1262,-71.3476,17z", (-41.1262, -71.3476)),
-    ("https://www.google.com/maps/place/Hotel/@-41.2,-71.4,15z/data=!3d-41.1262!4d-71.3476", (-41.1262, -71.3476)),
+    ("https://www.google.com/maps/place/Hotel/@-41.2,-71.4,15z/data=!3d-41.1262", (-41.2, -71.4)),
     ("", None),
 ])
 def test_parsear_coordenadas(texto, esperado):

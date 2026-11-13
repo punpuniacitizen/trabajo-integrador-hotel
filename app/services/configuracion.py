@@ -9,10 +9,10 @@ from datetime import date
 from app.extensions import db
 from app.models import Habitacion, Reserva, TipoHabitacion, Usuario
 from app.services.errores import ErrorDeNegocio
+from app.services.hotel import normalizar_email
 
 MAXIMO_POR_TANDA = 50
 MAXIMO_PISO = 99
-EMAIL = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
 
 
 # --- Tipos de habitación ---------------------------------------------------------
@@ -115,11 +115,11 @@ def eliminar_habitacion(habitacion):
 # --- Usuarios ----------------------------------------------------------------------------
 
 def crear_usuario(nombre, email, rol, password):
-    nombre, email = " ".join(nombre.split()), email.strip().lower()
+    nombre, email = " ".join(nombre.split()), normalizar_email(email)
     if not nombre:
         raise ErrorDeNegocio("Poné el nombre del usuario.")
-    if not EMAIL.fullmatch(email):
-        raise ErrorDeNegocio("El email no es válido.")
+    if not email:
+        raise ErrorDeNegocio("Poné el email del usuario.")
     if db.session.scalar(db.select(Usuario).where(Usuario.email == email)):
         raise ErrorDeNegocio(f"Ya hay un usuario con el email {email}.")
     if rol not in (Usuario.ADMIN, Usuario.RECEPCION):

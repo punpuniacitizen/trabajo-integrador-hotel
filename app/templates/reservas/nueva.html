@@ -111,11 +111,10 @@
           <span class="label">¿Ya se alojó antes? Buscalo</span>
           <span class="nr-buscar__campo">
             {{ icono("buscar") }}
-            <input class="input" type="search" placeholder="Nombre, apellido, documento o email" autocomplete="off"
-                   data-buscar-huesped role="combobox" aria-expanded="false" aria-controls="resultados-huesped" aria-autocomplete="list">
+            <input class="input" type="search" placeholder="Nombre, apellido, documento o email" autocomplete="off" data-buscar-huesped>
           </span>
         </label>
-        <ul class="nr-resultados" id="resultados-huesped" role="listbox" hidden></ul>
+        <ul class="nr-resultados" id="resultados-huesped" hidden></ul>
       </div>
 
       <fieldset class="nr-nuevo" data-huesped-nuevo{% if huesped %} hidden disabled{% endif %}>

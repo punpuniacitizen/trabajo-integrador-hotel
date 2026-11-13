@@ -95,7 +95,7 @@
           <h2>Sobre {{ hotel.nombre }}</h2>
           {% for parrafo in presentacion[1:] %}<p>{{ parrafo }}</p>{% endfor %}
           {% if hotel.lista_informacion %}
-            <h3>Bueno saber</h3>
+            <h3>Para tener en cuenta</h3>
             <ul class="lista-info">
               {% for dato in hotel.lista_informacion %}<li>{{ icono("check") }}{{ dato }}</li>{% endfor %}
             </ul>

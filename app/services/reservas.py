@@ -8,10 +8,8 @@ from app.models import Habitacion, Huesped, Reserva
 from app.services import recepcion
 from app.services.errores import ErrorDeNegocio
 
-# Para que el demostrador no permita estadías absurdas
-MAXIMO_NOCHES_WEB = 30
-# Desde la administración: evita que un error al tipear el año cree una reserva de meses
-MAXIMO_NOCHES = 90
+# Tope de noches por reserva: evita que un error al tipear el año cree una reserva de meses
+MAXIMO_NOCHES = 30
 
 
 def reserva_superpuesta(habitacion, entrada, salida, excluir=None):
@@ -121,8 +119,9 @@ def disponibilidad(entrada, salida, personas):
 
 
 def crear_reserva(habitacion, huesped, entrada, salida, personas, hoy, pagado=0, notas=None, checkin=False):
-    """Reserva cargada por recepción desde la administración (teléfono, mail o mostrador).
+    """Crea una reserva confirmada después de revisar todas las reglas.
 
+    La usan la nueva reserva de la administración y la reserva web del sitio público.
     Si el huésped ya está en el mostrador y entra hoy, se puede hacer el check-in en el mismo paso.
     """
     if entrada < hoy:
@@ -169,22 +168,15 @@ def habitacion_libre(tipo, entrada, salida):
 def crear_reserva_web(tipo, entrada, salida, personas, nombre, email, hoy):
     """Reserva hecha por un cliente desde el sitio público.
 
-    Es un demostrador: no hay pago. El sistema elige la habitación y la reserva queda
-    confirmada, con todo el saldo a pagar en el hotel.
+    Es un demostrador: no hay pago. El cliente elige el tipo y el sistema le asigna la primera
+    habitación libre. La reserva queda confirmada, con todo el saldo a pagar en el hotel.
     """
     nombre = " ".join((nombre or "").split())
     if " " not in nombre:
         raise ErrorDeNegocio("Poné tu nombre y apellido.")
-    if entrada < hoy:
-        raise ErrorDeNegocio("La llegada no puede ser anterior a hoy.")
-    if salida <= entrada:
-        raise ErrorDeNegocio("La salida tiene que ser posterior a la llegada.")
-    if (salida - entrada).days > MAXIMO_NOCHES_WEB:
-        raise ErrorDeNegocio(f"Desde la web se puede reservar hasta {MAXIMO_NOCHES_WEB} noches.")
     if not 1 <= personas <= tipo.capacidad:
         texto = "1 persona" if tipo.capacidad == 1 else f"{tipo.capacidad} personas"
         raise ErrorDeNegocio(f"La {tipo.nombre} es para {texto}. Elegí otra habitación.")
-
     habitacion = habitacion_libre(tipo, entrada, salida)
     if habitacion is None:
         raise ErrorDeNegocio(
@@ -194,17 +186,7 @@ def crear_reserva_web(tipo, entrada, salida, personas, nombre, email, hoy):
     # "Lucía Fernández" -> nombre "Lucía", apellido "Fernández"
     nombres, apellido = nombre.rsplit(" ", 1)
     huesped = Huesped(nombre=nombres, apellido=apellido, email=(email or "").strip() or None)
-    reserva = Reserva(
-        huesped=huesped,
-        habitacion=habitacion,
-        entrada=entrada,
-        salida=salida,
-        personas=personas,
-        estado=Reserva.CONFIRMADA,
-        total=calcular_total(tipo, entrada, salida),
-        pagado=0,
-        notas="Reserva hecha desde el sitio web.",
-        token=secrets.token_urlsafe(9),
-    )
-    db.session.add(reserva)
+    reserva = crear_reserva(habitacion, huesped, entrada, salida, personas, hoy,
+                            notas="Reserva hecha desde el sitio web.")
+    reserva.token = secrets.token_urlsafe(9)  # para el link de confirmación (/reserva/<token>)
     return reserva

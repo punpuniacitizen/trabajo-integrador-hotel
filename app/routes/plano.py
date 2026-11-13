@@ -3,7 +3,7 @@ from itertools import groupby
 
 from flask import Blueprint, render_template, request
 
-from app.auth import login_requerido
+from app.routes.auth import login_requerido
 from app.extensions import db
 from app.models import Habitacion, TipoHabitacion
 from app.services import ocupacion

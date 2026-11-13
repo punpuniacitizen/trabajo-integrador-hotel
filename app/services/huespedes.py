@@ -51,10 +51,7 @@ def nuevo_huesped(nombre, apellido, documento=None, email=None, telefono=None, p
                 f"Ya hay un huésped con el documento {documento}: {repetido.nombre_completo}. Buscalo y elegilo."
             )
 
-    try:
-        email = normalizar_email(email)
-    except ErrorDeNegocio:
-        raise ErrorDeNegocio("El email del huésped no es válido.") from None
+    email = normalizar_email(email)
 
     pais = (pais or "").upper() or None
     if pais and pais not in NOMBRES_PAISES:

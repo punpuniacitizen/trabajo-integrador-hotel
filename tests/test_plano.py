@@ -5,9 +5,8 @@ import pytest
 from app.extensions import db
 from app.models import Habitacion, Reserva
 from app.services import ocupacion
+from app.services.errores import ErrorDeNegocio
 from app.services.recepcion import (
-    ErrorDeNegocio,
-    RequiereConfirmacion,
     hacer_checkin,
     hacer_checkout,
     marcar_no_show,
@@ -127,29 +126,28 @@ def test_no_show_no_se_puede_antes_de_la_llegada(habitacion, reservar):
         marcar_no_show(reserva, HOY)
 
 
-def test_mantenimiento_con_reservas_pide_confirmacion(habitacion, reservar):
-    reservar(habitacion, dia(3), dia(5))
-    with pytest.raises(RequiereConfirmacion, match="1 reserva"):
-        poner_en_mantenimiento(habitacion, "Pintura", HOY)
-    poner_en_mantenimiento(habitacion, "Pintura", HOY, confirmado=True)
+def test_mantenimiento_devuelve_las_reservas_a_reubicar(habitacion, reservar):
+    proxima = reservar(habitacion, dia(3), dia(5))
+    assert poner_en_mantenimiento(habitacion, "Pintura", HOY) == [proxima]
     assert habitacion.fuera_de_servicio
 
 
-def test_mantenimiento_sin_reservas_cercanas_no_pregunta(habitacion, reservar):
+def test_mantenimiento_sin_reservas_cercanas(habitacion, reservar):
     reservar(habitacion, dia(20), dia(22))
-    poner_en_mantenimiento(habitacion, "Pintura", HOY)
+    assert poner_en_mantenimiento(habitacion, "Pintura", HOY) == []
     assert habitacion.fuera_de_servicio
 
 
-def test_api_de_mantenimiento_devuelve_la_pregunta(cliente, habitacion, reservar):
+def test_mantenimiento_con_huesped_alojado_no_se_puede(habitacion, reservar):
+    reservar(habitacion, dia(-1), dia(2), Reserva.EN_CURSO)
+    with pytest.raises(ErrorDeNegocio, match="huésped alojado"):
+        poner_en_mantenimiento(habitacion, "Pintura", HOY)
+
+
+def test_api_de_mantenimiento_avisa_las_reservas(cliente, habitacion, reservar):
     hoy = date.today()
     reservar(habitacion, hoy + timedelta(days=1), hoy + timedelta(days=3))
     url = f"/administracion/api/habitaciones/{habitacion.id}/mantenimiento"
-
     respuesta = cliente.post(url, json={"activo": True, "nota": "Pintura"})
-    assert respuesta.status_code == 409
-    assert respuesta.get_json()["requiere_confirmacion"] is True
-
-    respuesta = cliente.post(url, json={"activo": True, "nota": "Pintura", "confirmado": True})
     assert respuesta.status_code == 200
-
+    assert "Tiene 1 reserva" in respuesta.get_json()["mensaje"]

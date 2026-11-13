@@ -147,20 +147,16 @@
     }
   }
 
-  // Si la salida queda antes de la entrada, se corre manteniendo la cantidad de noches
-  let nochesPrevias = Math.max(contarNoches(), 1);
+  // Si la salida queda antes de la entrada, se corre al día siguiente
   entrada.addEventListener("change", () => {
     if (!entrada.value) return;
     salida.min = sumarDias(entrada.value, 1);
-    if (!salida.value || salida.value <= entrada.value) salida.value = sumarDias(entrada.value, nochesPrevias);
+    if (!salida.value || salida.value <= entrada.value) salida.value = salida.min;
   });
 
   form.addEventListener("change", (evento) => {
     const campo = evento.target.name;
-    if (campo === "entrada" || campo === "salida" || campo === "personas") {
-      if (contarNoches() > 0) nochesPrevias = contarNoches();
-      consultarDisponibilidad();
-    }
+    if (campo === "entrada" || campo === "salida" || campo === "personas") consultarDisponibilidad();
     if (campo === "habitacion_id") aviso.hidden = true;
     actualizarResumen();
   });
@@ -173,27 +169,12 @@
   const bloqueElegido = form.querySelector("[data-huesped-elegido]");
   const bloqueNuevo = form.querySelector("[data-huesped-nuevo]");
   let resultados = [];
-  let activo = -1;
   let espera;
 
   const detalleHuesped = (h) =>
     [h.documento ? `Doc. ${h.documento}` : "Sin documento", h.email, h.pais].filter(Boolean).join(" · ");
 
-  function cerrarLista() {
-    lista.hidden = true;
-    buscar.setAttribute("aria-expanded", "false");
-    buscar.removeAttribute("aria-activedescendant");
-  }
-
-  function marcarActivo() {
-    lista.querySelectorAll(".nr-resultado").forEach((item, i) => {
-      item.setAttribute("aria-selected", String(i === activo));
-      if (i === activo) {
-        item.scrollIntoView({ block: "nearest" });
-        buscar.setAttribute("aria-activedescendant", item.id);
-      }
-    });
-  }
+  const cerrarLista = () => (lista.hidden = true);
 
   function mostrarResultados() {
     lista.replaceChildren();
@@ -204,10 +185,9 @@
       lista.append(vacio);
     }
     resultados.forEach((h) => {
+      // Se arma con createElement y textContent: los nombres los escribe la gente y no deben interpretarse como HTML
       const item = document.createElement("li");
       item.className = "nr-resultado";
-      item.id = `huesped-${h.id}`;
-      item.setAttribute("role", "option");
 
       const avatar = document.createElement("span");
       avatar.className = "avatar avatar--sm";
@@ -231,8 +211,6 @@
       lista.append(item);
     });
     lista.hidden = false;
-    buscar.setAttribute("aria-expanded", "true");
-    marcarActivo();
   }
 
   function elegir(h) {
@@ -275,7 +253,6 @@
         const datos = await respuesta.json();
         if (buscar.value.trim() !== texto) return; // ya escribió otra cosa
         resultados = datos.huespedes || [];
-        activo = resultados.length ? 0 : -1;
         mostrarResultados();
       } catch {
         Conserje.toast("No se pudo buscar huéspedes.", "danger");
@@ -283,24 +260,11 @@
     }, 200);
   });
 
+  // Enter elige el primer resultado (y no manda el formulario)
   buscar.addEventListener("keydown", (evento) => {
-    // Enter elige el resultado marcado (y no manda el formulario)
-    if (evento.key === "Enter") {
-      evento.preventDefault();
-      if (!lista.hidden && resultados[activo]) elegir(resultados[activo]);
-      return;
-    }
-    if (evento.key === "Escape") {
-      cerrarLista();
-      return;
-    }
-    if (lista.hidden || !resultados.length) return;
-    if (evento.key === "ArrowDown" || evento.key === "ArrowUp") {
-      evento.preventDefault();
-      const paso = evento.key === "ArrowDown" ? 1 : -1;
-      activo = (activo + paso + resultados.length) % resultados.length;
-      marcarActivo();
-    }
+    if (evento.key !== "Enter") return;
+    evento.preventDefault();
+    if (!lista.hidden && resultados[0]) elegir(resultados[0]);
   });
 
   buscar.addEventListener("blur", cerrarLista);

@@ -6,7 +6,7 @@ from itertools import groupby
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from app.auth import login_requerido
+from app.routes.auth import login_requerido
 from app.extensions import db
 from app.filtros import rango_fechas
 from app.models import Habitacion, Huesped, Reserva, TipoHabitacion
@@ -141,16 +141,12 @@ def _url_volver(volver, fecha=None):
     return url_for("reservas.index")
 
 
-def _destino(reserva, volver, hoy):
+def _destino(reserva, volver):
     """Después de crearla se muestra la reserva: en el plano (con su panel abierto) o en el tape chart."""
     if volver == "plano":
         return _url_volver("plano", reserva.entrada) + f"#hab-{reserva.habitacion.numero}"
-    # Si se ve bien en la grilla que el tape chart muestra por defecto, no hace falta moverla
-    if reserva.entrada <= hoy + timedelta(days=SALTO_DIAS):
-        url = url_for("reservas.index")
-    else:
-        url = url_for("reservas.index", desde=(reserva.entrada - timedelta(days=DIAS_ANTES_DE_HOY)).isoformat())
-    return url + f"#reserva-{reserva.id}"
+    desde = reserva.entrada - timedelta(days=DIAS_ANTES_DE_HOY)
+    return url_for("reservas.index", desde=desde.isoformat()) + f"#reserva-{reserva.id}"
 
 
 def _formulario(datos, hoy, error=None):
@@ -248,4 +244,4 @@ def nueva():
     if reserva.estado == Reserva.EN_CURSO:
         mensaje += " Check-in hecho."
     flash(mensaje, "success")
-    return redirect(_destino(reserva, datos.get("volver"), hoy))
+    return redirect(_destino(reserva, datos.get("volver")))

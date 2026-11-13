@@ -7,11 +7,9 @@ from datetime import timedelta
 from app.extensions import db
 from app.filtros import fecha_corta
 from app.models import Habitacion, Reserva
-from app.services.errores import ErrorDeNegocio, RequiereConfirmacion
+from app.services.errores import ErrorDeNegocio
 
-__all__ = ["ErrorDeNegocio", "RequiereConfirmacion"]  # se importan desde acá en rutas y tests
-
-# Antes de bloquear una habitación se avisa de las reservas de estos próximos días
+# Al bloquear una habitación se avisa de las reservas de estos próximos días
 DIAS_AVISO_MANTENIMIENTO = 7
 
 
@@ -56,7 +54,7 @@ def marcar_no_show(reserva, hoy):
     if reserva.estado != Reserva.CONFIRMADA:
         raise ErrorDeNegocio("Esta reserva no está pendiente de llegada.")
     if reserva.entrada > hoy:
-        raise ErrorDeNegocio(f"La reserva empieza el {fecha_corta(reserva.entrada)}: todavía no se puede marcar.")
+        raise ErrorDeNegocio(f"La reserva empieza el {fecha_corta(reserva.entrada)}: todavía no se puede marcar como no presentada.")
     reserva.estado = Reserva.NO_SHOW
 
 
@@ -81,24 +79,16 @@ def reservas_por_llegar(habitacion, hoy):
     ).all()
 
 
-def poner_en_mantenimiento(habitacion, nota, hoy, confirmado=False):
+def poner_en_mantenimiento(habitacion, nota, hoy):
+    """Bloquea la habitación. Devuelve las reservas de los próximos días que hay que reubicar."""
     if huesped_alojado(habitacion):
         raise ErrorDeNegocio(
             f"Hay un huésped alojado en la {habitacion.numero}. "
             "Hacé el check-out o cambialo de habitación antes de bloquearla."
         )
-    afectadas = reservas_por_llegar(habitacion, hoy)
-    if afectadas and not confirmado:
-        primera = afectadas[0]
-        cuando = "hoy" if primera.entrada <= hoy else f"el {fecha_corta(primera.entrada)}"
-        cantidad = "1 reserva" if len(afectadas) == 1 else f"{len(afectadas)} reservas"
-        raise RequiereConfirmacion(
-            f"La {habitacion.numero} tiene {cantidad} en los próximos {DIAS_AVISO_MANTENIMIENTO} días "
-            f"(la primera: {primera.huesped.apellido}, llega {cuando}). "
-            "Si la bloqueás, vas a tener que cambiarlas de habitación. ¿Bloquearla igual?"
-        )
     habitacion.fuera_de_servicio = True
     habitacion.nota_mantenimiento = nota or None
+    return reservas_por_llegar(habitacion, hoy)
 
 
 def quitar_de_mantenimiento(habitacion):

@@ -31,7 +31,7 @@
   /* --- Acento ------------------------------------------------------------
      Lo reemplaza cada hotel desde Configuración (se inyecta en base.html).
      --accent-contrast es el color del texto sobre el acento: el servidor
-     elige blanco o casi negro según la luminancia del color del hotel.
+     elige blanco o casi negro según el brillo del color del hotel.
      Las variantes se derivan solas, así funcionan con cualquier color. */
   --accent: #18181B;
   --accent-contrast: #FFFFFF;

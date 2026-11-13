@@ -4,6 +4,8 @@ from flask.cli import with_appcontext
 
 from app.extensions import db
 from app.models import Usuario
+from app.services.configuracion import crear_usuario
+from app.services.errores import ErrorDeNegocio
 
 
 @click.command("crear-usuario")
@@ -14,12 +16,10 @@ from app.models import Usuario
 @click.password_option("--password", prompt="Contraseña", confirmation_prompt="Repetir contraseña")
 @with_appcontext
 def crear_usuario_command(nombre, email, rol, password):
-    """Crea un usuario para entrar a /administracion."""
-    email = email.strip().lower()
-    if db.session.scalar(db.select(Usuario).where(Usuario.email == email)):
-        raise click.ClickException(f"Ya existe un usuario con el email {email}.")
-    usuario = Usuario(nombre=nombre.strip(), email=email, rol=rol)
-    usuario.set_password(password)
-    db.session.add(usuario)
+    """Crea un usuario para entrar a /administracion (el primero, si no se cargó la demo)."""
+    try:
+        usuario = crear_usuario(nombre, email, rol, password)
+    except ErrorDeNegocio as error:
+        raise click.ClickException(str(error)) from None
     db.session.commit()
     click.echo(f"Listo: {usuario.nombre} ({rol}) ya puede ingresar.")

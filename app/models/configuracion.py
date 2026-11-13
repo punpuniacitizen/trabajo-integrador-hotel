@@ -23,7 +23,6 @@ class ConfiguracionHotel(db.Model):
     moneda = db.Column(db.String(8), nullable=False, default="$")
     hora_checkin = db.Column(db.String(5), nullable=False, default="14:00")
     hora_checkout = db.Column(db.String(5), nullable=False, default="10:00")
-    setup_completo = db.Column(db.Boolean, nullable=False, default=False)
 
     # Sitio público: textos (una entrada por línea en servicios e información útil)
     presentacion = db.Column(db.Text)  # párrafos separados por una línea en blanco
@@ -45,16 +44,9 @@ class ConfiguracionHotel(db.Model):
     def actual(cls):
         """La configuración guardada o, si todavía no hay, una con valores por defecto (sin guardar)."""
         config = db.session.scalar(db.select(cls).limit(1))
-        if config:
-            return config
-        return cls(
-            nombre="Mi hotel",
-            color_acento="#18181B",
-            moneda="$",
-            hora_checkin="14:00",
-            hora_checkout="10:00",
-            setup_completo=False,
-        )
+        # Los default de las columnas recién se aplican al guardar: por eso se repiten acá
+        return config or cls(nombre="Mi hotel", color_acento="#18181B", moneda="$",
+                             hora_checkin="14:00", hora_checkout="10:00")
 
     # --- Textos del sitio --------------------------------------------------------
 

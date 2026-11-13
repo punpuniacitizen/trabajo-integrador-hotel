@@ -62,9 +62,7 @@
       // La respuesta no era JSON: se usa el mensaje genérico
     }
     if (!respuesta.ok || cuerpo.ok === false) {
-      const error = new Error(cuerpo.error || "No se pudo completar la acción.");
-      error.requiereConfirmacion = Boolean(cuerpo.requiere_confirmacion);
-      throw error;
+      throw new Error(cuerpo.error || "No se pudo completar la acción.");
     }
     return cuerpo;
   }

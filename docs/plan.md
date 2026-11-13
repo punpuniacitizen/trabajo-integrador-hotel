@@ -1,5 +1,7 @@
 # Plan: sistema de gestión hotelera "marca blanca" (Flask)
 
+> Es el plan del comienzo del trabajo y quedó como registro. Algunas cosas cambiaron en el camino (por ejemplo, no hay asistente inicial ni Flask-Login). Lo que existe hoy está en el [README](../README.md) y en el [mapa del código](mapa-del-codigo.html).
+
 ## Contexto
 
 Trabajo integrador del colegio: una web de gestión interna hecha con Flask, HTML, CSS y JS, con SQLite.

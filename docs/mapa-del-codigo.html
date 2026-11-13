@@ -1,0 +1,1265 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa del código · Conserje</title>
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --sunken: #F4F4F5;
+    --border: #E4E4E7;
+    --border-strong: #D4D4D8;
+    --text: #18181B;
+    --muted: #71717A;
+    --subtle: #A1A1AA;
+    --accent: #1F6F5C;
+    --accent-soft: #E3EFEB;
+    /* Un color por capa */
+    --c-pagina: #1D4ED8;  --c-pagina-soft: #DBEAFE;
+    --c-ruta: #1F6F5C;    --c-ruta-soft: #DCEFE8;
+    --c-servicio: #A16207; --c-servicio-soft: #FEF3C7;
+    --c-modelo: #7C3AED;  --c-modelo-soft: #EDE9FE;
+    --c-base: #52525B;    --c-base-soft: #F4F4F5;
+    --sombra: 0 1px 2px rgb(24 24 27 / 0.06);
+    --sombra-lg: 0 12px 32px -14px rgb(24 24 27 / 0.3);
+    --mono: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111113; --surface: #19191C; --sunken: #222226; --border: #2E2E33; --border-strong: #3F3F46;
+      --text: #F4F4F5; --muted: #A1A1AA; --subtle: #71717A; --accent: #5FC2A8; --accent-soft: #17302A;
+      --c-pagina: #7AA2FF; --c-pagina-soft: #1A2546;
+      --c-ruta: #5FC2A8; --c-ruta-soft: #15302A;
+      --c-servicio: #E7B54A; --c-servicio-soft: #352A12;
+      --c-modelo: #B39BFF; --c-modelo-soft: #29213F;
+      --c-base: #A1A1AA; --c-base-soft: #222226;
+      --sombra: none; --sombra-lg: 0 12px 32px -14px rgb(0 0 0 / 0.6);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #111113; --surface: #19191C; --sunken: #222226; --border: #2E2E33; --border-strong: #3F3F46;
+    --text: #F4F4F5; --muted: #A1A1AA; --subtle: #71717A; --accent: #5FC2A8; --accent-soft: #17302A;
+    --c-pagina: #7AA2FF; --c-pagina-soft: #1A2546;
+    --c-ruta: #5FC2A8; --c-ruta-soft: #15302A;
+    --c-servicio: #E7B54A; --c-servicio-soft: #352A12;
+    --c-modelo: #B39BFF; --c-modelo-soft: #29213F;
+    --c-base: #A1A1AA; --c-base-soft: #222226;
+    --sombra: none; --sombra-lg: 0 12px 32px -14px rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, p { margin: 0; }
+  code, .archivo { font-family: var(--mono); font-size: 0.86em; }
+  a { color: inherit; }
+
+  .contenedor { width: min(1180px, 100% - 32px); margin: 0 auto; }
+
+  /* --- Cabecera ------------------------------------------------------------ */
+  .cabecera { padding: 56px 0 28px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .etiqueta { color: var(--accent); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+  .cabecera h1 { margin-top: 8px; font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem); line-height: 1.1; letter-spacing: -0.03em; }
+  .cabecera .bajada { max-width: 62ch; margin-top: 12px; color: var(--muted); font-size: 18px; }
+  .indice { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+  .indice a {
+    padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg);
+    color: var(--muted); font-size: 14px; font-weight: 500; text-decoration: none;
+  }
+  .indice a:hover { border-color: var(--border-strong); color: var(--text); }
+
+  /* --- Secciones ------------------------------------------------------------ */
+  section { padding: 56px 0 8px; scroll-margin-top: 16px; }
+  section h2 { font-size: 26px; letter-spacing: -0.02em; }
+  section > .contenedor > .bajada { max-width: 70ch; margin-top: 8px; color: var(--muted); }
+  .tarjeta { margin-top: 24px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: var(--sombra); }
+
+  /* --- Capas (diagrama general) ---------------------------------------------- */
+  .capas { padding: 20px; overflow-x: auto; }
+  .capas svg { display: block; width: 100%; min-width: 760px; height: auto; }
+  .capas text { fill: var(--text); font-family: system-ui, "Segoe UI", sans-serif; }
+  .capas .t-titulo { font-size: 15px; font-weight: 700; }
+  .capas .t-detalle { fill: var(--muted); font-size: 12.5px; }
+  .capas .t-mono { font-family: var(--mono); font-size: 12px; }
+  .capas .t-flecha { fill: var(--muted); font-size: 12px; font-style: italic; }
+  .capas .flecha { fill: none; stroke: var(--subtle); stroke-width: 1.6; }
+  .leyenda-capas { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 16px; }
+  .leyenda-capas div { padding: 14px 16px; border: 1px solid var(--border); border-left: 4px solid var(--c); border-radius: 10px; background: var(--surface); font-size: 14px; }
+  .leyenda-capas strong { display: block; margin-bottom: 2px; font-size: 15px; }
+  .leyenda-capas span { color: var(--muted); }
+
+  /* --- Dónde vive cada cosa (diagrama de Venn) ---------------------------------------- */
+  .venn { padding: 12px 20px 20px; overflow-x: auto; }
+  .venn svg { display: block; width: 100%; min-width: 760px; max-width: 1060px; height: auto; margin: 0 auto; }
+  .venn text { fill: var(--text); font-family: system-ui, "Segoe UI", sans-serif; }
+  .circulo { fill: var(--c); fill-opacity: 0.13; stroke: var(--c); stroke-width: 2.5; transition: fill-opacity 0.2s, stroke-opacity 0.2s; }
+  .venn.hay-seleccion .circulo { fill-opacity: 0.04; stroke-opacity: 0.35; }
+  .venn.hay-seleccion .circulo.activo { fill-opacity: 0.2; stroke-opacity: 1; }
+  .v-titulo { font-size: 24px; font-weight: 800; }
+  .venn .v-sub { fill: var(--muted); font-size: 15px; }
+  .venn .v-enlace { fill: var(--muted); font-size: 15px; font-style: italic; }
+  .venn .v-enlace .fuerte { fill: var(--text); font-style: normal; font-weight: 700; }
+  .v-item { cursor: pointer; outline: none; }
+  .v-item rect { fill: var(--surface); stroke: var(--border-strong); stroke-width: 1.2; transition: stroke 0.15s; }
+  .venn .v-item text { font-size: 16px; font-weight: 600; pointer-events: none; }
+  .venn .v-item.tabla text { font-family: var(--mono); font-size: 15px; font-weight: 500; }
+  .v-item:hover rect, .v-item:focus-visible rect { stroke: var(--text); }
+  .v-item.elegido rect { fill: var(--text); stroke: var(--text); }
+  .venn .v-item.elegido text { fill: var(--surface); }
+  .v-vacio { fill: var(--surface); stroke: var(--muted); stroke-dasharray: 4 4; }
+  .venn .v-nota { fill: var(--muted); font-size: 14px; }
+
+  .venn-detalle { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 16px 32px; margin-top: 16px; padding: 20px 24px; }
+  .venn-detalle h3 { font-size: 20px; }
+  .venn-detalle .zonas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .zona { padding: 2px 10px; border-radius: 999px; background: var(--c-soft); color: var(--c); font-size: 13px; font-weight: 600; }
+  .venn-detalle p { margin-top: 10px; font-size: 15px; }
+  .venn-detalle h4 { margin: 0 0 10px; color: var(--muted); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .camino { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 6px; margin: 0; padding: 0; list-style: none; }
+  .camino li { padding: 4px 10px; border: 1px solid var(--border); border-left: 3px solid var(--c); border-radius: 6px; background: var(--bg); font-family: var(--mono); font-size: 13px; }
+  .camino li + li { position: relative; margin-left: 18px; }
+  .camino li + li::before { content: "→"; position: absolute; left: -17px; color: var(--muted); font-family: system-ui, sans-serif; }
+  .claves-venn { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 16px; }
+  .claves-venn div { padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 14px; }
+  .claves-venn strong { display: block; margin-bottom: 2px; }
+  .claves-venn span { color: var(--muted); }
+
+  @media (max-width: 720px) {
+    .venn-detalle { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  /* --- Conexiones (interactivo) ------------------------------------------------- */
+  .conexiones { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; margin-top: 24px; }
+  .lienzo { position: relative; padding: 18px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+  .lienzo svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .columnas { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 44px; }
+  .columna h3 { margin-bottom: 10px; color: var(--c); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .columna .nota { margin-top: 8px; color: var(--subtle); font-size: 12px; }
+  .nodo {
+    display: block; width: 100%; margin-bottom: 8px; padding: 8px 10px;
+    border: 1px solid var(--border); border-left: 3px solid var(--c); border-radius: 8px;
+    background: var(--surface); color: var(--text); font: inherit; text-align: left; cursor: pointer;
+    transition: opacity 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .nodo strong { display: block; font-size: 14px; line-height: 1.25; }
+  .nodo small { display: block; overflow: hidden; color: var(--muted); font-family: var(--mono); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+  .nodo:hover { box-shadow: 0 0 0 1px var(--c); }
+  .nodo:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+  /* Atenuadas con colores y no con opacidad: así las líneas no se ven a través de las cajas */
+  .lienzo.hay-seleccion .nodo:not(.relacionado):not(.elegido) { border-left-color: var(--border-strong); color: var(--subtle); }
+  .lienzo.hay-seleccion .nodo:not(.relacionado):not(.elegido) small { color: var(--border-strong); }
+  .lienzo.hay-seleccion .nodo.elegido { background: var(--c-soft); box-shadow: 0 0 0 2px var(--c); }
+  .linea { fill: none; stroke: var(--border-strong); stroke-width: 1.2; opacity: 0.55; transition: opacity 0.15s; }
+  .lienzo.hay-seleccion .linea { opacity: 0.08; }
+  .lienzo.hay-seleccion .linea.activa { stroke: var(--text); stroke-width: 1.8; opacity: 0.75; }
+
+  .detalle { position: sticky; top: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: var(--sombra-lg); }
+  .detalle .tipo { display: inline-block; padding: 2px 8px; border-radius: 999px; background: var(--c-soft); color: var(--c); font-size: 12px; font-weight: 600; }
+  .detalle h3 { margin-top: 10px; font-size: 20px; letter-spacing: -0.01em; }
+  .detalle .archivo { display: block; margin-top: 4px; color: var(--muted); word-break: break-all; }
+  .detalle p { margin-top: 12px; font-size: 15px; }
+  .detalle h4 { margin: 18px 0 6px; color: var(--muted); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .detalle ul { margin: 0; padding-left: 18px; font-size: 14px; }
+  .detalle li + li { margin-top: 3px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    padding: 3px 9px; border: 1px solid var(--border); border-left: 3px solid var(--c); border-radius: 6px;
+    background: var(--bg); color: var(--text); font: inherit; font-size: 13px; cursor: pointer;
+  }
+  .chip:hover { border-color: var(--c); }
+  .vacio { color: var(--muted); font-size: 14px; }
+
+  /* --- Carpetas ------------------------------------------------------------------ */
+  .carpetas { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); align-items: start; gap: 16px; margin-top: 24px; }
+  details { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  summary { display: flex; align-items: baseline; gap: 10px; padding: 14px 18px; cursor: pointer; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "▸"; color: var(--subtle); transition: transform 0.15s; }
+  details[open] summary::before { transform: rotate(90deg); }
+  summary code { color: var(--c, var(--text)); font-size: 15px; font-weight: 700; }
+  summary span { color: var(--muted); font-size: 14px; }
+  .archivos { margin: 0; padding: 0 18px 14px 38px; list-style: none; }
+  .archivos li { padding: 8px 0; border-top: 1px solid var(--border); font-size: 14px; }
+  .archivos li > code:first-child { display: block; font-weight: 700; overflow-wrap: anywhere; }
+  .archivos span { display: block; margin-top: 2px; color: var(--muted); }
+
+  /* --- URLs ------------------------------------------------------------------------ */
+  .tabla-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td code { white-space: nowrap; }
+  .grupo td { padding-top: 18px; background: var(--sunken); font-weight: 700; }
+  .grupo td small { margin-left: 8px; color: var(--muted); font-weight: 400; }
+  .metodo { display: inline-block; min-width: 46px; padding: 1px 6px; border-radius: 4px; background: var(--sunken); font-family: var(--mono); font-size: 11px; font-weight: 700; text-align: center; }
+  .metodo--post { background: var(--c-servicio-soft); color: var(--c-servicio); }
+  .acceso { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .acceso--publico { background: var(--c-pagina-soft); color: var(--c-pagina); }
+  .acceso--login { background: var(--c-ruta-soft); color: var(--c-ruta); }
+  .acceso--admin { background: var(--c-modelo-soft); color: var(--c-modelo); }
+  .acceso--json { background: var(--c-servicio-soft); color: var(--c-servicio); }
+
+  /* --- Base de datos ----------------------------------------------------------------- */
+  .er { padding: 20px; overflow-x: auto; }
+  .er svg { display: block; width: 100%; min-width: 760px; height: auto; }
+  .er text { fill: var(--text); font-family: var(--mono); font-size: 12.5px; }
+  .er .t-tabla { font-family: system-ui, "Segoe UI", sans-serif; font-size: 15px; font-weight: 700; }
+  .er .t-nombre { fill: var(--muted); font-size: 11.5px; }
+  .er .t-clave { fill: var(--c-modelo); font-weight: 700; }
+  .er .t-rel { fill: var(--muted); font-family: system-ui, sans-serif; font-size: 12px; font-style: italic; }
+  .er .relacion { fill: none; stroke: var(--c-modelo); stroke-width: 1.6; }
+  .notas-base { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 16px; }
+  .notas-base div { padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 14px; }
+  .notas-base strong { display: block; margin-bottom: 4px; }
+  .estados { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+  .estados code { padding: 1px 6px; border-radius: 4px; background: var(--sunken); }
+
+  /* --- Recorridos ---------------------------------------------------------------------- */
+  .recorridos { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 16px; margin-top: 24px; }
+  .recorrido { padding: 20px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+  .recorrido h3 { font-size: 18px; }
+  .recorrido > p { margin-top: 4px; color: var(--muted); font-size: 14px; }
+  .pasos { margin: 16px 0 0; padding: 0; list-style: none; counter-reset: paso; }
+  .pasos li { position: relative; padding: 0 0 14px 38px; font-size: 14px; counter-increment: paso; }
+  .pasos li::before {
+    content: counter(paso); position: absolute; top: 0; left: 0; display: grid; place-items: center;
+    width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent);
+    font-size: 12px; font-weight: 700;
+  }
+  .pasos li::after { content: ""; position: absolute; top: 26px; bottom: 2px; left: 11.5px; width: 1px; background: var(--border); }
+  .pasos li:last-child::after { display: none; }
+  .pasos code { padding: 1px 5px; border-radius: 4px; background: var(--sunken); }
+
+  .pie { margin-top: 56px; padding: 24px 0 40px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 980px) {
+    .conexiones { grid-template-columns: minmax(0, 1fr); }
+    .detalle { position: static; }
+  }
+
+  @media (max-width: 720px) {
+    .columnas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .lienzo svg { display: none; }
+    .cabecera { padding-top: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="contenedor">
+    <p class="etiqueta">Conserje · trabajo integrador</p>
+    <h1>Mapa del código</h1>
+    <p class="bajada">Cómo está armada la aplicación: qué hay en cada carpeta, para qué sirve cada parte y qué se conecta con qué.</p>
+    <nav class="indice" aria-label="Secciones">
+      <a href="guia-de-estudio.html" style="border-color: var(--accent); color: var(--accent); font-weight: 600">← Guía de estudio</a>
+      <a href="#capas">Capas</a>
+      <a href="#donde">Dónde vive cada cosa</a>
+      <a href="#conexiones">Conexiones</a>
+      <a href="#carpetas">Carpetas</a>
+      <a href="#urls">URLs</a>
+      <a href="#base">Base de datos</a>
+      <a href="#recorridos">Recorridos</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ======================================================================= -->
+<section id="capas">
+  <div class="contenedor">
+    <h2>Las capas</h2>
+    <p class="bajada">Cada pedido del navegador entra por Flask, lo atiende una ruta, la ruta le pide a un servicio que aplique las reglas, el servicio lee o modifica los modelos y los modelos se guardan en SQLite. La ruta responde con una plantilla HTML o, si el pedido vino de JavaScript, con JSON.</p>
+
+    <div class="tarjeta capas">
+      <svg viewBox="0 0 1000 600" role="img" aria-labelledby="capas-titulo">
+        <title id="capas-titulo">Diagrama de capas: navegador, Flask, rutas, plantillas, servicios, modelos y SQLite</title>
+        <defs>
+          <marker id="punta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--subtle)"/>
+          </marker>
+        </defs>
+
+        <!-- Navegador -->
+        <rect x="20" y="16" width="960" height="78" rx="12" fill="var(--c-pagina-soft)" stroke="var(--c-pagina)"/>
+        <text class="t-titulo" x="40" y="44">Navegador</text>
+        <text class="t-detalle" x="40" y="66">HTML + CSS + JavaScript (static/js)</text>
+        <rect x="330" y="32" width="190" height="46" rx="8" fill="var(--surface)" stroke="var(--c-pagina)"/>
+        <text class="t-titulo" x="425" y="52" text-anchor="middle" style="font-size:13px">Sitio público</text>
+        <text class="t-mono" x="425" y="69" text-anchor="middle">/ (sin login)</text>
+        <rect x="540" y="32" width="200" height="46" rx="8" fill="var(--surface)" stroke="var(--c-pagina)"/>
+        <text class="t-titulo" x="640" y="52" text-anchor="middle" style="font-size:13px">Administración</text>
+        <text class="t-mono" x="640" y="69" text-anchor="middle">/administracion</text>
+        <rect x="760" y="32" width="200" height="46" rx="8" fill="var(--surface)" stroke="var(--c-pagina)"/>
+        <text class="t-titulo" x="860" y="52" text-anchor="middle" style="font-size:13px">fetch() del JS</text>
+        <text class="t-mono" x="860" y="69" text-anchor="middle">/administracion/api</text>
+
+        <!-- Flask -->
+        <path class="flecha" d="M250,94 L250,134" marker-end="url(#punta)"/>
+        <text class="t-flecha" x="262" y="120">pedido HTTP (GET / POST)</text>
+        <rect x="20" y="136" width="960" height="70" rx="12" fill="var(--c-base-soft)" stroke="var(--c-base)"/>
+        <text class="t-titulo" x="40" y="162">Flask · create_app()</text>
+        <text class="t-mono" x="40" y="184">app/__init__.py</text>
+        <text class="t-detalle" x="330" y="162">antes de cada ruta (before_request):</text>
+        <text class="t-detalle" x="330" y="184"><tspan class="t-mono">contexto.py</tspan> carga el hotel y el usuario · <tspan class="t-mono">auth.py</tspan> pide login (o rol admin)</text>
+
+        <!-- Rutas -->
+        <path class="flecha" d="M250,206 L250,244" marker-end="url(#punta)"/>
+        <rect x="20" y="246" width="470" height="118" rx="12" fill="var(--c-ruta-soft)" stroke="var(--c-ruta)"/>
+        <text class="t-titulo" x="40" y="272">Rutas · blueprints</text>
+        <text class="t-mono" x="40" y="292">app/routes/</text>
+        <text class="t-detalle" x="40" y="318">sitio · auth · plano · reservas</text>
+        <text class="t-detalle" x="40" y="338">configuracion · api · media</text>
+        <text class="t-detalle" x="40" y="356" style="font-size:11.5px">leen el pedido, llaman al servicio y eligen la respuesta</text>
+
+        <!-- Plantillas -->
+        <path class="flecha" d="M490,312 L578,312" marker-end="url(#punta)"/>
+        <text class="t-flecha" x="534" y="300" text-anchor="middle" style="font-size:11px">render_</text>
+        <text class="t-flecha" x="534" y="330" text-anchor="middle" style="font-size:11px">template()</text>
+        <rect x="580" y="246" width="400" height="118" rx="12" fill="var(--c-pagina-soft)" stroke="var(--c-pagina)"/>
+        <text class="t-titulo" x="600" y="272">Plantillas Jinja2 + archivos estáticos</text>
+        <text class="t-mono" x="600" y="292">app/templates/ · app/static/</text>
+        <text class="t-detalle" x="600" y="318">base.html (administración) y sitio/base.html</text>
+        <text class="t-detalle" x="600" y="338">css/ (tokens, componentes, una hoja por sección)</text>
+        <text class="t-detalle" x="600" y="356">js/ (una por pantalla + app.js común)</text>
+        <!-- vuelta al navegador -->
+        <path class="flecha" d="M780,246 L780,96" marker-end="url(#punta)"/>
+        <text class="t-flecha" x="790" y="225">HTML</text>
+        <path class="flecha" d="M44,246 C10,230 10,110 44,96" marker-end="url(#punta)"/>
+        <text class="t-flecha" x="48" y="232">JSON (api.py)</text>
+
+        <!-- Servicios -->
+        <path class="flecha" d="M250,364 L250,402" marker-end="url(#punta)"/>
+        <text class="t-flecha" x="262" y="388">llaman a</text>
+        <rect x="20" y="404" width="470" height="84" rx="12" fill="var(--c-servicio-soft)" stroke="var(--c-servicio)"/>
+        <text class="t-titulo" x="40" y="430">Servicios · reglas del negocio</text>
+        <text class="t-mono" x="40" y="450">app/services/</text>
+        <text class="t-detalle" x="40" y="474">ocupacion · recepcion · reservas · huespedes · configuracion · hotel · archivos</text>
+
+        <!-- Uploads -->
+        <path class="flecha" d="M490,446 C540,446 560,520 598,520" marker-end="url(#punta)"/>
+        <text class="t-flecha" x="508" y="472">archivos.py guarda</text>
+
+        <!-- Modelos -->
+        <path class="flecha" d="M250,488 L250,514" marker-end="url(#punta)"/>
+        <rect x="20" y="516" width="470" height="68" rx="12" fill="var(--c-modelo-soft)" stroke="var(--c-modelo)"/>
+        <text class="t-titulo" x="40" y="542">Modelos · tablas (SQLAlchemy)</text>
+        <text class="t-mono" x="40" y="564">app/models/  → instance/hotel.db (SQLite)</text>
+
+        <rect x="600" y="490" width="380" height="94" rx="12" fill="var(--c-base-soft)" stroke="var(--c-base)" stroke-dasharray="5 4"/>
+        <text class="t-titulo" x="620" y="516">Archivos subidos</text>
+        <text class="t-mono" x="620" y="538">instance/uploads/</text>
+        <text class="t-detalle" x="620" y="560">logo, portada, fotos y modelos 3D (.glb)</text>
+        <text class="t-detalle" x="620" y="577">se sirven en /media/&lt;nombre&gt; (routes/media.py)</text>
+      </svg>
+    </div>
+
+    <div class="leyenda-capas">
+      <div style="--c: var(--c-pagina)"><strong>Lo que se ve</strong><span>Plantillas, CSS y JS. No toman decisiones: muestran datos y mandan pedidos.</span></div>
+      <div style="--c: var(--c-ruta)"><strong>Rutas</strong><span>Una función por URL. Traducen el pedido (formulario o JSON) a una llamada a un servicio.</span></div>
+      <div style="--c: var(--c-servicio)"><strong>Servicios</strong><span>Las reglas: si algo no se puede hacer, lanzan <code>ErrorDeNegocio</code> con el mensaje para el usuario.</span></div>
+      <div style="--c: var(--c-modelo)"><strong>Modelos</strong><span>Las clases que son tablas. La ruta hace el <code>commit</code> cuando todo salió bien.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================= -->
+<section id="donde">
+  <div class="contenedor">
+    <h2>Dónde vive cada cosa</h2>
+    <p class="bajada">Cada parte de la aplicación está en la zona de lo que usa. Lo que queda en el medio usa las tres cosas: JavaScript en el navegador, Python en el servidor y la base de datos. Tocá una etiqueta para ver por dónde viaja.</p>
+
+    <div class="tarjeta venn" id="venn">
+      <svg viewBox="0 -50 1100 1050" role="img" aria-labelledby="venn-titulo">
+        <title id="venn-titulo">Diagrama de Venn: JavaScript, Python y base de datos, con cada parte de la aplicación en su zona</title>
+        <circle class="circulo" data-zona="js" cx="400" cy="350" r="330" style="--c: var(--c-pagina)"/>
+        <circle class="circulo" data-zona="py" cx="700" cy="350" r="330" style="--c: var(--c-ruta)"/>
+        <circle class="circulo" data-zona="db" cx="550" cy="610" r="330" style="--c: var(--c-modelo)"/>
+
+        <text class="v-titulo" x="30" y="30" style="fill: var(--c-pagina)">JavaScript</text>
+        <text class="v-sub" x="30" y="54">en el navegador</text>
+        <text class="v-sub" x="30" y="74">static/js/</text>
+        <text class="v-titulo" x="1070" y="30" text-anchor="end" style="fill: var(--c-ruta)">Python (Flask)</text>
+        <text class="v-sub" x="1070" y="54" text-anchor="end">en el servidor</text>
+        <text class="v-sub" x="1070" y="74" text-anchor="end">routes/ y services/</text>
+        <text class="v-titulo" x="550" y="972" text-anchor="middle" style="fill: var(--c-modelo)">Base de datos (SQLite)</text>
+        <text class="v-sub" x="550" y="994" text-anchor="middle">instance/hotel.db · se usa con models/</text>
+
+        <!-- Cómo se hablan entre sí -->
+        <text class="v-enlace" x="550" y="-16" text-anchor="middle"><tspan class="fuerte">JS ⇄ Python:</tspan> fetch() con JSON, formularios y HTML</text>
+        <text class="v-enlace" x="975" y="800" text-anchor="middle"><tspan class="fuerte">Python ⇄ Base:</tspan></text>
+        <text class="v-enlace" x="975" y="822" text-anchor="middle">SQLAlchemy (modelos)</text>
+        <text class="v-enlace" x="125" y="800" text-anchor="middle"><tspan class="fuerte">JS ✕ Base:</tspan></text>
+        <text class="v-enlace" x="125" y="822" text-anchor="middle">nunca directo</text>
+
+        <!-- La zona JavaScript + base sin Python queda vacía a propósito -->
+        <rect class="v-vacio" x="285" y="545" width="160" height="76" rx="10"/>
+        <text class="v-nota" x="365" y="571" text-anchor="middle">vacío: el navegador</text>
+        <text class="v-nota" x="365" y="590" text-anchor="middle">nunca toca la base</text>
+        <text class="v-nota" x="365" y="609" text-anchor="middle">sin pasar por Python</text>
+
+        <g id="venn-items"></g>
+      </svg>
+    </div>
+
+    <div class="tarjeta venn-detalle" id="venn-detalle" aria-live="polite"></div>
+
+    <div class="claves-venn">
+      <div><strong>Solo JavaScript</strong><span>Pasa en el navegador con lo que ya está en la página. No le pregunta nada al servidor.</span></div>
+      <div><strong>Solo Python</strong><span>Trabajo del servidor que no necesita la base: armar el HTML, validar, dar formato.</span></div>
+      <div><strong>Solo base de datos</strong><span>Las tablas. Están guardadas, pero nadie las lee directo: siempre a través de los modelos.</span></div>
+      <div><strong>Las tres</strong><span>Las pantallas que trabajan sin recargar: el JS le pide al servidor, el servidor lee o cambia la base y responde.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================= -->
+<section id="conexiones">
+  <div class="contenedor">
+    <h2>Qué se conecta con qué</h2>
+    <p class="bajada">Elegí una caja para ver para qué sirve, qué funciones tiene y con qué partes se conecta. Las líneas van de izquierda a derecha: una pantalla llama a rutas, las rutas usan servicios y modelos.</p>
+
+    <div class="conexiones">
+      <div class="lienzo" id="lienzo">
+        <svg id="lineas" aria-hidden="true"></svg>
+        <div class="columnas" id="columnas"></div>
+      </div>
+      <aside class="detalle" id="detalle" aria-live="polite"></aside>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================= -->
+<section id="carpetas">
+  <div class="contenedor">
+    <h2>Qué hay en cada carpeta</h2>
+    <p class="bajada">Todo el sistema está en <code>app/</code>. Afuera quedan la configuración, el punto de entrada, las pruebas y el material de diseño.</p>
+    <div class="carpetas">
+
+      <details open style="--c: var(--c-base)">
+        <summary><code>raíz</code><span>arranque y configuración</span></summary>
+        <ul class="archivos">
+          <li><code>run.py</code><span>Punto de entrada: <code>python run.py</code> crea la app y la levanta en el puerto 5000.</span></li>
+          <li><code>config.py</code><span>Clave secreta, base de datos (SQLite por defecto), tope de subida de 25 MB y cookie de sesión.</span></li>
+          <li><code>requirements.txt</code><span>Flask, Flask-SQLAlchemy, python-dotenv y pytest.</span></li>
+          <li><code>.env.example</code><span>Modelo del archivo <code>.env</code> con la clave secreta.</span></li>
+          <li><code>instance/</code><span>No está en el repo: la base <code>hotel.db</code> y los archivos subidos.</span></li>
+        </ul>
+      </details>
+
+      <details open style="--c: var(--c-base)">
+        <summary><code>app/</code><span>la aplicación</span></summary>
+        <ul class="archivos">
+          <li><code>__init__.py</code><span><code>create_app()</code>: conecta la base, registra los blueprints, los filtros y los comandos.</span></li>
+          <li><code>extensions.py</code><span>El objeto <code>db</code> (SQLAlchemy). Está aparte para que modelos y rutas lo importen sin importarse entre sí.</span></li>
+          <li><code>contexto.py</code><span>Antes de cada pedido carga el hotel y el usuario logueado; les pasa a todas las plantillas el color de acento y la fecha.</span></li>
+          <li><code>filtros.py</code><span>Filtros de Jinja: fechas en castellano (<code>14 oct</code>), montos (<code>$ 48.000</code>), iniciales.</span></li>
+          <li><code>demo.py</code><span>Comando <code>flask demo</code>: borra la base y carga el Hotel Mirador con 24 habitaciones y reservas.</span></li>
+          <li><code>comandos.py</code><span>Comando <code>flask crear-usuario</code> para el primer usuario si no se carga la demo.</span></li>
+        </ul>
+      </details>
+
+      <details open style="--c: var(--c-modelo)">
+        <summary><code>app/models/</code><span>tablas de la base</span></summary>
+        <ul class="archivos">
+          <li><code>configuracion.py</code><span><code>ConfiguracionHotel</code>: una sola fila con los datos del hotel. Arma los links de mapa, WhatsApp e Instagram.</span></li>
+          <li><code>habitacion.py</code><span><code>TipoHabitacion</code> (capacidad, tarifa, foto, modelo 3D) y <code>Habitacion</code> (número, piso, limpieza, mantenimiento).</span></li>
+          <li><code>huesped.py</code><span><code>Huesped</code>: nombre, apellido, documento, contacto y país.</span></li>
+          <li><code>reserva.py</code><span><code>Reserva</code>: fechas, personas, estado, total y pagado. Calcula noches y saldo.</span></li>
+          <li><code>usuario.py</code><span><code>Usuario</code>: email, contraseña con hash y rol (admin o recepción).</span></li>
+        </ul>
+      </details>
+
+      <details open style="--c: var(--c-ruta)">
+        <summary><code>app/routes/</code><span>un blueprint por sección</span></summary>
+        <ul class="archivos">
+          <li><code>sitio.py</code><span>Sitio público: portada, página de cada tipo, reserva online y confirmación.</span></li>
+          <li><code>auth.py</code><span>Login y logout, y los controles <code>login_requerido</code> y <code>admin_requerido</code> que usan las otras secciones.</span></li>
+          <li><code>plano.py</code><span>Plano de habitaciones y el panel de detalle (fragmentos HTML que pide plano.js).</span></li>
+          <li><code>reservas.py</code><span>Tape chart y el formulario de nueva reserva.</span></li>
+          <li><code>configuracion.py</code><span>Hotel, tipos, pisos y habitaciones, usuarios. Solo rol administración.</span></li>
+          <li><code>api.py</code><span>Acciones que dispara el JavaScript (check-in, mover, disponibilidad…). Reciben y devuelven JSON.</span></li>
+          <li><code>media.py</code><span>Sirve los archivos subidos en <code>/media/&lt;nombre&gt;</code>, sin dejar que un SVG ejecute scripts.</span></li>
+        </ul>
+      </details>
+
+      <details open style="--c: var(--c-servicio)">
+        <summary><code>app/services/</code><span>reglas del negocio</span></summary>
+        <ul class="archivos">
+          <li><code>ocupacion.py</code><span>Calcula el estado de cada habitación en una fecha a partir de las reservas.</span></li>
+          <li><code>recepcion.py</code><span>Check-in, check-out, no-show, limpieza y mantenimiento.</span></li>
+          <li><code>reservas.py</code><span>Superposición de fechas, disponibilidad, crear y mover reservas.</span></li>
+          <li><code>huespedes.py</code><span>Buscador de huéspedes y alta de uno nuevo (con lista de países).</span></li>
+          <li><code>configuracion.py</code><span>Tipos de habitación, alta de habitaciones por piso y usuarios.</span></li>
+          <li><code>hotel.py</code><span>Color del texto sobre el acento, coordenadas, email, WhatsApp, Instagram e ícono de cada servicio.</span></li>
+          <li><code>archivos.py</code><span>Guarda y borra los archivos subidos; revisa tipo y tamaño.</span></li>
+          <li><code>errores.py</code><span><code>ErrorDeNegocio</code>: la excepción que usan todos los servicios.</span></li>
+        </ul>
+      </details>
+
+      <details style="--c: var(--c-pagina)">
+        <summary><code>app/templates/</code><span>plantillas Jinja2</span></summary>
+        <ul class="archivos">
+          <li><code>base.html</code><span>Marco de la administración: barra lateral, buscador, avisos.</span></li>
+          <li><code>components/</code><span><code>iconos.html</code> (íconos SVG propios) y el macro <code>icono()</code>.</span></li>
+          <li><code>auth/</code><span>Pantalla de login.</span></li>
+          <li><code>plano/</code><span>Página del plano; <code>_kpis</code>, <code>_pisos</code> y <code>_panel</code> son fragmentos que se recargan solos.</span></li>
+          <li><code>reservas/</code><span>Tape chart (<code>_tape.html</code> es la grilla) y nueva reserva.</span></li>
+          <li><code>configuracion/</code><span>Las tres pestañas, con un <code>_layout.html</code> común.</span></li>
+          <li><code>sitio/</code><span>Sitio público, con su propio <code>base.html</code>.</span></li>
+        </ul>
+      </details>
+
+      <details style="--c: var(--c-pagina)">
+        <summary><code>app/static/</code><span>CSS, JS e imágenes</span></summary>
+        <ul class="archivos">
+          <li><code>css/tokens.css</code><span>Variables: colores, espacios, radios, sombras. El acento lo pisa cada hotel.</span></li>
+          <li><code>css/components.css</code><span>Botones, campos, tarjetas, badges, barras de reserva, avisos.</span></li>
+          <li><code>css/*.css</code><span>Una hoja por sección: app, plano, tapechart, nueva-reserva, configuracion, sitio.</span></li>
+          <li><code>js/app.js</code><span>Común a la administración: menú, Ctrl+K, avisos y <code>postJSON()</code> para hablar con la API.</span></li>
+          <li><code>js/*.js</code><span>Uno por pantalla: plano, tapechart, nueva-reserva, configuracion, reservar.</span></li>
+          <li><code>vendor/</code><span><code>model-viewer</code>, el visor 3D (la única librería externa).</span></li>
+          <li><code>img/</code>, <code>modelos/</code>, <code>brand/</code><span>Renders y .glb de la demo, y los logos de Conserje.</span></li>
+        </ul>
+      </details>
+
+      <details style="--c: var(--c-base)">
+        <summary><code>tests/</code><span>pruebas con pytest</span></summary>
+        <ul class="archivos">
+          <li><code>conftest.py</code><span>Una app con base en memoria por prueba y datos de ejemplo (fixtures).</span></li>
+          <li><code>test_plano.py</code><span>Estados de ocupación, check-in, check-out, no-show, mantenimiento.</span></li>
+          <li><code>test_reservas.py</code><span>Superposición y mover reservas.</span></li>
+          <li><code>test_nueva_reserva.py</code><span>Alta desde la administración, buscador y API.</span></li>
+          <li><code>test_sitio.py</code><span>Sitio público y reserva web.</span></li>
+          <li><code>test_configuracion.py</code>, <code>test_hotel.py</code>, <code>test_login.py</code><span>Configuración, datos del hotel y login.</span></li>
+        </ul>
+      </details>
+
+      <details style="--c: var(--c-base)">
+        <summary><code>design/</code> · <code>docs/</code><span>material de apoyo</span></summary>
+        <ul class="archivos">
+          <li><code>design/identidad/</code><span>Logos de Conserje y el brandbook.</span></li>
+          <li><code>design/stitch/</code><span>Los prompts usados en Google Stitch para las pantallas.</span></li>
+          <li><code>design/3d/</code><span>Escena de Blender y el script que arma, renderiza y hornea las habitaciones.</span></li>
+          <li><code>docs/</code><span>Este mapa, el plan inicial y las notas de los modelos 3D.</span></li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================= -->
+<section id="urls">
+  <div class="contenedor">
+    <h2>Las URLs</h2>
+    <p class="bajada">Todas las direcciones que atiende la aplicación, agrupadas por blueprint. <span class="acceso acceso--publico">público</span> no pide nada, <span class="acceso acceso--login">login</span> pide estar logueado, <span class="acceso acceso--admin">admin</span> pide el rol administración y <span class="acceso acceso--json">JSON</span> son las que usa el JavaScript.</p>
+    <div class="tarjeta tabla-scroll">
+      <table>
+        <thead><tr><th>Método</th><th>URL</th><th>Qué hace</th><th>Acceso</th></tr></thead>
+        <tbody id="tabla-urls"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================= -->
+<section id="base">
+  <div class="contenedor">
+    <h2>Base de datos</h2>
+    <p class="bajada">Seis tablas. Las líneas son las claves foráneas: un tipo tiene muchas habitaciones, una habitación tiene muchas reservas y un huésped puede tener muchas reservas.</p>
+
+    <div class="tarjeta er">
+      <svg viewBox="0 0 1000 420" role="img" aria-labelledby="er-titulo">
+        <title id="er-titulo">Diagrama de tablas y relaciones</title>
+
+        <!-- TipoHabitacion -->
+        <rect x="20" y="20" width="220" height="196" rx="10" fill="var(--surface)" stroke="var(--c-modelo)"/>
+        <rect x="20" y="20" width="220" height="44" rx="10" fill="var(--c-modelo-soft)"/>
+        <text class="t-tabla" x="36" y="40">TipoHabitacion</text>
+        <text class="t-nombre" x="36" y="56">tipos_habitacion</text>
+        <text class="t-clave" x="36" y="86">id</text>
+        <text x="36" y="106">nombre</text>
+        <text x="36" y="124">capacidad</text>
+        <text x="36" y="142">tarifa_base</text>
+        <text x="36" y="160">slug  (URL del sitio)</text>
+        <text x="36" y="178">metros, comodidades</text>
+        <text x="36" y="196">imagen, modelo (.glb)</text>
+
+        <!-- Habitacion -->
+        <rect x="320" y="20" width="220" height="178" rx="10" fill="var(--surface)" stroke="var(--c-modelo)"/>
+        <rect x="320" y="20" width="220" height="44" rx="10" fill="var(--c-modelo-soft)"/>
+        <text class="t-tabla" x="336" y="40">Habitacion</text>
+        <text class="t-nombre" x="336" y="56">habitaciones</text>
+        <text class="t-clave" x="336" y="86">id</text>
+        <text x="336" y="106">numero  (101, 102…)</text>
+        <text x="336" y="124">piso</text>
+        <text class="t-clave" x="336" y="142">tipo_id →</text>
+        <text x="336" y="160">estado_limpieza</text>
+        <text x="336" y="178">fuera_de_servicio</text>
+
+        <!-- Reserva -->
+        <rect x="620" y="20" width="240" height="250" rx="10" fill="var(--surface)" stroke="var(--c-modelo)"/>
+        <rect x="620" y="20" width="240" height="44" rx="10" fill="var(--c-modelo-soft)"/>
+        <text class="t-tabla" x="636" y="40">Reserva</text>
+        <text class="t-nombre" x="636" y="56">reservas</text>
+        <text class="t-clave" x="636" y="86">id</text>
+        <text class="t-clave" x="636" y="106">habitacion_id →</text>
+        <text class="t-clave" x="636" y="124">huesped_id →</text>
+        <text x="636" y="142">entrada, salida</text>
+        <text x="636" y="160">personas</text>
+        <text x="636" y="178">estado</text>
+        <text x="636" y="196">total, pagado</text>
+        <text x="636" y="214">notas</text>
+        <text x="636" y="232">token  (reservas web)</text>
+        <text x="636" y="250">creada</text>
+
+        <!-- Huesped -->
+        <rect x="620" y="300" width="240" height="90" rx="10" fill="var(--surface)" stroke="var(--c-modelo)"/>
+        <rect x="620" y="300" width="240" height="44" rx="10" fill="var(--c-modelo-soft)"/>
+        <text class="t-tabla" x="636" y="320">Huesped</text>
+        <text class="t-nombre" x="636" y="336">huespedes</text>
+        <text x="636" y="364">nombre, apellido, documento</text>
+        <text x="636" y="381">email, telefono, pais</text>
+
+        <!-- ConfiguracionHotel y Usuario: sin relaciones -->
+        <rect x="20" y="246" width="270" height="144" rx="10" fill="var(--surface)" stroke="var(--c-modelo)" stroke-dasharray="5 4"/>
+        <rect x="20" y="246" width="270" height="44" rx="10" fill="var(--c-modelo-soft)"/>
+        <text class="t-tabla" x="36" y="266">ConfiguracionHotel</text>
+        <text class="t-nombre" x="36" y="282">configuracion_hotel</text>
+        <text x="36" y="312">(una sola fila)</text>
+        <text x="36" y="330">nombre, logo, color_acento</text>
+        <text x="36" y="348">eslogan, portada, servicios…</text>
+        <text x="36" y="366">direccion, latitud, longitud</text>
+        <text x="36" y="384">telefono, email, whatsapp…</text>
+
+        <rect x="320" y="246" width="220" height="110" rx="10" fill="var(--surface)" stroke="var(--c-modelo)" stroke-dasharray="5 4"/>
+        <rect x="320" y="246" width="220" height="44" rx="10" fill="var(--c-modelo-soft)"/>
+        <text class="t-tabla" x="336" y="266">Usuario</text>
+        <text class="t-nombre" x="336" y="282">usuarios</text>
+        <text x="336" y="312">nombre, email</text>
+        <text x="336" y="330">password_hash</text>
+        <text x="336" y="348">rol  (admin | recepcion)</text>
+
+        <!-- Relaciones -->
+        <path class="relacion" d="M240,86 C280,86 280,142 320,142"/>
+        <text class="t-rel" x="280" y="76" text-anchor="middle">1 → muchas</text>
+        <path class="relacion" d="M540,86 C580,86 580,106 620,106"/>
+        <text class="t-rel" x="580" y="76" text-anchor="middle">1 → muchas</text>
+        <path class="relacion" d="M860,124 C985,124 985,350 860,350"/>
+        <text class="t-rel" x="905" y="242" text-anchor="middle">muchas ← 1</text>
+
+        <text class="t-rel" x="320" y="384">Punteadas: tablas sin claves foráneas.</text>
+      </svg>
+    </div>
+
+    <div class="notas-base">
+      <div>
+        <strong>La ocupación no se guarda</strong>
+        La habitación solo guarda su estado físico (limpieza y mantenimiento). Si está libre u ocupada lo calcula <code>services/ocupacion.py</code> mirando las reservas de esa fecha.
+      </div>
+      <div>
+        <strong>Estados de una reserva</strong>
+        <span class="estados"><code>confirmada</code> → <code>en_curso</code> (check-in) → <code>finalizada</code> (check-out)</span>
+        <span class="estados"><code>cancelada</code> y <code>no_show</code> no ocupan la habitación.</span>
+      </div>
+      <div>
+        <strong>Fechas</strong>
+        <code>salida</code> es el día del check-out: esa noche ya no se ocupa. Por eso uno puede salir y otro entrar el mismo día sin superponerse.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================= -->
+<section id="recorridos">
+  <div class="contenedor">
+    <h2>Tres recorridos de punta a punta</h2>
+    <p class="bajada">Qué archivos y funciones se usan, en orden, cuando pasa algo en la pantalla.</p>
+    <div class="recorridos">
+
+      <article class="recorrido">
+        <h3>Un cliente reserva desde el sitio</h3>
+        <p>Formulario común: el servidor responde con HTML.</p>
+        <ol class="pasos">
+          <li>En la portada (<code>sitio/inicio.html</code>) elige fechas y personas: el buscador hace <code>GET /reservar</code>.</li>
+          <li><code>routes/sitio.py → reservar()</code> elige el tipo más barato donde entran y muestra <code>sitio/reservar.html</code>. <code>reservar.js</code> calcula el total mientras cambia los datos.</li>
+          <li>Al confirmar hace <code>POST /reservar</code> y la ruta llama a <code>reservas.crear_reserva_web()</code>, que revisa el nombre y la capacidad y busca la primera habitación libre del tipo.</li>
+          <li><code>crear_reserva()</code> valida fechas, mantenimiento y superposición, calcula el total y crea la <code>Reserva</code> con su <code>Huesped</code>.</li>
+          <li>La ruta hace <code>db.session.commit()</code> y redirige a <code>/reserva/&lt;token&gt;</code>. La reserva ya aparece en el plano y en el tape chart.</li>
+        </ol>
+      </article>
+
+      <article class="recorrido">
+        <h3>Recepción hace un check-in</h3>
+        <p>JavaScript: la página no se recarga.</p>
+        <ol class="pasos">
+          <li>Clic en una habitación: <code>plano.js</code> pide <code>GET /administracion/plano/habitaciones/&lt;id&gt;</code> y pone el HTML de <code>_panel.html</code> en el panel.</li>
+          <li>Botón «Hacer check-in»: <code>postJSON()</code> de <code>app.js</code> manda <code>POST /administracion/api/reservas/&lt;id&gt;/check-in</code>.</li>
+          <li><code>api.checkin()</code> llama a <code>recepcion.hacer_checkin()</code>: revisa que la reserva esté confirmada, que sea el día, que la habitación esté limpia y libre.</li>
+          <li>Si algo falla, el servicio lanza <code>ErrorDeNegocio</code> y la API responde 409 con el mensaje: aparece un aviso rojo.</li>
+          <li>Si sale bien hace el commit y responde <code>{"ok": true, "mensaje": …}</code>. <code>plano.js</code> pide <code>/plano/contenido</code> y reemplaza los indicadores y los pisos.</li>
+        </ol>
+      </article>
+
+      <article class="recorrido">
+        <h3>Recepción arrastra una reserva</h3>
+        <p>Tape chart: arrastrar con el mouse o el dedo.</p>
+        <ol class="pasos">
+          <li><code>tapechart.js</code> escucha <code>pointerdown</code> y <code>pointermove</code> sobre la barra y calcula las fechas nuevas según cuántos días se movió.</li>
+          <li>Mientras arrastra, <code>motivoDeRechazo()</code> revisa en pantalla si pisa otra reserva y lo muestra en el tooltip.</li>
+          <li>Al soltar manda <code>POST /administracion/api/reservas/&lt;id&gt;/mover</code> con la habitación y las fechas.</li>
+          <li><code>api.mover()</code> llama a <code>reservas.mover_reserva()</code>, que vuelve a validar todo en el servidor y recalcula el total.</li>
+          <li><code>tapechart.js</code> pide <code>/reservas/grilla</code> (el HTML de <code>_tape.html</code>) y reemplaza la grilla sin perder el scroll.</li>
+        </ol>
+      </article>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="pie">
+  <div class="contenedor">Armado a partir del código del repositorio. Si se agrega un archivo o una URL, conviene sumarlo acá.</div>
+</footer>
+
+<script>
+// --- Dónde vive cada cosa (diagrama de Venn) -----------------------------------------------
+(function () {
+  const ZONAS = {
+    js: { nombre: "JavaScript", color: "pagina" },
+    py: { nombre: "Python", color: "ruta" },
+    db: { nombre: "Base de datos", color: "modelo" },
+  };
+  // Cada paso del camino es "zona|texto" para pintarlo con el color de donde ocurre.
+  // Las posiciones (x, y) están calculadas para que cada etiqueta caiga entera dentro de
+  // su zona (círculos de radio 330 en js 400,350 · py 700,350 · db 550,610).
+  const ITEMS = [
+    { zonas: "js", x: 300, y: 130, nombre: "Arrastrar barras",
+      que: "Mientras arrastrás una reserva, tapechart.js convierte los píxeles en días y avisa si pisa otra. No le pregunta nada al servidor hasta que soltás: eso ya es el «Tape chart» del medio.",
+      camino: ["js|mouse o dedo", "js|tapechart.js · pointermove", "js|motivoDeRechazo()", "js|tooltip"] },
+    { zonas: "js", x: 262, y: 190, nombre: "Filtros del plano",
+      que: "plano.js oculta o muestra las tarjetas que ya están en la página según piso, tipo, estado o lo que se escribe en el buscador.",
+      camino: ["js|selects y buscador", "js|plano.js · aplicarFiltros()", "js|tarjetas visibles"] },
+    { zonas: "js", x: 236, y: 250, nombre: "Total en vivo",
+      que: "reservar.js y nueva-reserva.js multiplican tarifa × noches para mostrar el total mientras se completa el formulario. Es solo para mostrar: al guardar, el servidor lo calcula de nuevo.",
+      camino: ["js|fechas elegidas", "js|reservar.js · actualizar()", "js|resumen"] },
+    { zonas: "js", x: 222, y: 310, nombre: "Visor 3D",
+      que: "<model-viewer> (static/vendor) dibuja el modelo .glb con WebGL y deja girarlo. El archivo lo entrega Python en /media, pero el dibujo es todo del navegador.",
+      camino: ["py|GET /media/tipo-x.glb", "js|model-viewer", "js|WebGL"] },
+    { zonas: "js", x: 200, y: 370, nombre: "Vista previa de fotos",
+      que: "Al elegir un archivo en Configuración, configuracion.js lo muestra antes de subirlo con URL.createObjectURL().",
+      camino: ["js|input file", "js|configuracion.js", "js|<img> o <model-viewer>"] },
+
+    { zonas: "py", x: 800, y: 130, nombre: "Armar el HTML",
+      que: "render_template() completa las plantillas Jinja con los datos que le pasa la ruta y manda el HTML terminado al navegador.",
+      camino: ["py|ruta", "py|render_template()", "py|templates/*.html", "js|HTML en el navegador"] },
+    { zonas: "py", x: 838, y: 190, nombre: "Elegir la ruta",
+      que: "Flask mira la URL y llama a la función del blueprint que la atiende. Antes corren los before_request: cargar el hotel y pedir login.",
+      camino: ["js|/administracion/reservas/", "py|Flask", "py|before_request", "py|reservas.index()"] },
+    { zonas: "py", x: 864, y: 250, nombre: "Validar datos",
+      que: "Reglas que no necesitan la base: capacidad de 1 a 20, hora con formato 14:00, email válido. Si algo está mal, el servicio lanza ErrorDeNegocio con el mensaje para el usuario.",
+      camino: ["js|formulario", "py|services/*.py", "py|ErrorDeNegocio"] },
+    { zonas: "py", x: 878, y: 310, nombre: "Fechas y precios",
+      que: "filtros.py convierte una fecha en «14 oct» y un número en «$ 48.000» dentro de las plantillas.",
+      camino: ["py|date(2026, 10, 14)", "py|filtros.fecha_corta()", "py|14 oct"] },
+    { zonas: "py", x: 900, y: 370, nombre: "Servir /media",
+      que: "media.py entrega los archivos subidos desde instance/uploads. Están en el disco, no en la base: la base solo guarda el nombre del archivo.",
+      camino: ["js|GET /media/logo-x.svg", "py|media.archivo()", "py|instance/uploads/"] },
+
+    { zonas: "db", x: 550, y: 700, nombre: "configuracion_hotel", tabla: true,
+      que: "Una sola fila con nombre, logo, color, textos del sitio, ubicación y contacto. contexto.py la lee en cada pedido.",
+      camino: ["py|contexto.py", "py|ConfiguracionHotel.actual()", "db|configuracion_hotel"] },
+    { zonas: "db", x: 550, y: 750, nombre: "habitaciones", tabla: true,
+      que: "Número, piso, tipo y estado físico (limpieza y mantenimiento). No guarda si está ocupada: eso sale de las reservas.",
+      camino: ["py|models/habitacion.py", "py|Habitacion", "db|habitaciones"] },
+    { zonas: "db", x: 550, y: 800, nombre: "reservas", tabla: true,
+      que: "Habitación, huésped, fechas, personas, estado, total y pagado. Es la tabla que más se usa: de acá sale la ocupación.",
+      camino: ["py|models/reserva.py", "py|Reserva", "db|reservas"] },
+    { zonas: "db", x: 475, y: 850, nombre: "huespedes", tabla: true,
+      que: "Nombre, apellido, documento, contacto y país. Un huésped puede tener muchas reservas.",
+      camino: ["py|models/huesped.py", "py|Huesped", "db|huespedes"] },
+    { zonas: "db", x: 630, y: 850, nombre: "usuarios", tabla: true,
+      que: "Quién entra a la administración: email, contraseña con hash y rol (admin o recepción).",
+      camino: ["py|models/usuario.py", "py|Usuario", "db|usuarios"] },
+    { zonas: "db", x: 550, y: 900, nombre: "tipos_habitacion", tabla: true,
+      que: "Capacidad, tarifa, descripción y el nombre de la foto y del .glb (los archivos están en instance/uploads).",
+      camino: ["py|models/habitacion.py", "py|TipoHabitacion", "db|tipos_habitacion"] },
+
+    { zonas: "js py", x: 550, y: 150, nombre: "Mensajes (toasts)",
+      que: "El servidor deja el mensaje con flash() o lo manda en el JSON; app.js lo muestra como aviso y lo saca a los segundos.",
+      camino: ["py|flash() o {mensaje}", "py|base.html", "js|app.js · toast()"] },
+    { zonas: "js py", x: 550, y: 205, nombre: "Color del texto",
+      que: "La misma cuenta (el brillo del color de acento) está dos veces: en hotel.py para pintar las páginas y en configuracion.js para la vista previa mientras se elige el color.",
+      camino: ["js|configuracion.js (vista previa)", "py|hotel.texto_sobre() (páginas)"] },
+    { zonas: "js py", x: 550, y: 255, nombre: "Coordenadas del mapa",
+      que: "La misma expresión regular reconoce «-41.13, -71.35» en configuracion.js (vista previa del mapa) y en hotel.py (al guardar).",
+      camino: ["js|configuracion.js (vista previa)", "py|hotel.parsear_coordenadas() (al guardar)"] },
+
+    { zonas: "py db", x: 778, y: 505, nombre: "Ocupación",
+      que: "ocupacion.py lee las reservas de una fecha y decide si cada habitación está libre, ocupada, llega o sale. El resultado no se guarda: se calcula en cada pedido.",
+      camino: ["py|plano.index()", "py|ocupacion.estados_del_dia()", "db|SELECT reservas", "py|plano/index.html"] },
+    { zonas: "py db", x: 768, y: 555, nombre: "Login y usuarios",
+      que: "auth.py busca el usuario por email, compara la contraseña con el hash y guarda su id en la sesión (una cookie firmada).",
+      camino: ["js|POST /administracion/login", "py|auth.login()", "db|SELECT usuarios", "py|session['usuario_id']"] },
+    { zonas: "py db", x: 748, y: 605, nombre: "Sitio y reserva web",
+      que: "Formularios comunes: el navegador manda el POST, Python crea la reserva y responde con otra página. El único JS es el total en vivo.",
+      camino: ["js|POST /reservar", "py|sitio.reservar()", "py|crear_reserva_web()", "db|INSERT reservas", "js|/reserva/<token>"] },
+    { zonas: "py db", x: 712, y: 645, nombre: "Guardar ajustes",
+      que: "Los formularios de Configuración van por POST: configuracion.py valida, guarda los archivos en instance/uploads y los datos en sus tablas.",
+      camino: ["js|POST /administracion/configuracion/", "py|configuracion.hotel()", "db|UPDATE configuracion_hotel"] },
+
+    { zonas: "js py db", x: 550, y: 330, nombre: "Tape chart",
+      que: "Al soltar una barra, tapechart.js manda la habitación y las fechas en JSON; mover_reserva() valida y actualiza la fila; después el JS pide la grilla de nuevo.",
+      camino: ["js|tapechart.js", "js|POST /api/reservas/<id>/mover", "py|reservas.mover_reserva()", "db|UPDATE reservas", "js|GET /reservas/grilla"] },
+    { zonas: "js py db", x: 550, y: 385, nombre: "Plano y check-in",
+      que: "plano.js pide el panel de la habitación; el botón manda el check-in a la API; hacer_checkin() revisa las reglas y cambia el estado; el JS recarga los pisos.",
+      camino: ["js|app.js · postJSON()", "js|POST /api/reservas/<id>/check-in", "py|recepcion.hacer_checkin()", "db|UPDATE reservas", "js|GET /plano/contenido"] },
+    { zonas: "js py db", x: 550, y: 440, nombre: "Nueva reserva",
+      que: "Cada vez que cambian las fechas, nueva-reserva.js pregunta qué habitaciones están libres; al guardar, el formulario va por POST y crear_reserva() valida todo otra vez.",
+      camino: ["js|nueva-reserva.js", "js|GET /api/disponibilidad", "py|reservas.disponibilidad()", "db|SELECT reservas", "js|fichas libres u ocupadas"] },
+    { zonas: "js py db", x: 550, y: 495, nombre: "Buscar huéspedes",
+      que: "Mientras se escribe, nueva-reserva.js busca huéspedes que ya vinieron para no cargarlos de nuevo.",
+      camino: ["js|nueva-reserva.js", "js|GET /api/huespedes?q=", "py|huespedes.buscar()", "db|SELECT huespedes", "js|lista de resultados"] },
+  ];
+
+  const NS = "http://www.w3.org/2000/svg";
+  const venn = document.getElementById("venn");
+  const capa = document.getElementById("venn-items");
+  const detalle = document.getElementById("venn-detalle");
+  const circulos = venn.querySelectorAll(".circulo");
+  const colorDe = (zona) => `var(--c-${ZONAS[zona].color})`;
+
+  ITEMS.forEach((item) => {
+    const g = document.createElementNS(NS, "g");
+    g.setAttribute("class", `v-item${item.tabla ? " tabla" : ""}`);
+    g.setAttribute("transform", `translate(${item.x} ${item.y})`);
+    g.setAttribute("tabindex", "0");
+    g.setAttribute("role", "button");
+    g.setAttribute("aria-label", item.nombre);
+    const rect = document.createElementNS(NS, "rect");
+    const texto = document.createElementNS(NS, "text");
+    texto.setAttribute("text-anchor", "middle");
+    texto.setAttribute("dy", "6");
+    texto.textContent = item.nombre;
+    g.append(rect, texto);
+    capa.append(g);
+    // El ancho de la etiqueta sale del largo real del texto
+    const ancho = texto.getComputedTextLength() + 28;
+    rect.setAttribute("x", -ancho / 2);
+    rect.setAttribute("y", -16);
+    rect.setAttribute("width", ancho);
+    rect.setAttribute("height", 32);
+    rect.setAttribute("rx", item.tabla ? 6 : 16);
+    g.addEventListener("click", () => elegir(item));
+    g.addEventListener("keydown", (evento) => {
+      if (evento.key === "Enter" || evento.key === " ") {
+        evento.preventDefault();
+        elegir(item);
+      }
+    });
+    item.el = g;
+  });
+
+  function elegir(item) {
+    const activas = item.zonas.split(" ");
+    venn.classList.add("hay-seleccion");
+    ITEMS.forEach((otro) => otro.el.classList.toggle("elegido", otro === item));
+    circulos.forEach((c) => c.classList.toggle("activo", activas.includes(c.dataset.zona)));
+
+    const izquierda = document.createElement("div");
+    const titulo = document.createElement("h3");
+    titulo.textContent = item.nombre;
+    const zonas = document.createElement("div");
+    zonas.className = "zonas";
+    activas.forEach((zona) => {
+      const chip = document.createElement("span");
+      chip.className = "zona";
+      chip.style.setProperty("--c", colorDe(zona));
+      chip.style.setProperty("--c-soft", `var(--c-${ZONAS[zona].color}-soft)`);
+      chip.textContent = ZONAS[zona].nombre;
+      zonas.append(chip);
+    });
+    const que = document.createElement("p");
+    que.textContent = item.que;
+    izquierda.append(titulo, zonas, que);
+
+    const derecha = document.createElement("div");
+    const subtitulo = document.createElement("h4");
+    subtitulo.textContent = "Por dónde pasa";
+    const pasos = document.createElement("ol");
+    pasos.className = "camino";
+    item.camino.forEach((paso) => {
+      const [zona, texto] = paso.split("|");
+      const li = document.createElement("li");
+      li.style.setProperty("--c", colorDe(zona));
+      li.title = ZONAS[zona].nombre;
+      li.textContent = texto;
+      pasos.append(li);
+    });
+    derecha.append(subtitulo, pasos);
+    detalle.replaceChildren(izquierda, derecha);
+  }
+
+  elegir(ITEMS.find((item) => item.nombre === "Tape chart"));
+})();
+
+(function () {
+  // --- Datos del mapa de conexiones --------------------------------------------------
+  // col: 0 pantallas, 1 rutas, 2 servicios, 3 modelos. va: a qué nodos de la derecha llama.
+  const COLUMNAS = [
+    { titulo: "Pantallas y JS", color: "pagina", nota: "" },
+    { titulo: "Rutas", color: "ruta", nota: "Todas pasan antes por contexto.py y auth.py." },
+    { titulo: "Servicios", color: "servicio", nota: "Todos usan ErrorDeNegocio (errores.py)." },
+    { titulo: "Modelos", color: "modelo", nota: "" },
+  ];
+
+  const NODOS = {
+    // Pantallas
+    p_sitio: { col: 0, nombre: "Sitio público", archivo: "templates/sitio/ · js/reservar.js",
+      que: "Lo que ve el cliente: portada, cada tipo de habitación con su visor 3D, reserva y confirmación. reservar.js calcula el total en vivo.",
+      funciones: ["inicio.html: portada con buscador de fechas", "habitacion.html: visor 3D (model-viewer)", "reservar.html + reservar.js", "confirmacion.html"],
+      va: ["r_sitio", "r_media"] },
+    p_login: { col: 0, nombre: "Login", archivo: "templates/auth/login.html",
+      que: "Formulario de ingreso a la administración. Con la demo cargada muestra los usuarios de prueba.",
+      funciones: ["Email y contraseña", "Lista de usuarios de la demo"], va: ["r_auth"] },
+    p_plano: { col: 0, nombre: "Plano", archivo: "templates/plano/ · js/plano.js",
+      que: "Las habitaciones por piso con su estado del día. plano.js filtra, abre el panel de cada habitación y dispara las acciones de recepción.",
+      funciones: ["aplicarFiltros(): piso, tipo, estado y buscador", "abrir(): pide el panel de la habitación", "ejecutar(): manda la acción a la API", "refrescar(): recarga indicadores y pisos"],
+      va: ["r_plano", "r_api"] },
+    p_tape: { col: 0, nombre: "Tape chart", archivo: "templates/reservas/ · js/tapechart.js",
+      que: "Las reservas en una grilla de habitaciones × días. Se arrastran para cambiar fechas o habitación; un clic en un espacio libre abre la nueva reserva.",
+      funciones: ["Arrastre con pointer events", "motivoDeRechazo(): valida en pantalla", "Selección de días libres → nueva reserva", "refrescar(): pide la grilla de nuevo"],
+      va: ["r_reservas", "r_api"] },
+    p_nueva: { col: 0, nombre: "Nueva reserva", archivo: "templates/reservas/nueva.html · js/nueva-reserva.js",
+      que: "Alta de reservas desde la administración. Mientras se completa, nueva-reserva.js pide qué habitaciones están libres y busca huéspedes que ya vinieron.",
+      funciones: ["consultarDisponibilidad(): GET /api/disponibilidad", "Buscador de huéspedes: GET /api/huespedes", "actualizarResumen(): total, pagado y saldo"],
+      va: ["r_reservas", "r_api"] },
+    p_config: { col: 0, nombre: "Configuración", archivo: "templates/configuracion/ · js/configuracion.js",
+      que: "Datos del hotel, tipos de habitación, pisos y usuarios. configuracion.js muestra vistas previas del archivo elegido, del color y del mapa.",
+      funciones: ["Vista previa de imagen y modelo 3D", "Color de acento en vivo", "Mapa de Google mientras se escribe la dirección"],
+      va: ["r_configuracion"] },
+    p_app: { col: 0, nombre: "app.js", archivo: "static/js/app.js",
+      que: "Se carga en todas las pantallas de la administración. Tiene lo común: menú en celular, Ctrl+K para el buscador, avisos (toasts) y postJSON().",
+      funciones: ["toast(mensaje, tipo)", "postJSON(url, datos): POST a la API y manejo de errores"],
+      va: ["r_api"] },
+
+    // Rutas
+    r_sitio: { col: 1, nombre: "sitio", archivo: "routes/sitio.py · /", acceso: "público",
+      que: "El sitio del hotel para clientes. No pide login.",
+      funciones: ["inicio()", "habitacion(slug)", "reservar(): GET muestra, POST crea", "confirmacion(token)"],
+      va: ["s_reservas", "m_tipo", "m_reserva"] },
+    r_auth: { col: 1, nombre: "auth", archivo: "routes/auth.py · /administracion/login",
+      que: "Login y logout. Además define login_requerido() y admin_requerido(), que las otras secciones registran con before_request.",
+      funciones: ["login(): guarda usuario_id en la sesión", "logout()", "login_requerido()", "admin_requerido()", "destino_seguro(): evita redirigir a otro sitio"],
+      va: ["m_usuario"] },
+    r_plano: { col: 1, nombre: "plano", archivo: "routes/plano.py · /administracion/",
+      que: "La pantalla de inicio de la administración. Devuelve la página completa o fragmentos para que plano.js los recargue.",
+      funciones: ["index()", "contenido(): indicadores y pisos", "panel(habitacion_id): detalle de una habitación"],
+      va: ["s_ocupacion", "m_habitacion", "m_tipo"] },
+    r_reservas: { col: 1, nombre: "reservas", archivo: "routes/reservas.py · /administracion/reservas",
+      que: "El tape chart y el formulario de nueva reserva.",
+      funciones: ["index(): tape chart", "grilla(): solo la grilla", "_contexto(): ubica cada barra en las columnas de días", "nueva(): GET muestra, POST crea"],
+      va: ["s_reservas", "s_huespedes", "m_habitacion", "m_huesped", "m_reserva", "m_tipo"] },
+    r_configuracion: { col: 1, nombre: "configuracion", archivo: "routes/configuracion.py", acceso: "admin",
+      que: "Todo lo que configura el hotel. Solo entra el rol administración.",
+      funciones: ["hotel(): datos, identidad, sitio, contacto, ubicación", "tipo(): crear o editar un tipo", "agregar_habitaciones(), cambiar_tipo(), eliminar_habitacion()", "usuarios(), eliminar_usuario()"],
+      va: ["s_configuracion", "s_hotel", "s_archivos", "m_config", "m_tipo", "m_habitacion", "m_usuario"] },
+    r_api: { col: 1, nombre: "api", archivo: "routes/api.py · /administracion/api", acceso: "JSON",
+      que: "Las acciones que dispara el JavaScript. Solo acepta JSON y responde {ok, mensaje} o {ok: false, error}.",
+      funciones: ["checkin(), checkout(), no_show()", "mover(): cambia fechas o habitación", "limpieza(), mantenimiento()", "disponibilidad(), buscar_huespedes()"],
+      va: ["s_recepcion", "s_reservas", "s_huespedes", "m_habitacion", "m_reserva"] },
+    r_media: { col: 1, nombre: "media", archivo: "routes/media.py · /media/<nombre>",
+      que: "Sirve los archivos que subió el hotel (logo, portada, fotos, modelos) desde instance/uploads, con cabeceras que impiden ejecutar scripts.",
+      funciones: ["archivo(nombre)"], va: [] },
+
+    // Servicios
+    s_ocupacion: { col: 2, nombre: "ocupacion", archivo: "services/ocupacion.py",
+      que: "Calcula el estado de cada habitación en una fecha (libre, ocupada, llega, sale, sucia, mantenimiento) a partir de las reservas.",
+      funciones: ["estados_del_dia(fecha, hoy)", "calcular_estado()", "resumen(): los indicadores", "detalle_habitacion(): lo que muestra el panel"],
+      va: ["m_habitacion", "m_reserva"] },
+    s_recepcion: { col: 2, nombre: "recepcion", archivo: "services/recepcion.py",
+      que: "Las operaciones del mostrador. Cada una revisa sus reglas y cambia el estado; el commit lo hace la ruta.",
+      funciones: ["hacer_checkin(), hacer_checkout()", "marcar_no_show()", "marcar_limpieza()", "poner_en_mantenimiento(), quitar_de_mantenimiento()"],
+      va: ["m_habitacion", "m_reserva"] },
+    s_reservas: { col: 2, nombre: "reservas", archivo: "services/reservas.py",
+      que: "Las reglas de las reservas. crear_reserva() es la única que crea: la usan la administración y el sitio web. Para el check-in en el mismo paso usa recepcion.py.",
+      funciones: ["reserva_superpuesta()", "validar_disponibilidad()", "disponibilidad(): estado de cada habitación para el formulario", "crear_reserva(), crear_reserva_web()", "mover_reserva()"],
+      va: ["m_habitacion", "m_huesped", "m_reserva"] },
+    s_huespedes: { col: 2, nombre: "huespedes", archivo: "services/huespedes.py",
+      que: "Busca huéspedes por nombre, apellido, documento o email, y arma uno nuevo validando sus datos.",
+      funciones: ["buscar(texto)", "nuevo_huesped()", "PAISES: lista para el selector"],
+      va: ["m_huesped"] },
+    s_configuracion: { col: 2, nombre: "configuracion", archivo: "services/configuracion.py",
+      que: "Reglas de la configuración. Los pisos no son una tabla: un piso existe mientras tenga habitaciones.",
+      funciones: ["validar_tipo(), slug_unico(), eliminar_tipo()", "agregar_habitaciones(piso, cantidad, tipo)", "cambiar_tipo(), eliminar_habitacion()", "crear_usuario(), eliminar_usuario()"],
+      va: ["m_tipo", "m_habitacion", "m_reserva", "m_usuario"] },
+    s_hotel: { col: 2, nombre: "hotel", archivo: "services/hotel.py",
+      que: "Funciones sin base de datos para los datos del hotel. La usan también contexto.py (color del texto) y filtros.py (íconos).",
+      funciones: ["texto_sobre(color): blanco o casi negro", "parsear_coordenadas()", "normalizar_email(), _whatsapp(), _instagram()", "icono_servicio(texto)"],
+      va: [] },
+    s_archivos: { col: 2, nombre: "archivos", archivo: "services/archivos.py",
+      que: "Guarda los archivos subidos en instance/uploads con un nombre nuevo, después de revisar la extensión, los primeros bytes y el tamaño.",
+      funciones: ["guardar(archivo, clase, prefijo)", "borrar(nombre)"],
+      va: [] },
+
+    // Modelos
+    m_config: { col: 3, nombre: "ConfiguracionHotel", archivo: "models/configuracion.py",
+      que: "Una sola fila con los datos del hotel. contexto.py la carga en cada pedido para que todas las plantillas tengan el nombre, el logo y el color.",
+      funciones: ["actual(): la guardada o una por defecto", "url_mapa, url_whatsapp…"], va: [] },
+    m_tipo: { col: 3, nombre: "TipoHabitacion", archivo: "models/habitacion.py",
+      que: "La categoría que se vende: capacidad, tarifa, descripción, foto y modelo 3D.", funciones: ["lista_comodidades"], va: [] },
+    m_habitacion: { col: 3, nombre: "Habitacion", archivo: "models/habitacion.py",
+      que: "Una habitación física: número, piso, tipo y su estado físico (limpieza y mantenimiento).", funciones: [], va: [] },
+    m_huesped: { col: 3, nombre: "Huesped", archivo: "models/huesped.py",
+      que: "Los datos de una persona. Puede tener varias reservas.", funciones: ["nombre_completo"], va: [] },
+    m_reserva: { col: 3, nombre: "Reserva", archivo: "models/reserva.py",
+      que: "Une un huésped con una habitación en un rango de fechas, con estado e importes.", funciones: ["noches", "saldo", "codigo (#0001)"], va: [] },
+    m_usuario: { col: 3, nombre: "Usuario", archivo: "models/usuario.py",
+      que: "Quien entra a la administración. La contraseña se guarda con hash (werkzeug).", funciones: ["set_password()", "check_password()"], va: [] },
+  };
+
+  const NOMBRE_TIPO = ["Pantalla", "Ruta", "Servicio", "Modelo"];
+  const columnas = document.getElementById("columnas");
+  const lienzo = document.getElementById("lienzo");
+  const svg = document.getElementById("lineas");
+  const detalle = document.getElementById("detalle");
+  const lineas = [];
+  let elegido = null;
+
+  const colorDe = (col) => `var(--c-${COLUMNAS[col].color})`;
+  const colorSuaveDe = (col) => `var(--c-${COLUMNAS[col].color}-soft)`;
+
+  // Quién llama a cada nodo (para mostrar las conexiones hacia la izquierda)
+  const llaman = {};
+  Object.entries(NODOS).forEach(([id, n]) => n.va.forEach((destino) => (llaman[destino] ||= []).push(id)));
+
+  // --- Columnas y cajas -------------------------------------------------------------
+  COLUMNAS.forEach((c, i) => {
+    const col = document.createElement("div");
+    col.className = "columna";
+    col.style.setProperty("--c", colorDe(i));
+    col.innerHTML = `<h3>${c.titulo}</h3>`;
+    Object.entries(NODOS).filter(([, n]) => n.col === i).forEach(([id, n]) => {
+      const boton = document.createElement("button");
+      boton.type = "button";
+      boton.className = "nodo";
+      boton.dataset.id = id;
+      boton.style.setProperty("--c-soft", colorSuaveDe(i));
+      boton.innerHTML = `<strong></strong><small></small>`;
+      boton.querySelector("strong").textContent = n.nombre;
+      boton.querySelector("small").textContent = n.archivo.split(" · ")[0];
+      boton.addEventListener("click", () => elegir(elegido === id ? null : id));
+      n.el = boton;
+      col.append(boton);
+    });
+    if (c.nota) {
+      const nota = document.createElement("p");
+      nota.className = "nota";
+      nota.textContent = c.nota;
+      col.append(nota);
+    }
+    columnas.append(col);
+  });
+
+  // --- Líneas entre cajas (de izquierda a derecha) -------------------------------------
+  Object.entries(NODOS).forEach(([id, n]) => n.va.forEach((destino) => {
+    const camino = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    camino.setAttribute("class", "linea");
+    svg.append(camino);
+    lineas.push({ desde: id, hasta: destino, el: camino });
+  }));
+
+  function dibujar() {
+    const base = lienzo.getBoundingClientRect();
+    svg.setAttribute("viewBox", `0 0 ${base.width} ${base.height}`);
+    lineas.forEach(({ desde, hasta, el }) => {
+      const a = NODOS[desde].el.getBoundingClientRect();
+      const b = NODOS[hasta].el.getBoundingClientRect();
+      const x1 = a.right - base.left;
+      const y1 = a.top + a.height / 2 - base.top;
+      const x2 = b.left - base.left;
+      const y2 = b.top + b.height / 2 - base.top;
+      const curva = Math.max((x2 - x1) * 0.45, 20);
+      el.setAttribute("d", `M${x1},${y1} C${x1 + curva},${y1} ${x2 - curva},${y2} ${x2},${y2}`);
+    });
+  }
+
+  // Todo lo que está a la derecha del nodo elegido (lo que usa, y lo que usan esos)
+  function haciaLaDerecha(id, encontrados = new Set()) {
+    NODOS[id].va.forEach((destino) => {
+      if (!encontrados.has(destino)) {
+        encontrados.add(destino);
+        haciaLaDerecha(destino, encontrados);
+      }
+    });
+    return encontrados;
+  }
+
+  // --- Panel de detalle ---------------------------------------------------------------------
+  function chips(ids) {
+    const contenedor = document.createElement("div");
+    contenedor.className = "chips";
+    ids.forEach((id) => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip";
+      chip.style.setProperty("--c", colorDe(NODOS[id].col));
+      chip.textContent = NODOS[id].nombre;
+      chip.addEventListener("click", () => elegir(id));
+      contenedor.append(chip);
+    });
+    return contenedor;
+  }
+
+  function bloque(titulo, contenido) {
+    const h4 = document.createElement("h4");
+    h4.textContent = titulo;
+    detalle.append(h4, contenido);
+  }
+
+  function mostrarDetalle(id) {
+    detalle.replaceChildren();
+    if (!id) {
+      const p = document.createElement("p");
+      p.className = "vacio";
+      p.textContent = "Elegí una caja del mapa para ver para qué sirve y con qué se conecta.";
+      detalle.append(p);
+      return;
+    }
+    const n = NODOS[id];
+    detalle.style.setProperty("--c", colorDe(n.col));
+    detalle.style.setProperty("--c-soft", colorSuaveDe(n.col));
+    const tipo = document.createElement("span");
+    tipo.className = "tipo";
+    tipo.textContent = NODOS[id].acceso ? `${NOMBRE_TIPO[n.col]} · ${n.acceso}` : NOMBRE_TIPO[n.col];
+    const h3 = document.createElement("h3");
+    h3.textContent = n.nombre;
+    const archivo = document.createElement("code");
+    archivo.className = "archivo";
+    archivo.textContent = n.archivo;
+    const que = document.createElement("p");
+    que.textContent = n.que;
+    detalle.append(tipo, h3, archivo, que);
+
+    if (n.funciones.length) {
+      const lista = document.createElement("ul");
+      n.funciones.forEach((f) => {
+        const li = document.createElement("li");
+        li.textContent = f;
+        lista.append(li);
+      });
+      bloque(n.col === 3 ? "Propiedades y métodos" : n.col === 0 ? "Qué tiene" : "Funciones", lista);
+    }
+    if (llaman[id]?.length) bloque("La usan", chips(llaman[id]));
+    if (n.va.length) bloque("Usa", chips(n.va));
+  }
+
+  function elegir(id) {
+    elegido = id;
+    lienzo.classList.toggle("hay-seleccion", Boolean(id));
+    const relacionados = id ? haciaLaDerecha(id) : new Set();
+    if (id) (llaman[id] || []).forEach((origen) => relacionados.add(origen));
+    Object.entries(NODOS).forEach(([otro, n]) => {
+      n.el.classList.toggle("elegido", otro === id);
+      n.el.classList.toggle("relacionado", relacionados.has(otro));
+    });
+    const activos = new Set([id, ...relacionados]);
+    lineas.forEach((l) => {
+      const directa = l.desde === id || l.hasta === id;
+      const enCadena = activos.has(l.desde) && activos.has(l.hasta) && NODOS[l.desde].col >= NODOS[id]?.col;
+      l.el.classList.toggle("activa", Boolean(id) && (directa || enCadena));
+    });
+    mostrarDetalle(id);
+  }
+
+  // --- Tabla de URLs ------------------------------------------------------------------------
+  const URLS = [
+    ["sitio", "routes/sitio.py", [
+      ["GET", "/", "Portada: presentación, buscador de fechas, servicios, habitaciones y ubicación", "publico"],
+      ["GET", "/habitaciones/<slug>", "Un tipo de habitación con su foto o visor 3D", "publico"],
+      ["GET POST", "/reservar", "Formulario de reserva web; el POST crea la reserva", "publico"],
+      ["GET", "/reserva/<token>", "Confirmación de una reserva web", "publico"],
+    ]],
+    ["media", "routes/media.py", [
+      ["GET", "/media/<nombre>", "Archivos subidos (logo, portada, fotos, modelos 3D)", "publico"],
+    ]],
+    ["auth", "routes/auth.py", [
+      ["GET POST", "/administracion/login", "Formulario de ingreso", "publico"],
+      ["POST", "/administracion/logout", "Cierra la sesión", "login"],
+    ]],
+    ["plano", "routes/plano.py", [
+      ["GET", "/administracion/", "Plano de habitaciones (acepta ?fecha=)", "login"],
+      ["GET", "/administracion/plano/contenido", "Solo indicadores y pisos, para recargar desde JS", "login"],
+      ["GET", "/administracion/plano/habitaciones/<id>", "Panel de detalle de una habitación (fragmento HTML)", "login"],
+    ]],
+    ["reservas", "routes/reservas.py", [
+      ["GET", "/administracion/reservas/", "Tape chart (acepta ?desde= y ?dias=14|30)", "login"],
+      ["GET", "/administracion/reservas/grilla", "Solo la grilla, para recargar desde JS", "login"],
+      ["GET POST", "/administracion/reservas/nueva", "Formulario de nueva reserva; el POST la crea", "login"],
+    ]],
+    ["api", "routes/api.py", [
+      ["GET", "/administracion/api/disponibilidad", "Qué habitaciones están libres para esas fechas y personas", "json"],
+      ["GET", "/administracion/api/huespedes", "Busca huéspedes (?q=)", "json"],
+      ["POST", "/administracion/api/reservas/<id>/check-in", "Check-in", "json"],
+      ["POST", "/administracion/api/reservas/<id>/check-out", "Check-out (la habitación queda sucia)", "json"],
+      ["POST", "/administracion/api/reservas/<id>/no-show", "El huésped no se presentó", "json"],
+      ["POST", "/administracion/api/reservas/<id>/mover", "Cambia fechas o habitación (tape chart)", "json"],
+      ["POST", "/administracion/api/habitaciones/<id>/limpieza", "Marca limpia o sucia", "json"],
+      ["POST", "/administracion/api/habitaciones/<id>/mantenimiento", "Bloquea o habilita la habitación", "json"],
+    ]],
+    ["configuracion", "routes/configuracion.py", [
+      ["GET POST", "/administracion/configuracion/", "Datos del hotel, identidad, sitio, contacto y ubicación", "admin"],
+      ["GET", "/administracion/configuracion/habitaciones", "Tipos, pisos y habitaciones", "admin"],
+      ["GET POST", "/administracion/configuracion/tipos/nuevo", "Crear un tipo de habitación", "admin"],
+      ["GET POST", "/administracion/configuracion/tipos/<id>", "Editar un tipo", "admin"],
+      ["POST", "/administracion/configuracion/tipos/<id>/eliminar", "Eliminar un tipo sin habitaciones", "admin"],
+      ["POST", "/administracion/configuracion/habitaciones/agregar", "Agregar habitaciones a un piso", "admin"],
+      ["POST", "/administracion/configuracion/habitaciones/<id>/tipo", "Cambiar el tipo de una habitación", "admin"],
+      ["POST", "/administracion/configuracion/habitaciones/<id>/eliminar", "Borrar una habitación sin reservas", "admin"],
+      ["GET POST", "/administracion/configuracion/usuarios", "Lista de usuarios y alta", "admin"],
+      ["POST", "/administracion/configuracion/usuarios/<id>/eliminar", "Eliminar un usuario", "admin"],
+    ]],
+  ];
+  const ACCESO = { publico: "público", login: "login", admin: "admin", json: "JSON" };
+  const cuerpo = document.getElementById("tabla-urls");
+  URLS.forEach(([blueprint, archivo, filas]) => {
+    const grupo = document.createElement("tr");
+    grupo.className = "grupo";
+    grupo.innerHTML = `<td colspan="4"></td>`;
+    grupo.firstChild.textContent = blueprint;
+    const small = document.createElement("small");
+    small.textContent = archivo;
+    grupo.firstChild.append(small);
+    cuerpo.append(grupo);
+    filas.forEach(([metodo, url, que, acceso]) => {
+      const tr = document.createElement("tr");
+      const metodos = metodo.split(" ").map((m) => `<span class="metodo${m === "POST" ? " metodo--post" : ""}">${m}</span>`).join(" ");
+      tr.innerHTML = `<td>${metodos}</td><td><code></code></td><td></td><td><span class="acceso acceso--${acceso}">${ACCESO[acceso]}</span></td>`;
+      tr.querySelector("code").textContent = url;
+      tr.children[2].textContent = que;
+      cuerpo.append(tr);
+    });
+  });
+
+  // --- Arranque -------------------------------------------------------------------------------
+  dibujar();
+  elegir("p_plano"); // un ejemplo elegido de entrada
+  new ResizeObserver(dibujar).observe(lienzo);
+})();
+</script>
+</body>
+</html>

@@ -93,7 +93,7 @@ def test_sin_lugar_muestra_el_aviso(anonimo, tipo):
     ({"personas": "3"}, "es para 2 personas"),
     ({"nombre": "Lucía"}, "nombre y apellido"),
     ({"entrada": (date.today() - timedelta(days=1)).isoformat()}, "anterior a hoy"),
-    ({"salida": date.today().isoformat()}, "posterior a la llegada"),
+    ({"salida": date.today().isoformat()}, "posterior a la entrada"),
 ])
 def test_validaciones(anonimo, tipo, cambios, mensaje):
     respuesta = anonimo.post("/reservar", data=datos_reserva(**cambios))

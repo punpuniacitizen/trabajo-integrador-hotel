@@ -311,13 +311,7 @@
   if (recienCreada) {
     const barra = scroll.querySelector(`.barra-reserva[data-id="${recienCreada[1]}"]`);
     if (barra) {
-      barra.scrollIntoView({ block: "center", inline: "nearest" });
-      // Se centra a lo ancho en la parte que no tapa la columna fija de las habitaciones
-      const caja = scroll.getBoundingClientRect();
-      const posicion = barra.getBoundingClientRect();
-      const anchoHab = scroll.querySelector(".tape__hab").offsetWidth;
-      const libre = caja.width - anchoHab;
-      scroll.scrollLeft += posicion.left - caja.left - anchoHab - Math.max((libre - posicion.width) / 2, 8);
+      barra.scrollIntoView({ block: "center", inline: "center" });
       barra.classList.add("barra-reserva--resaltada");
       setTimeout(() => barra.classList.remove("barra-reserva--resaltada"), 3000);
     }

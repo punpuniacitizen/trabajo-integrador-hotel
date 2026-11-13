@@ -4,13 +4,12 @@ from itertools import groupby
 
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 
-from app.auth import admin_requerido
+from app.routes.auth import admin_requerido
 from app.extensions import db
 from app.models import Habitacion, TipoHabitacion, Usuario
 from app.services import archivos, configuracion
 from app.services import hotel as hotel_servicio
 from app.services.errores import ErrorDeNegocio
-from app.services.tema import es_color_valido
 
 bp = Blueprint("configuracion", __name__, url_prefix="/administracion/configuracion")
 bp.before_request(admin_requerido)
@@ -67,7 +66,7 @@ def hotel():
         try:
             if not nombre:
                 raise ErrorDeNegocio("Poné el nombre del hotel.")
-            if not es_color_valido(color):
+            if not hotel_servicio.es_color_valido(color):
                 raise ErrorDeNegocio("El color tiene que ser un código como #1F6F5C.")
             if not (HORA.fullmatch(checkin) and HORA.fullmatch(checkout)):
                 raise ErrorDeNegocio("Los horarios tienen que tener el formato 14:00.")

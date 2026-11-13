@@ -136,7 +136,7 @@
 }
 
 .nr-resultado:hover,
-.nr-resultado[aria-selected="true"] { background: var(--surface-sunken); }
+.nr-resultado:first-child { background: var(--surface-sunken); }
 .nr-resultado > div { flex: 1; min-width: 0; }
 .nr-resultado p { color: var(--text-muted); font-size: var(--text-xs); overflow-wrap: anywhere; }
 .nr-resultado__estadias { flex: none; color: var(--text-muted); font-size: var(--text-xs); white-space: nowrap; }

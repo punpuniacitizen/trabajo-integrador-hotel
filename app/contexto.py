@@ -5,7 +5,7 @@ from flask import g, session
 
 from app.extensions import db
 from app.models import ConfiguracionHotel, Usuario
-from app.services.tema import TINTA, es_color_valido, texto_sobre
+from app.services.hotel import TINTA, es_color_valido, texto_sobre
 
 
 def turno(hora):

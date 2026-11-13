@@ -76,8 +76,6 @@
         <button class="btn btn--primary" type="button" data-accion="{{ url_for('api.checkin', reserva_id=r.id) }}">
           {{ icono("entrada") }}Hacer check-in
         </button>
-      {% endif %}
-      {% if d.puede_no_show %}
         <button class="btn btn--ghost btn--ghost-danger" type="button" data-accion="{{ url_for('api.no_show', reserva_id=r.id) }}"
                 data-confirmar="¿Marcar que {{ r.huesped.nombre_completo }} no se presentó? La habitación queda libre.">
           {{ icono("cerrar") }}No se presentó

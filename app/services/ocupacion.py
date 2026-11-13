@@ -58,8 +58,7 @@ class DetalleHabitacion:
     estado: EstadoHabitacion
     proxima: Reserva | None
     puede_checkin: bool
-    puede_checkout: bool
-    puede_no_show: bool
+    puede_checkout: bool  # el no-show se ofrece en el mismo caso que el check-in
 
 
 def _consulta_reservas(fecha, hoy):
@@ -159,5 +158,4 @@ def detalle_habitacion(habitacion, fecha, hoy):
         proxima=proxima,
         puede_checkin=es_hoy and estado.estado == LLEGA,
         puede_checkout=es_hoy and reserva is not None and reserva.estado == Reserva.EN_CURSO,
-        puede_no_show=es_hoy and estado.estado == LLEGA,
     )

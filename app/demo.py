@@ -166,7 +166,6 @@ def cargar_demo(hoy, semilla=7):
         moneda="$",
         hora_checkin="14:00",
         hora_checkout="10:00",
-        setup_completo=True,
     ))
 
     for nombre, email, password, rol in USUARIOS_DEMO:

@@ -51,7 +51,7 @@ def test_crear_reserva_calcula_el_total(habitacion):
     (dia(3), dia(3), 2, 0, "posterior a la entrada"),
     (dia(1), dia(2), 3, 0, "es para 2 personas"),
     (dia(1), dia(2), 2, 60000, "no puede superar el total"),
-    (dia(1), dia(200), 2, 0, "hasta 90 noches"),
+    (dia(1), dia(40), 2, 0, "hasta 30 noches"),
 ])
 def test_crear_reserva_rechaza_datos_invalidos(habitacion, entrada, salida, personas, pagado, mensaje):
     with pytest.raises(ErrorDeNegocio, match=mensaje):
@@ -98,7 +98,7 @@ def test_huesped_nuevo_valida_los_datos(app):
         huespedes.nuevo_huesped("Ana", "  ")
     with pytest.raises(ErrorDeNegocio, match="Ana Rossi"):
         huespedes.nuevo_huesped("Otra", "Persona", documento="30 111 222")
-    with pytest.raises(ErrorDeNegocio, match="email del huésped"):
+    with pytest.raises(ErrorDeNegocio, match="no es válido"):
         huespedes.nuevo_huesped("Otra", "Persona", email="sin-arroba")
     nuevo = huespedes.nuevo_huesped("  Juan  Pablo ", "Gómez", pais="uy", email="JP@Example.com")
     assert (nuevo.nombre, nuevo.pais, nuevo.email) == ("Juan Pablo", "UY", "jp@example.com")

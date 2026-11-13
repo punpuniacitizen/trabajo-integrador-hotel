@@ -110,11 +110,7 @@
       Conserje.toast(mensaje);
       await refrescar();
     } catch (error) {
-      // El servidor puede pedir confirmación (por ejemplo, bloquear una habitación con reservas)
-      if (error.requiereConfirmacion && confirm(error.message)) {
-        return ejecutar(boton, url, { ...datos, confirmado: true });
-      }
-      if (!error.requiereConfirmacion) Conserje.toast(error.message, "danger");
+      Conserje.toast(error.message, "danger");
       boton.disabled = false;
     }
   }

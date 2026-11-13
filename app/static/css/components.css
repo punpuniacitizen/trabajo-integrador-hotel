@@ -174,9 +174,6 @@ code {
 
 .hint { font-size: var(--text-xs); color: var(--text-muted); }
 
-.field--error .input,
-.field--error .select { border-color: var(--danger); }
-.field--error .hint { color: var(--danger); }
 
 /* --- Tarjetas ------------------------------------------------------------------- */
 .card {
@@ -195,7 +192,6 @@ code {
   border-bottom: 1px solid var(--border);
 }
 
-.card__body { padding: var(--space-5); }
 
 /* --- Badges de estado ------------------------------------------------------------
    Uso: <span class="badge badge--libre">Libre</span>                                */
@@ -362,7 +358,6 @@ code {
 }
 
 .habitacion__bandera--sucia { background: var(--estado-sucia-soft); color: var(--estado-sucia); }
-.habitacion__bandera--mantenimiento { background: var(--estado-mantenimiento-soft); color: var(--estado-mantenimiento); }
 
 .habitacion--libre { --c: var(--estado-libre); }
 .habitacion--ocupada { --c: var(--estado-ocupada); }

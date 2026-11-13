@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía de estudio · Conserje</title>
+<style>
+  :root {
+    --bg: #FAFAFA; --surface: #FFFFFF; --sunken: #F4F4F5; --border: #E4E4E7; --border-strong: #D4D4D8;
+    --text: #18181B; --muted: #71717A; --subtle: #A1A1AA;
+    --accent: #1F6F5C; --accent-soft: #E3EFEB;
+    --azul: #1D4ED8; --azul-soft: #DBEAFE;
+    --verde: #1F6F5C; --verde-soft: #DCEFE8;
+    --ambar: #A16207; --ambar-soft: #FEF3C7;
+    --violeta: #7C3AED; --violeta-soft: #EDE9FE;
+    --sombra: 0 1px 2px rgb(24 24 27 / 0.06);
+    --mono: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111113; --surface: #19191C; --sunken: #222226; --border: #2E2E33; --border-strong: #3F3F46;
+      --text: #F4F4F5; --muted: #A1A1AA; --subtle: #71717A; --accent: #5FC2A8; --accent-soft: #17302A;
+      --azul: #7AA2FF; --azul-soft: #1A2546; --verde: #5FC2A8; --verde-soft: #15302A;
+      --ambar: #E7B54A; --ambar-soft: #352A12; --violeta: #B39BFF; --violeta-soft: #29213F;
+      --sombra: none; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111113; --surface: #19191C; --sunken: #222226; --border: #2E2E33; --border-strong: #3F3F46;
+    --text: #F4F4F5; --muted: #A1A1AA; --subtle: #71717A; --accent: #5FC2A8; --accent-soft: #17302A;
+    --azul: #7AA2FF; --azul-soft: #1A2546; --verde: #5FC2A8; --verde-soft: #15302A;
+    --ambar: #E7B54A; --ambar-soft: #352A12; --violeta: #B39BFF; --violeta-soft: #29213F;
+    --sombra: none; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Inter, Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3, h4, p { margin: 0; }
+  code { padding: 1px 5px; border-radius: 4px; background: var(--sunken); font-family: var(--mono); font-size: 0.84em; }
+  a { color: var(--accent); }
+  .contenedor { width: min(1080px, 100% - 32px); margin: 0 auto; }
+
+  /* --- Cabecera ----------------------------------------------------------------- */
+  .cabecera { padding: 52px 0 32px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .etiqueta { color: var(--accent); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+  .cabecera h1 { margin-top: 8px; font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem); line-height: 1.1; letter-spacing: -0.03em; }
+  .cabecera .bajada { max-width: 60ch; margin-top: 12px; color: var(--muted); font-size: 19px; }
+  .acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .boton { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); color: var(--text); font-weight: 600; text-decoration: none; }
+  .boton--principal { border-color: var(--accent); background: var(--accent); color: var(--surface); }
+  .boton:hover { border-color: var(--text); }
+  .indice { display: flex; flex-wrap: wrap; gap: 6px 8px; margin-top: 22px; }
+  .indice a { padding: 5px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--muted); font-size: 14px; text-decoration: none; }
+  .indice a:hover { color: var(--text); border-color: var(--border-strong); }
+
+  /* --- Secciones ----------------------------------------------------------------- */
+  section { padding: 56px 0 4px; scroll-margin-top: 12px; }
+  .numero { color: var(--accent); font-size: 14px; font-weight: 700; letter-spacing: 0.06em; }
+  section h2 { margin-top: 4px; font-size: 28px; letter-spacing: -0.02em; }
+  .intro { max-width: 68ch; margin-top: 10px; color: var(--muted); }
+  .tarjeta { margin-top: 20px; padding: 22px 24px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: var(--sombra); }
+  .tarjeta p + p { margin-top: 10px; }
+
+  /* Para decir en voz alta */
+  .decir { position: relative; margin-top: 20px; padding: 20px 24px 20px 28px; border-left: 4px solid var(--accent); border-radius: 0 14px 14px 0; background: var(--accent-soft); font-size: 18px; }
+  .decir::before { content: "Para decir"; display: block; margin-bottom: 6px; color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* --- El restaurante ------------------------------------------------------------------ */
+  .restaurante { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin-top: 22px; }
+  .puesto { position: relative; padding: 18px 18px 20px; border: 1px solid var(--border); border-top: 5px solid var(--c); background: var(--surface); }
+  .puesto:first-child { border-radius: 12px 0 0 12px; }
+  .puesto:last-child { border-radius: 0 12px 12px 0; }
+  .puesto + .puesto { border-left: 0; }
+  .puesto + .puesto::before { content: "→"; position: absolute; top: 14px; left: -12px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+  .puesto .rol { color: var(--c); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .puesto h3 { margin-top: 4px; font-size: 20px; }
+  .puesto p { margin-top: 8px; color: var(--muted); font-size: 15px; }
+  .puesto .es { display: block; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border); font-size: 14px; }
+  .extras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+  .extras div { padding: 16px 18px; border: 1px solid var(--border); border-left: 4px solid var(--c); border-radius: 10px; background: var(--surface); font-size: 15px; }
+  .extras strong { display: block; margin-bottom: 4px; }
+
+  /* --- Historia ------------------------------------------------------------------------------ */
+  .historia { margin: 22px 0 0; padding: 0; list-style: none; counter-reset: paso; }
+  .historia li { position: relative; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 6px 28px; padding: 0 0 22px 48px; counter-increment: paso; }
+  .historia li::before { content: counter(paso); position: absolute; top: 0; left: 0; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--surface); font-size: 14px; font-weight: 700; }
+  .historia li::after { content: ""; position: absolute; top: 34px; bottom: 4px; left: 14.5px; width: 1px; background: var(--border-strong); }
+  .historia li:last-child::after { display: none; }
+  .historia .tecnico { color: var(--muted); font-size: 14px; }
+  .historia .tecnico::before { content: "En el código: "; font-weight: 600; }
+
+  /* --- Ideas importantes --------------------------------------------------------------------- */
+  .ideas { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 22px; }
+  .idea { display: flex; flex-direction: column; padding: 20px 22px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+  .idea h3 { font-size: 19px; }
+  .idea .ejemplo { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: var(--sunken); font-size: 15px; }
+  .idea .ejemplo::before { content: "Ejemplo · "; color: var(--accent); font-weight: 700; }
+  .idea > p { margin-top: 10px; font-size: 15px; }
+  .idea .donde { margin-top: auto; padding-top: 14px; color: var(--muted); font-size: 13px; }
+
+  /* --- Guion -------------------------------------------------------------------------------- */
+  .guion { margin-top: 22px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); overflow: hidden; }
+  .bloque { display: grid; grid-template-columns: 110px minmax(0, 1fr) minmax(0, 1fr); gap: 20px; padding: 18px 22px; border-top: 1px solid var(--border); }
+  .bloque:first-child { border-top: 0; }
+  .bloque .tiempo { color: var(--accent); font-weight: 700; font-size: 15px; }
+  .bloque .tiempo small { display: block; color: var(--muted); font-weight: 500; }
+  .bloque h4 { margin-bottom: 4px; color: var(--muted); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .bloque p, .bloque li { font-size: 15px; }
+  .bloque ul { margin: 0; padding-left: 18px; }
+  .bloque .cita { font-style: italic; }
+
+  /* --- Preguntas ------------------------------------------------------------------------------ */
+  .preguntas { display: grid; gap: 10px; margin-top: 22px; }
+  details { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  summary { display: flex; gap: 12px; padding: 16px 20px; font-weight: 600; cursor: pointer; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "+"; display: grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+  details[open] summary::before { content: "−"; }
+  details > div { padding: 0 20px 18px 56px; font-size: 16px; }
+  details > div p + p { margin-top: 8px; }
+
+  /* --- Glosario ------------------------------------------------------------------------------- */
+  .glosario { width: 100%; margin-top: 22px; border-collapse: collapse; overflow: hidden; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); font-size: 15px; }
+  .glosario th, .glosario td { padding: 12px 16px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  .glosario th { color: var(--muted); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .glosario tr:last-child td { border-bottom: 0; }
+  .glosario td:first-child { width: 22%; font-weight: 700; }
+  .glosario td:last-child { color: var(--muted); }
+
+  /* --- Cómo correrlo -------------------------------------------------------------------------- */
+  .pasos-correr { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 22px; }
+  .pasos-correr .tarjeta { margin-top: 0; }
+  .pasos-correr h3 { font-size: 18px; }
+  .pasos-correr p, .pasos-correr li { font-size: 15px; }
+  .pasos-correr ul { margin: 8px 0 0; padding-left: 18px; }
+
+  .pie { margin-top: 64px; padding: 24px 0 40px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
+
+  @media (max-width: 860px) {
+    .restaurante { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+    .puesto, .puesto:first-child, .puesto:last-child { border: 1px solid var(--border); border-top: 5px solid var(--c); border-radius: 12px; }
+    .puesto + .puesto::before { display: none; }
+    .historia li { grid-template-columns: minmax(0, 1fr); }
+    .bloque { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+    .extras { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media print {
+    .acciones, .indice { display: none; }
+    details { break-inside: avoid; }
+    details > div { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="contenedor">
+    <p class="etiqueta">Conserje · trabajo integrador</p>
+    <h1>Guía de estudio</h1>
+    <p class="bajada">Cómo funciona el sistema y cómo explicárselo al profe, con ejemplos de la vida real en vez de palabras técnicas.</p>
+    <div class="acciones">
+      <a class="boton boton--principal" href="mapa-del-codigo.html">Abrir el mapa del código →</a>
+      <a class="boton" href="mapa-del-codigo.html#donde">Diagrama «Dónde vive cada cosa»</a>
+    </div>
+    <nav class="indice" aria-label="Secciones">
+      <a href="#resumen">1 · En 30 segundos</a>
+      <a href="#restaurante">2 · La idea general</a>
+      <a href="#historia">3 · Una reserva, paso a paso</a>
+      <a href="#ideas">4 · Las ideas importantes</a>
+      <a href="#guion">5 · Guion para exponer</a>
+      <a href="#preguntas">6 · Preguntas del profe</a>
+      <a href="#glosario">7 · Palabras técnicas</a>
+      <a href="#correr">8 · Cómo correrlo</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ============================================================================= -->
+<section id="resumen">
+  <div class="contenedor">
+    <p class="numero">1</p>
+    <h2>Conserje en 30 segundos</h2>
+    <div class="decir">
+      Conserje es un sistema para administrar un hotel, pensado para <strong>venderlo a muchos hoteles</strong>. Cada hotel le pone su nombre, su logo y su color, y el sistema se adapta. Tiene dos partes: la <strong>administración</strong>, donde la recepción ve qué habitaciones están ocupadas, hace el check-in y mueve reservas arrastrándolas, y el <strong>sitio público</strong>, donde un cliente ve las habitaciones en 3D y reserva. Cuando alguien reserva desde la web, la reserva aparece al instante en la administración.
+    </div>
+    <div class="tarjeta">
+      <p><strong>Con qué está hecho:</strong> Python con Flask del lado del servidor, una base de datos SQLite, y del lado de la página HTML, CSS y JavaScript sin frameworks. Las habitaciones en 3D se modelaron en Blender. Lo único externo es Google Maps (el mapa del hotel), Google Fonts (la letra) y un visor 3D llamado <code>model-viewer</code>.</p>
+      <p><strong>Usuarios para probar:</strong> <code>admin@mirador.demo</code> / <code>admin123</code> (ve todo) y <code>recepcion@mirador.demo</code> / <code>recepcion123</code> (no ve la configuración).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================================= -->
+<section id="restaurante">
+  <div class="contenedor">
+    <p class="numero">2</p>
+    <h2>La idea general: funciona como un restaurante</h2>
+    <p class="intro">Una aplicación web se entiende bien pensándola como un restaurante. Cada parte del código tiene un puesto, y cada puesto hace una sola cosa.</p>
+
+    <div class="restaurante">
+      <div class="puesto" style="--c: var(--azul)">
+        <span class="rol">El cliente en la mesa</span>
+        <h3>El navegador</h3>
+        <p>Mira la carta (la página) y hace pedidos: «quiero ver el plano», «reservá la 204».</p>
+        <span class="es">Es HTML, CSS y JavaScript.</span>
+      </div>
+      <div class="puesto" style="--c: var(--verde)">
+        <span class="rol">El mozo</span>
+        <h3>Las rutas</h3>
+        <p>Toma el pedido, se lo lleva a la cocina y vuelve con el plato. No cocina: solo sabe a quién pedirle cada cosa.</p>
+        <span class="es">Es <code>app/routes/</code>.</span>
+      </div>
+      <div class="puesto" style="--c: var(--ambar)">
+        <span class="rol">La cocina</span>
+        <h3>Los servicios</h3>
+        <p>Tienen las recetas, o sea las reglas: «no se puede hacer el check-in si la habitación está sucia». Si algo no se puede, avisan por qué.</p>
+        <span class="es">Es <code>app/services/</code>.</span>
+      </div>
+      <div class="puesto" style="--c: var(--violeta)">
+        <span class="rol">La despensa</span>
+        <h3>La base de datos</h3>
+        <p>Donde se guardan las cosas en fichas ordenadas: habitaciones, reservas, huéspedes. Se usa a través de los modelos.</p>
+        <span class="es">Es <code>app/models/</code> y el archivo <code>hotel.db</code>.</span>
+      </div>
+    </div>
+
+    <div class="extras">
+      <div style="--c: var(--azul)"><strong>El emplatado: las plantillas</strong>La cocina prepara los datos y las plantillas (<code>app/templates/</code>) los ponen lindos en el plato: arman el HTML con el nombre del hotel, las habitaciones y los colores.</div>
+      <div style="--c: var(--azul)"><strong>Lo que hacés sin llamar al mozo: JavaScript</strong>Filtrar el plano o arrastrar una reserva pasa en la mesa, sin molestar a nadie. Cuando hace falta guardar algo, el JavaScript le pasa una notita al mozo (eso es un <code>fetch</code> con JSON) y espera la respuesta.</div>
+    </div>
+
+    <div class="decir">
+      La regla más importante: <strong>el cliente nunca entra a la despensa</strong>. El navegador no toca la base de datos; siempre le pide a Python, y Python revisa las reglas antes de guardar. Así nadie puede saltearse una regla desde la página.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================================= -->
+<section id="historia">
+  <div class="contenedor">
+    <p class="numero">3</p>
+    <h2>Una reserva, contada como historia</h2>
+    <p class="intro">Seguir un solo ejemplo de punta a punta es la mejor forma de mostrar que las partes se conectan. Lucía quiere ir al Hotel Mirador del 20 al 23.</p>
+
+    <ol class="historia">
+      <li>
+        <span>Lucía entra al sitio del hotel, pone las fechas y 2 personas, y aprieta «Ver disponibilidad».</span>
+        <span class="tecnico">el navegador pide la página <code>/reservar</code>.</span>
+      </li>
+      <li>
+        <span>El mozo (la ruta) le arma la página de reserva con la habitación más barata donde entran dos personas. Mientras Lucía cambia las fechas, el total se actualiza solo, sin recargar.</span>
+        <span class="tecnico"><code>routes/sitio.py</code> y <code>reservar.js</code> para el total.</span>
+      </li>
+      <li>
+        <span>Lucía escribe su nombre y confirma. No hay tarjeta: el pago es un ejemplo, se paga en el hotel.</span>
+        <span class="tecnico">el formulario se manda con <code>POST /reservar</code>.</span>
+      </li>
+      <li>
+        <span>La cocina revisa las reglas: que las fechas tengan sentido, que entren dos personas, y busca una habitación de ese tipo que no esté ocupada esas noches. Encuentra la 102.</span>
+        <span class="tecnico"><code>services/reservas.py</code>: <code>crear_reserva_web()</code> y <code>crear_reserva()</code>.</span>
+      </li>
+      <li>
+        <span>Se guarda la reserva en la despensa y Lucía ve la página de confirmación con su código.</span>
+        <span class="tecnico">se agrega una fila en la tabla <code>reservas</code>.</span>
+      </li>
+      <li>
+        <span>En la recepción, Martín abre el plano y la 102 ya figura «Llega» el día 20. Nadie la cargó a mano: el plano mira las reservas cada vez que se abre.</span>
+        <span class="tecnico"><code>services/ocupacion.py</code> calcula el estado de cada habitación.</span>
+      </li>
+      <li>
+        <span>El día 20 llega Lucía. Martín toca la 102 y aprieta «Hacer check-in». Si la habitación estuviera sucia, el sistema le avisaría que primero hay que limpiarla.</span>
+        <span class="tecnico"><code>plano.js</code> → <code>/api/.../check-in</code> → <code>services/recepcion.py</code>.</span>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================================================= -->
+<section id="ideas">
+  <div class="contenedor">
+    <p class="numero">4</p>
+    <h2>Las ideas importantes, con ejemplos</h2>
+    <p class="intro">Estas son las decisiones que conviene saber explicar. Cada una tiene un ejemplo para contarla sin tecnicismos.</p>
+
+    <div class="ideas">
+      <article class="idea">
+        <h3>La ocupación no se guarda: se calcula</h3>
+        <p>La habitación no tiene un casillero que diga «ocupada». El sistema mira las reservas de ese día y lo deduce.</p>
+        <p class="ejemplo">Es como la edad: no anotás «tengo 17» porque cambia todos los años. Guardás la fecha de nacimiento y la edad se calcula. Acá se guardan las reservas y «ocupada» se calcula.</p>
+        <p class="donde"><code>services/ocupacion.py</code></p>
+      </article>
+
+      <article class="idea">
+        <h3>Dos reservas no se pueden pisar</h3>
+        <p>Antes de guardar o mover una reserva se revisa que esa habitación no tenga otra esas noches. Salir y entrar el mismo día sí se puede.</p>
+        <p class="ejemplo">Como un lugar de estacionamiento: uno se va a las 10 y el otro llega a las 14. El mismo día, pero no a la vez. Por eso en el tape chart cada día está partido en mañana (salida) y tarde (entrada).</p>
+        <p class="donde"><code>reserva_superpuesta()</code> en <code>services/reservas.py</code></p>
+      </article>
+
+      <article class="idea">
+        <h3>Se revisa dos veces: en la página y en el servidor</h3>
+        <p>Cuando arrastrás una reserva, la página ya te avisa si pisa otra. Pero el servidor lo vuelve a revisar al guardar.</p>
+        <p class="ejemplo">El mozo te dice «ese plato se terminó», pero la cocina igual se fija antes de cocinar. Alguien podría saltearse al mozo (por ejemplo, mandando el pedido a mano), así que la cocina no confía y revisa.</p>
+        <p class="donde"><code>tapechart.js</code> avisa · <code>mover_reserva()</code> decide</p>
+      </article>
+
+      <article class="idea">
+        <h3>Marca blanca: el mismo sistema para cualquier hotel</h3>
+        <p>Nombre, logo, color y textos se cargan desde Configuración. El color del texto de los botones (blanco o negro) se elige solo según lo claro que sea el color del hotel.</p>
+        <p class="ejemplo">Como las franquicias: el local es el mismo, cambia el cartel. Si el hotel elige amarillo, los botones llevan letra negra; si elige azul oscuro, letra blanca, para que siempre se lea.</p>
+        <p class="donde"><code>texto_sobre()</code> en <code>services/hotel.py</code></p>
+      </article>
+
+      <article class="idea">
+        <h3>Login y permisos</h3>
+        <p>La administración pide usuario y contraseña; el sitio público no. Hay dos roles: recepción y administración. Solo administración entra a Configuración.</p>
+        <p class="ejemplo">En un hotel, el recepcionista tiene llave de las habitaciones pero no de la oficina del dueño. Acá pasa lo mismo con las pantallas.</p>
+        <p class="donde"><code>routes/auth.py</code>: <code>login_requerido()</code> y <code>admin_requerido()</code></p>
+      </article>
+
+      <article class="idea">
+        <h3>La contraseña no se guarda tal cual</h3>
+        <p>Se guarda un «hash»: una versión transformada de la que no se puede volver atrás. Al ingresar, se transforma lo que escribiste y se compara.</p>
+        <p class="ejemplo">Como una huella digital: el sistema no guarda tu dedo, guarda la huella. Puede comprobar que sos vos, pero con la huella no se puede fabricar el dedo.</p>
+        <p class="donde"><code>set_password()</code> y <code>check_password()</code> en <code>models/usuario.py</code></p>
+      </article>
+
+      <article class="idea">
+        <h3>Páginas que se actualizan sin recargar</h3>
+        <p>En el plano, el tape chart y la nueva reserva, el JavaScript le pide datos al servidor y cambia solo un pedazo de la página.</p>
+        <p class="ejemplo">Como un tablero de aeropuerto que cambia una línea cuando un vuelo se demora, en vez de reimprimir todo el tablero.</p>
+        <p class="donde"><code>routes/api.py</code> (responde en JSON) · <code>static/js/</code></p>
+      </article>
+
+      <article class="idea">
+        <h3>Cuando algo no se puede, el sistema explica por qué</h3>
+        <p>Todas las reglas usan el mismo aviso, <code>ErrorDeNegocio</code>, con un mensaje pensado para la persona: «La 204 está sucia. Marcala como limpia antes del check-in».</p>
+        <p class="ejemplo">Es la diferencia entre un cajero que dice «error» y uno que dice «no tenés saldo suficiente».</p>
+        <p class="donde"><code>services/errores.py</code></p>
+      </article>
+
+      <article class="idea">
+        <h3>Las habitaciones en 3D</h3>
+        <p>Se armaron en Blender con muebles gratuitos, y la luz se «horneó» dentro del modelo. El navegador solo tiene que mostrarlo, sin calcular luces.</p>
+        <p class="ejemplo">Como una maqueta ya pintada con sombras: se ve bien desde cualquier ángulo y no hace falta iluminarla con lámparas.</p>
+        <p class="donde"><code>design/3d/</code> · archivos <code>.glb</code> · <code>model-viewer</code></p>
+      </article>
+
+      <article class="idea">
+        <h3>Las pruebas automáticas</h3>
+        <p>Hay 98 pruebas que revisan solas que las reglas sigan funcionando, por ejemplo que no se pueda reservar una habitación ocupada.</p>
+        <p class="ejemplo">Como un checklist antes de despegar: cada vez que se cambia algo se corre la lista entera, y si algo se rompió se nota enseguida.</p>
+        <p class="donde"><code>tests/</code> · se corren con <code>python -m pytest</code></p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================================= -->
+<section id="guion">
+  <div class="contenedor">
+    <p class="numero">5</p>
+    <h2>Guion para exponer (unos 12 minutos)</h2>
+    <p class="intro">Un orden posible. Conviene correr <code>iniciar.bat</code> antes de empezar y aceptar «recargar los datos de ejemplo», así las reservas quedan alrededor del día de la exposición.</p>
+
+    <div class="guion">
+      <div class="bloque">
+        <p class="tiempo">0:00<small>1 min</small></p>
+        <div><h4>Qué mostrar</h4><p>La portada del sitio del hotel.</p></div>
+        <div><h4>Qué decir</h4><p class="cita">«Conserje es un sistema para vender a hoteles. Esto es lo que ve un cliente: el hotel de ejemplo, Hotel Mirador.»</p></div>
+      </div>
+      <div class="bloque">
+        <p class="tiempo">1:00<small>2 min</small></p>
+        <div><h4>Qué mostrar</h4><ul><li>Una habitación en 3D (girarla).</li><li>Hacer una reserva con tu nombre.</li></ul></div>
+        <div><h4>Qué decir</h4><p class="cita">«El cliente elige el tipo y las fechas, el sistema le asigna una habitación libre. El pago es un ejemplo, no se cobra nada.»</p></div>
+      </div>
+      <div class="bloque">
+        <p class="tiempo">3:00<small>3 min</small></p>
+        <div><h4>Qué mostrar</h4><ul><li>Entrar como recepción.</li><li>El plano: los colores de cada estado y los filtros.</li><li>Tocar una habitación que llega hoy y hacer el check-in.</li><li>En otra que llega hoy: marcarla sucia y probar el check-in (aparece el aviso).</li></ul></div>
+        <div><h4>Qué decir</h4><p class="cita">«El estado de cada habitación no se guarda, se calcula con las reservas del día. Y si intento algo que no se puede, el sistema explica por qué.»</p></div>
+      </div>
+      <div class="bloque">
+        <p class="tiempo">6:00<small>2 min</small></p>
+        <div><h4>Qué mostrar</h4><ul><li>El tape chart: buscar la reserva hecha desde la web.</li><li>Arrastrar una reserva a otra habitación.</li><li>Arrastrarla encima de otra (se pone en rojo).</li><li>Arrastrar en un espacio libre para crear una nueva.</li></ul></div>
+        <div><h4>Qué decir</h4><p class="cita">«Acá está la reserva que hice desde la web. Es un diagrama de Gantt: filas son habitaciones, columnas son días. La página avisa si se pisa con otra, pero el servidor lo vuelve a revisar antes de guardar.»</p></div>
+      </div>
+      <div class="bloque">
+        <p class="tiempo">8:00<small>1 min</small></p>
+        <div><h4>Qué mostrar</h4><ul><li>Entrar como administración.</li><li>Configuración: cambiar el color del hotel y guardar.</li></ul></div>
+        <div><h4>Qué decir</h4><p class="cita">«Esto es lo que lo hace vendible: otro hotel carga su nombre, logo, color, habitaciones y usuarios, y el sistema es suyo.»</p></div>
+      </div>
+      <div class="bloque">
+        <p class="tiempo">9:00<small>3 min</small></p>
+        <div><h4>Qué mostrar</h4><ul><li>El mapa del código: «Las capas» y «Dónde vive cada cosa».</li><li>Tocar «Tape chart» en el diagrama para mostrar el camino.</li><li>Si piden código: <code>services/reservas.py</code>, función <code>reserva_superpuesta()</code>.</li></ul></div>
+        <div><h4>Qué decir</h4><p class="cita">«El código está separado como un restaurante: rutas que reciben pedidos, servicios con las reglas y modelos que guardan. El navegador nunca toca la base directamente.»</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================================= -->
+<section id="preguntas">
+  <div class="contenedor">
+    <p class="numero">6</p>
+    <h2>Preguntas que te puede hacer el profe</h2>
+    <p class="intro">Respuestas cortas para tener a mano. Tocá cada pregunta para abrirla.</p>
+
+    <div class="preguntas">
+      <details>
+        <summary>¿Dónde se guarda si una habitación está ocupada?</summary>
+        <div><p>En ningún lado, a propósito. Se guardan las reservas y el estado se calcula cada vez (<code>services/ocupacion.py</code>). Si se guardara aparte, podría quedar desactualizado: por ejemplo, cancelan una reserva y alguien se olvida de liberar la habitación.</p></div>
+      </details>
+      <details>
+        <summary>¿Qué pasa si dos personas reservan la misma habitación las mismas noches?</summary>
+        <div><p>Antes de guardar, <code>reserva_superpuesta()</code> busca si hay otra reserva activa de esa habitación cuyas fechas se crucen. Si la hay, no se guarda y se muestra un mensaje. En la web, el sistema directamente busca otra habitación libre del mismo tipo.</p></div>
+      </details>
+      <details>
+        <summary>¿Por qué separaron rutas y servicios?</summary>
+        <div><p>Porque la misma regla se usa desde lugares distintos. Crear una reserva se hace desde el sitio web y desde la administración, y las dos usan la misma función <code>crear_reserva()</code>. Si la regla estuviera dentro de cada ruta, habría que escribirla dos veces y mantenerlas iguales.</p></div>
+      </details>
+      <details>
+        <summary>¿Cómo sabe el sistema que estoy logueado?</summary>
+        <div><p>Al ingresar, Flask guarda tu número de usuario en la sesión, que es una cookie firmada con una clave secreta (está en <code>.env</code>). Si alguien la modifica, la firma no coincide y no sirve. Antes de cada página de la administración, <code>login_requerido()</code> se fija si hay alguien en la sesión.</p></div>
+      </details>
+      <details>
+        <summary>¿Qué es un blueprint?</summary>
+        <div><p>Un grupo de páginas de una misma sección. Hay uno para el sitio público, uno para el plano, uno para reservas, uno para configuración, etcétera. Sirve para no tener todas las URLs en un solo archivo enorme, y para decir de una vez «todo este grupo pide login».</p></div>
+      </details>
+      <details>
+        <summary>¿Por qué Flask y SQLite?</summary>
+        <div><p>Flask es chico y deja ver cómo funciona cada pedido, sin magia escondida. SQLite es una base de datos que vive en un solo archivo y no necesita instalar un servidor aparte. Si un hotel la necesitara más grande, se cambia a PostgreSQL desde <code>DATABASE_URL</code> sin tocar el código.</p></div>
+      </details>
+      <details>
+        <summary>¿Qué APIs o servicios externos usan?</summary>
+        <div><p>Google Maps para el mapa del hotel (se inserta con un link, sin clave), Google Fonts para la letra Inter y la librería <code>model-viewer</code> de Google para mostrar los modelos 3D (guardada dentro del proyecto). Además, la administración tiene su propia API interna en JSON (<code>routes/api.py</code>) que usa el JavaScript.</p></div>
+      </details>
+      <details>
+        <summary>¿Es seguro?</summary>
+        <div><p>Para un trabajo escolar tiene lo básico bien hecho: contraseñas con hash, sesión firmada, la configuración solo para administración, el JavaScript nunca toca la base, y los archivos subidos se revisan (que una «imagen» sea de verdad una imagen y no pese demasiado). Para un hotel real faltaría, por ejemplo, HTTPS y límite de intentos de login.</p></div>
+      </details>
+      <details>
+        <summary>¿Qué hicieron con inteligencia artificial y qué ustedes?</summary>
+        <div><p>Respondé con la verdad de cómo trabajaste. Una forma de contarlo: las decisiones (qué hace el sistema, que sea para vender a hoteles, cómo se reserva, el diseño de las pantallas en Google Stitch, los modelos en Blender) las tomaste vos, y usaste IA como ayuda para escribir y revisar el código. Lo importante es poder explicar cada parte, y para eso está esta guía.</p></div>
+      </details>
+      <details>
+        <summary>¿Qué le agregarían después?</summary>
+        <div><p>Cancelar y editar reservas, la sección de Huéspedes (está marcada como «Pronto»), pagos reales con una pasarela de pago, reportes de ocupación por mes, y que una sola instalación sirva para varios hoteles a la vez.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================================= -->
+<section id="glosario">
+  <div class="contenedor">
+    <p class="numero">7</p>
+    <h2>Palabras técnicas, traducidas</h2>
+    <table class="glosario">
+      <thead><tr><th>Palabra</th><th>Qué es</th><th>Dónde aparece</th></tr></thead>
+      <tbody>
+        <tr><td>Servidor</td><td>El programa en Python que recibe los pedidos y responde. Mientras corre <code>iniciar.bat</code>, tu compu es el servidor.</td><td><code>run.py</code></td></tr>
+        <tr><td>Ruta</td><td>Una dirección (como <code>/reservar</code>) y la función que la atiende.</td><td><code>app/routes/</code></td></tr>
+        <tr><td>Plantilla</td><td>Un HTML con huecos que Python completa con datos.</td><td><code>app/templates/</code></td></tr>
+        <tr><td>Modelo</td><td>Una clase de Python que representa una tabla. Cada objeto es una fila.</td><td><code>app/models/</code></td></tr>
+        <tr><td>Tabla</td><td>Una planilla dentro de la base: columnas fijas, una fila por cosa.</td><td><code>habitaciones</code>, <code>reservas</code>…</td></tr>
+        <tr><td>Clave foránea</td><td>Una columna que apunta a una fila de otra tabla. La reserva guarda el número de habitación, no la habitación entera.</td><td><code>habitacion_id</code></td></tr>
+        <tr><td>GET y POST</td><td>GET es «mostrame algo»; POST es «guardá esto».</td><td>todas las rutas</td></tr>
+        <tr><td>JSON</td><td>Un formato de texto para pasar datos: <code>{"ok": true, "mensaje": "Check-in hecho"}</code>.</td><td><code>routes/api.py</code></td></tr>
+        <tr><td>fetch</td><td>La forma en que el JavaScript le pide algo al servidor sin recargar la página.</td><td><code>static/js/</code></td></tr>
+        <tr><td>Sesión</td><td>Lo que el servidor recuerda de vos entre una página y otra (quién sos), guardado en una cookie firmada.</td><td><code>routes/auth.py</code></td></tr>
+        <tr><td>Hash</td><td>Una transformación de la contraseña que no se puede deshacer.</td><td><code>models/usuario.py</code></td></tr>
+        <tr><td>Tape chart</td><td>Un diagrama de Gantt de reservas: habitaciones por días.</td><td><code>tapechart.js</code></td></tr>
+        <tr><td>Marca blanca</td><td>Un producto sin marca propia que cada cliente vende con la suya.</td><td>Configuración</td></tr>
+        <tr><td>Test</td><td>Un programita que prueba una regla y avisa si se rompió.</td><td><code>tests/</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================================= -->
+<section id="correr">
+  <div class="contenedor">
+    <p class="numero">8</p>
+    <h2>Cómo correrlo</h2>
+    <div class="pasos-correr">
+      <div class="tarjeta">
+        <h3><code>iniciar.bat</code></h3>
+        <p>Doble clic. La primera vez prepara Python e instala las librerías (necesita internet). Después pregunta si querés recargar los datos de ejemplo con la fecha de hoy, levanta el servidor y abre la página.</p>
+        <ul><li>Sitio: <code>http://127.0.0.1:5000/</code></li><li>Administración: <code>/administracion</code></li><li>Para cortarlo: cerrar la ventana negra.</li></ul>
+      </div>
+      <div class="tarjeta">
+        <h3><code>guia-de-estudio.bat</code></h3>
+        <p>Abre esta guía y el mapa del código. No necesita internet ni que el servidor esté andando.</p>
+        <ul><li>Mapa: <code>docs/mapa-del-codigo.html</code></li><li>Guía: <code>docs/guia-de-estudio.html</code></li></ul>
+      </div>
+      <div class="tarjeta">
+        <h3>Si algo falla</h3>
+        <ul>
+          <li><strong>«No se encontró Python»:</strong> instalarlo desde python.org tildando «Add python.exe to PATH».</li>
+          <li><strong>El puerto 5000 está ocupado:</strong> cerrar la otra ventana del servidor.</li>
+          <li><strong>Las reservas están viejas:</strong> correr <code>iniciar.bat</code> y responder S para recargar.</li>
+          <li><strong>Correr las pruebas:</strong> <code>.venv\Scripts\python -m pytest</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="pie">
+  <div class="contenedor">Guía de estudio de Conserje · seguí con el <a href="mapa-del-codigo.html">mapa del código</a> para ver cada archivo y cada conexión.</div>
+</footer>
+</body>
+</html>

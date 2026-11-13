@@ -35,15 +35,10 @@
       texto.textContent = color.value.toUpperCase();
       muestra.style.setProperty("--accent", color.value);
       muestra.style.setProperty("--accent-hover", color.value);
-      // Mismo criterio que el servidor (app/services/tema.py): texto blanco o casi negro
-      const [r, g, b] = [1, 3, 5].map((i) => {
-        const c = parseInt(color.value.slice(i, i + 2), 16) / 255;
-        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-      });
-      const luminancia = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      const conBlanco = 1.05 / (luminancia + 0.05);
-      const conNegro = (luminancia + 0.05) / 0.0601;
-      muestra.style.setProperty("--accent-contrast", conBlanco >= conNegro ? "#FFFFFF" : "#18181B");
+      // Mismo cálculo que el servidor (texto_sobre en app/services/hotel.py)
+      const [r, g, b] = [1, 3, 5].map((i) => parseInt(color.value.slice(i, i + 2), 16));
+      const brillo = 0.299 * r + 0.587 * g + 0.114 * b;
+      muestra.style.setProperty("--accent-contrast", brillo > 150 ? "#18181B" : "#FFFFFF");
     };
     color.addEventListener("input", actualizar);
     actualizar();
@@ -61,9 +56,7 @@
     };
 
     const coordenadas = (texto) => {
-      const coincidencia =
-        texto.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/) ||
-        texto.match(/(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)/);
+      const coincidencia = texto.match(/(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)/);
       return coincidencia ? `${coincidencia[1]},${coincidencia[2]}` : null;
     };
 
